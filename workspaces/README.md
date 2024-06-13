@@ -14,3 +14,5 @@ A collection of Projects for testing and demos.  Please keep these organized and
 * chinook-db-py : Simple python project to view data in SQLite db chinook.db
 * chinook-db-r : Simple R project to view data in SQLite db chinook.db
    - requires `connections` package
+* generate-data-frames-py : Simple project for generating large data frames with Python
+* generate-data-frames-r : Simple project for generating large data frames with R
