@@ -28,4 +28,4 @@ get_data_from_excel <- function() {
   return(df)
 }
 
-df <- get_data_from_excel()
+df2 <- get_data_from_excel()
