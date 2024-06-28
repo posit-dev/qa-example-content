@@ -16,3 +16,4 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - requires `connections` package
 * generate-data-frames-py : Simple project for generating large data frames with Python
 * generate-data-frames-r : Simple project for generating large data frames with R
+* quarto_basic : Simple quarto project for integration testing
