@@ -8,10 +8,9 @@ use arrow::datatypes::i256;
 use arrow_array::{
     Array, ArrayRef, BinaryArray, BooleanArray, Date32Array, Date64Array, Decimal128Array,
     Decimal256Array, Float16Array, Float32Array, Float64Array, Int16Array, Int32Array, Int64Array,
-    Int8Array, NullArray, RecordBatch, StringArray, Time32MillisecondArray, Time32SecondArray,
-    Time64MicrosecondArray, Time64NanosecondArray, TimestampMicrosecondArray,
-    TimestampMillisecondArray, TimestampNanosecondArray, TimestampSecondArray, UInt16Array,
-    UInt32Array, UInt64Array, UInt8Array,
+    Int8Array, NullArray, RecordBatch, StringArray, Time32MillisecondArray, Time64MicrosecondArray,
+    Time64NanosecondArray, TimestampMicrosecondArray, TimestampMillisecondArray,
+    TimestampNanosecondArray, UInt16Array, UInt32Array, UInt64Array, UInt8Array,
 };
 use half::f16;
 use parquet::{arrow::ArrowWriter, basic::Compression, file::properties::WriterProperties};
@@ -24,7 +23,6 @@ use std::time::UNIX_EPOCH;
 use std::{fs::File, time::SystemTime};
 
 // Constants.
-const SECONDS_PER_DAY: i32 = 86_400;
 const MILLISECONDS_PER_DAY: i32 = 86_400_000;
 const MICROSECONDS_PER_DAY: i64 = 86_400_000_000;
 
@@ -228,23 +226,6 @@ fn main() {
             )
         },
         //
-        // TimestampSecond.
-        //
-        |size| {
-            let now = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs() as i64;
-            ColumnBatch::new(
-                "TimestampSecond",
-                Arc::new(TimestampSecondArray::from(
-                    (0..size)
-                        .map(|_| thread_rng().gen_range(-now..now))
-                        .collect::<Vec<i64>>(),
-                )) as ArrayRef,
-            )
-        },
-        //
         // TimestampMillisecond.
         //
         |size| {
@@ -327,19 +308,6 @@ fn main() {
                     (0..size)
                         .map(|_| thread_rng().gen_range(-now..now))
                         .collect::<Vec<i64>>(),
-                )) as ArrayRef,
-            )
-        },
-        //
-        // Time32Second.
-        //
-        |size| {
-            ColumnBatch::new(
-                "Time32Second",
-                Arc::new(Time32SecondArray::from(
-                    (0..size)
-                        .map(|_| thread_rng().gen_range(0..SECONDS_PER_DAY))
-                        .collect::<Vec<i32>>(),
                 )) as ArrayRef,
             )
         },
