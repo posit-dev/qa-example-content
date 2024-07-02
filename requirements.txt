@@ -1,0 +1,9 @@
+et-xmlfile
+numpy
+openpyxl
+pandas
+pyarrow
+python-dateutil
+pytz
+six
+tzdata
