@@ -1,3 +1,4 @@
+.DS_Store
 workspaces/quarto_basic/.quarto/*
 workspaces/quarto_basic/quarto_basic_files/*
 workspaces/quarto_basic/quarto_basic.html
