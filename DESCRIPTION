@@ -1,0 +1,12 @@
+Package: qa.content.examples
+Title: Exampe R Content for Testing
+Version: 0.0.0.9000
+Description: Not really a package. This file is just to enable installing dependencies.
+Imports: 
+    arrow,
+    readxl,
+    connections,
+    tidyverse,
+    RSQLite,
+    lubridate,
+    dplyr
