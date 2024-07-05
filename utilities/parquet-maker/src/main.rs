@@ -4,15 +4,13 @@
  *--------------------------------------------------------------------------------------------*/
 
 #![feature(f16)]
-use arrow::datatypes::i256;
 use arrow_array::{
     Array, ArrayRef, BinaryArray, BooleanArray, Date32Array, Date64Array, Decimal128Array,
-    Decimal256Array, Float16Array, Float32Array, Float64Array, Int16Array, Int32Array, Int64Array,
-    Int8Array, NullArray, RecordBatch, StringArray, Time32MillisecondArray, Time64MicrosecondArray,
+    Float32Array, Float64Array, Int16Array, Int32Array, Int64Array, Int8Array, NullArray,
+    RecordBatch, StringArray, Time32MillisecondArray, Time64MicrosecondArray,
     Time64NanosecondArray, TimestampMicrosecondArray, TimestampMillisecondArray,
     TimestampNanosecondArray, UInt16Array, UInt32Array, UInt64Array, UInt8Array,
 };
-use half::f16;
 use parquet::{arrow::ArrowWriter, basic::Compression, file::properties::WriterProperties};
 use rand::distributions::{Alphanumeric, DistString};
 use rand::{thread_rng, Rng};
@@ -191,19 +189,6 @@ fn main() {
             )
         },
         //
-        // Float16.
-        //
-        |size| {
-            ColumnBatch::new(
-                "Float16",
-                Arc::new(Float16Array::from(
-                    (0..size)
-                        .map(|_| f16::from_f32(rand::random()))
-                        .collect::<Vec<f16>>(),
-                )) as ArrayRef,
-            )
-        },
-        //
         // Float32.
         //
         |size| {
@@ -365,31 +350,28 @@ fn main() {
             )
         },
         //
-        // Decimal256.
-        //
-        |size| {
-            ColumnBatch::new(
-                "Decimal256Array",
-                Arc::new(Decimal256Array::from(
-                    (0..size)
-                        .map(|_| i256::from_parts(rand::random(), rand::random()))
-                        .collect::<Vec<i256>>(),
-                )) as ArrayRef,
-            )
-        },
-        //
         // These types have been ignored because they are too esoteric:
         // IntervalYearMonth
         // IntervalDayTime
         // IntervalMonthDayNano
         //
-        // These types are not supported:
+        // These types are not supported
         // DurationSecond
         // DurationMillisecond
         // DurationMicrosecond
         // DurationNanosecond
         // They result in an error ArrowError("Converting Duration to parquet not supported").
     ];
+
+    let mut df = column_batch_factories.clone();
+    df.push(|size| {
+        ColumnBatch::new(
+            "Float64",
+            Arc::new(Float64Array::from(
+                (0..size).map(|_| rand::random()).collect::<Vec<f64>>(),
+            )) as ArrayRef,
+        )
+    });
 
     // Create the file.
     let file = File::create("data.parquet").unwrap();
