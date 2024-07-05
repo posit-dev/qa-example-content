@@ -84,7 +84,7 @@ fn main() {
                     (0..size)
                         .map(|_| {
                             (0..thread_rng().gen_range(1..100))
-                                .map(|_| rand::random())
+                                .map(|_| thread_rng().gen_range(128..255))
                                 .collect::<Vec<u8>>()
                         })
                         .collect::<Vec<Vec<u8>>>(),
