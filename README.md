@@ -9,3 +9,13 @@ This is a place to store content for internal testing & demos. Please keep thing
 * [Utilities] (utilities/README.md) - A collection of utilities used to create test data.
 
 * [Workspaces](workspaces/README.md) - Example workspaces/projects.
+
+## Dependencies
+
+In the root of the repository, there are 2 dependency files:
+
+* `requirements.txt` - Python packages needed for the [Workspaces](workspaces/README.md)
+  - `pip install -r requirements.txt`
+
+* `DESCRIPTION` - R packages needed for the [Workspaces](workspaces/README.md)
+  - `Rscript -e "pak::local_install_dev_deps(ask = FALSE)"`
