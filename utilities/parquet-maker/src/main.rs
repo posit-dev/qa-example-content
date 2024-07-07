@@ -5,11 +5,11 @@
 
 #![feature(f16)]
 use arrow_array::{
-    Array, ArrayRef, BinaryArray, BooleanArray, Date32Array, Date64Array, Decimal128Array,
-    Float32Array, Float64Array, Int16Array, Int32Array, Int64Array, Int8Array, NullArray,
-    RecordBatch, StringArray, Time32MillisecondArray, Time64MicrosecondArray,
-    Time64NanosecondArray, TimestampMicrosecondArray, TimestampMillisecondArray,
-    TimestampNanosecondArray, UInt16Array, UInt32Array, UInt64Array, UInt8Array,
+    Array, ArrayRef, BooleanArray, Date32Array, Date64Array, Float32Array, Float64Array,
+    Int16Array, Int32Array, Int64Array, Int8Array, NullArray, RecordBatch, StringArray,
+    Time32MillisecondArray, Time64MicrosecondArray, Time64NanosecondArray,
+    TimestampMicrosecondArray, TimestampMillisecondArray, TimestampNanosecondArray, UInt16Array,
+    UInt32Array, UInt64Array, UInt8Array,
 };
 use parquet::{arrow::ArrowWriter, basic::Compression, file::properties::WriterProperties};
 use rand::distributions::{Alphanumeric, DistString};
@@ -338,17 +338,17 @@ fn main() {
                 )) as ArrayRef,
             )
         },
-        //
-        // Decimal128.
-        //
-        |size| {
-            ColumnBatch::new(
-                "Decimal128Array",
-                Arc::new(Decimal128Array::from(
-                    (0..size).map(|_| rand::random()).collect::<Vec<i128>>(),
-                )) as ArrayRef,
-            )
-        },
+        // //
+        // // Decimal128.
+        // //
+        // |size| {
+        //     ColumnBatch::new(
+        //         "Decimal128Array",
+        //         Arc::new(Decimal128Array::from(
+        //             (0..size).map(|_| rand::random()).collect::<Vec<i128>>(),
+        //         )) as ArrayRef,
+        //     )
+        // },
         //
         // These types have been ignored because they are too esoteric:
         // IntervalYearMonth
