@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 arrow = "52.0.0"
 arrow-array = "52.0.0"
+chrono = "0.4.38"
 half = "2.4.1"
 parquet = "52.0.0"
 rand = "0.8.5"

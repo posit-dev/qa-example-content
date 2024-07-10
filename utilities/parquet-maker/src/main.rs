@@ -5,11 +5,11 @@
 
 #![feature(f16)]
 use arrow_array::{
-    Array, ArrayRef, BooleanArray, Date32Array, Date64Array, Float32Array, Float64Array,
-    Int16Array, Int32Array, Int64Array, Int8Array, NullArray, RecordBatch, StringArray,
-    Time32MillisecondArray, Time64MicrosecondArray, Time64NanosecondArray,
-    TimestampMicrosecondArray, TimestampMillisecondArray, TimestampNanosecondArray, UInt16Array,
-    UInt32Array, UInt64Array, UInt8Array,
+    Array, ArrayRef, BooleanArray, Date32Array, Float32Array, Float64Array, Int16Array, Int32Array,
+    Int64Array, Int8Array, NullArray, RecordBatch, StringArray, Time32MillisecondArray,
+    Time64MicrosecondArray, Time64NanosecondArray, TimestampMicrosecondArray,
+    TimestampMillisecondArray, TimestampNanosecondArray, UInt16Array, UInt32Array, UInt64Array,
+    UInt8Array,
 };
 use parquet::{arrow::ArrowWriter, basic::Compression, file::properties::WriterProperties};
 use rand::distributions::{Alphanumeric, DistString};
@@ -220,11 +220,14 @@ fn main() {
                 .as_millis() as i64;
             ColumnBatch::new(
                 "TimestampMillisecond",
-                Arc::new(TimestampMillisecondArray::from(
-                    (0..size)
-                        .map(|_| thread_rng().gen_range(-now..now))
-                        .collect::<Vec<i64>>(),
-                )) as ArrayRef,
+                Arc::new(
+                    TimestampMillisecondArray::from(
+                        (0..size)
+                            .map(|_| thread_rng().gen_range(-now..now))
+                            .collect::<Vec<i64>>(),
+                    )
+                    .with_timezone_utc(),
+                ) as ArrayRef,
             )
         },
         //
@@ -237,11 +240,14 @@ fn main() {
                 .as_micros() as i64;
             ColumnBatch::new(
                 "TimestampMicrosecond",
-                Arc::new(TimestampMicrosecondArray::from(
-                    (0..size)
-                        .map(|_| thread_rng().gen_range(-now..now))
-                        .collect::<Vec<i64>>(),
-                )) as ArrayRef,
+                Arc::new(
+                    TimestampMicrosecondArray::from(
+                        (0..size)
+                            .map(|_| thread_rng().gen_range(-now..now))
+                            .collect::<Vec<i64>>(),
+                    )
+                    .with_timezone_utc(),
+                ) as ArrayRef,
             )
         },
         //
@@ -254,11 +260,14 @@ fn main() {
                 .as_nanos() as i64;
             ColumnBatch::new(
                 "TimestampNanosecond",
-                Arc::new(TimestampNanosecondArray::from(
-                    (0..size)
-                        .map(|_| thread_rng().gen_range(-now..now))
-                        .collect::<Vec<i64>>(),
-                )) as ArrayRef,
+                Arc::new(
+                    TimestampNanosecondArray::from(
+                        (0..size)
+                            .map(|_| thread_rng().gen_range(-now..now))
+                            .collect::<Vec<i64>>(),
+                    )
+                    .with_timezone_utc(),
+                ) as ArrayRef,
             )
         },
         //
@@ -289,11 +298,14 @@ fn main() {
                 .as_millis() as i64;
             ColumnBatch::new(
                 "Date64",
-                Arc::new(Date64Array::from(
-                    (0..size)
-                        .map(|_| thread_rng().gen_range(-now..now))
-                        .collect::<Vec<i64>>(),
-                )) as ArrayRef,
+                Arc::new(
+                    TimestampMillisecondArray::from(
+                        (0..size)
+                            .map(|_| thread_rng().gen_range(-now..now))
+                            .collect::<Vec<i64>>(),
+                    )
+                    .with_timezone_utc(),
+                ) as ArrayRef,
             )
         },
         //
@@ -362,16 +374,6 @@ fn main() {
         // DurationNanosecond
         // They result in an error ArrowError("Converting Duration to parquet not supported").
     ];
-
-    let mut df = column_batch_factories.clone();
-    df.push(|size| {
-        ColumnBatch::new(
-            "Float64",
-            Arc::new(Float64Array::from(
-                (0..size).map(|_| rand::random()).collect::<Vec<f64>>(),
-            )) as ArrayRef,
-        )
-    });
 
     // Create the file.
     let file = File::create("data.parquet").unwrap();
