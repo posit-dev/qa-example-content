@@ -2,3 +2,8 @@
 workspaces/quarto_basic/.quarto/*
 workspaces/quarto_basic/quarto_basic_files/*
 workspaces/quarto_basic/quarto_basic.html
+workspaces/basic-rmd-file/basicRmd_cache/*
+workspaces/basic-rmd-file/basicRmd_files/*
+workspaces/basic-rmd-file/basicRmd.html
+workspaces/basic-rmd-file/.gitignore
+
