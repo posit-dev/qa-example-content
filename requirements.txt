@@ -8,3 +8,8 @@ pytz
 six
 tzdata
 polars
+faicons
+shiny
+shinywidgets
+plotly
+ridgeplot

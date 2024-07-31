@@ -9,4 +9,5 @@ Imports:
     tidyverse,
     RSQLite,
     lubridate,
-    dplyr
+    dplyr,
+    shiny
