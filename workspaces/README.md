@@ -23,3 +23,5 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - shiny extension is required
 * streamlit-py-example
    - has a requirements.txt
+* dash-py-example
+   - has a requirements.txt
