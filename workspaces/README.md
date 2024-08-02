@@ -21,3 +21,5 @@ A collection of Projects for testing and demos.  Please keep these organized and
 * shiny-py-example : Sample shiny app for python
    - has a requirements.txt
    - shiny extension is required
+* streamlit-py-example
+   - has a requirements.txt
