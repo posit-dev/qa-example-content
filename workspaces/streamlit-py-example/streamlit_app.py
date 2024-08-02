@@ -3,13 +3,12 @@ import streamlit as st
 from st_aggrid import AgGrid, GridOptionsBuilder
 from st_aggrid.shared import GridUpdateMode
 
-STREAMLIT_AGGRID_URL = "https://github.com/PablocFonseca/streamlit-aggrid"
 st.set_page_config(
     layout="centered", page_icon="🖱️", page_title="Interactive table app"
 )
 st.title("🖱️ Interactive table app")
 st.write(
-    """This app shows how you can use the [streamlit-aggrid](STREAMLIT_AGGRID_URL) 
+    """This app shows how you can use the [streamlit-aggrid](https://github.com/PablocFonseca/streamlit-aggrid) 
     Streamlit component in an interactive way so as to display additional content 
     based on user click."""
 )
