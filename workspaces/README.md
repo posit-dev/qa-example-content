@@ -25,3 +25,7 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - has a requirements.txt
 * dash-py-example
    - has a requirements.txt
+* python-widgets
+   - various python widgets
+* fast-statment-execution
+   - designated for fast execution tests where editor is driven with Ctrl-Enter

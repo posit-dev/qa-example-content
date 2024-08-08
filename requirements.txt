@@ -13,3 +13,5 @@ shiny
 shinywidgets
 plotly
 ridgeplot
+ipyleaflet
+ipywidgets
