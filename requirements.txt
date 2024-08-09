@@ -15,3 +15,12 @@ plotly
 ridgeplot
 ipyleaflet
 ipywidgets
+bqplot
+ipydatagrid
+ipympl
+ipytree
+leafmap
+matplotlib
+streamlit-aggrid
+streamlit
+click
