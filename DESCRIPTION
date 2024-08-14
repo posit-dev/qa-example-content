@@ -10,4 +10,8 @@ Imports:
     RSQLite,
     lubridate,
     dplyr,
-    shiny
+    shiny,
+    corrr,
+    highcharter,
+    leaflet,
+    plotly
