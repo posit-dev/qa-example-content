@@ -24,3 +24,4 @@ matplotlib
 streamlit-aggrid
 streamlit
 click
+bokeh
