@@ -25,3 +25,4 @@ streamlit-aggrid
 streamlit
 click
 bokeh
+altair
