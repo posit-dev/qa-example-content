@@ -29,3 +29,7 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - various python widgets
 * fast-statment-execution
    - designated for fast execution tests where editor is driven with Ctrl-Enter
+* python-plots
+   - collection of sample plot scripts
+* r_testing
+   - sample R package with tests
