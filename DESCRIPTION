@@ -15,4 +15,5 @@ Imports:
     highcharter,
     leaflet,
     plotly,
-    testthat
+    testthat,
+    devtools
