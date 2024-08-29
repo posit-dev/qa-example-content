@@ -33,3 +33,5 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - collection of sample plot scripts
 * r_testing
    - sample R package with tests
+* sparklines
+   - sample scripts for sparkline testing
