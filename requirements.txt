@@ -26,3 +26,4 @@ streamlit
 click
 bokeh
 altair
+hvplot

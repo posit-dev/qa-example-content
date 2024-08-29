@@ -16,4 +16,5 @@ Imports:
     leaflet,
     plotly,
     testthat,
-    devtools
+    devtools,
+    generator
