@@ -27,3 +27,5 @@ click
 bokeh
 altair
 hvplot
+graphviz
+pydot

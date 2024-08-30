@@ -35,3 +35,6 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - sample R package with tests
 * sparklines
    - sample scripts for sparkline testing
+* graphviz
+   - various graphviz samples
+   - graphviz needs to be locally installed: [Graphviz install](https://graphviz.org/download/)
