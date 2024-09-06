@@ -17,4 +17,9 @@ Imports:
     plotly,
     testthat,
     devtools,
-    generator
+    generator,
+    fixest,
+    palmerpenguins,
+    modelsummary,
+    reactable,
+    reprex

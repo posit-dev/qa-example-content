@@ -29,3 +29,5 @@ altair
 hvplot
 graphviz
 pydot
+vetiver
+great-tables
