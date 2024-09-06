@@ -40,3 +40,5 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - graphviz needs to be locally installed: [Graphviz install](https://graphviz.org/download/)
 * performance
    - various performance QA cases
+* matplotlib
+   - various matplotlib samples
