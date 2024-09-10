@@ -23,5 +23,5 @@ Imports:
     palmerpenguins,
     modelsummary,
     reactable,
-    reprex
+    reprex,
     reticulate
