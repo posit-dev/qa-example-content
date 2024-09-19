@@ -6,4 +6,6 @@ workspaces/basic-rmd-file/basicRmd_cache/*
 workspaces/basic-rmd-file/basicRmd_files/*
 workspaces/basic-rmd-file/basicRmd.html
 workspaces/basic-rmd-file/.gitignore
-
+workspaces/quarto_interactive/.quarto/*
+workspaces/quarto_interactive/quarto_interactive_files/*
+workspaces/quarto_interactive/quarto_interactive.html
