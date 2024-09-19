@@ -17,6 +17,7 @@ A collection of Projects for testing and demos.  Please keep these organized and
 * generate-data-frames-py : Simple project for generating large data frames with Python
 * generate-data-frames-r : Simple project for generating large data frames with R
 * quarto_basic : Simple quarto project for integration testing
+* quarto_interactive : Simple interactive quarto project for integration testing
 * polars-dataframe-py : Simple polars example for testing
 * shiny-py-example : Sample shiny app for python
    - has a requirements.txt
