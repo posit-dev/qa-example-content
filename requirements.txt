@@ -31,3 +31,6 @@ graphviz
 pydot
 vetiver
 great-tables
+gradio
+fastapi
+dash
