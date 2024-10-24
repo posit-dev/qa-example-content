@@ -1,3 +1,5 @@
 {
-    "positron.interpreters.automaticStartup": false
+    "positron.interpreters.automaticStartup": false,
+    "positron.r.kernel.logLevel": "debug",
+    "python.languageServerLogLevel": "debug"
 }
