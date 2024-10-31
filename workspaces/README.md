@@ -43,3 +43,5 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - various performance QA cases
 * matplotlib
    - various matplotlib samples
+* large_py_notebook
+   - notebook with many graphics based on spotify data
