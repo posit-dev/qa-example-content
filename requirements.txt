@@ -35,3 +35,5 @@ gradio
 fastapi
 dash
 flask
+seaborn
+nbformat
