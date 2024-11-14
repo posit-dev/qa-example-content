@@ -23,4 +23,6 @@ Imports:
     palmerpenguins,
     modelsummary,
     reactable,
-    reprex
+    reprex,
+    shinyjs,
+    phonTools
