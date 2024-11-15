@@ -45,3 +45,6 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - various matplotlib samples
 * large_py_notebook
    - notebook with many graphics based on spotify data
+* bitmap-notebook
+   - simple notebook that repeatedly loads a bitmap.  
+   - performance testing
