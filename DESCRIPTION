@@ -25,4 +25,5 @@ Imports:
     reactable,
     reprex,
     shinyjs,
-    phonTools
+    phonTools,
+    reticulate
