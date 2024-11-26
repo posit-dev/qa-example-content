@@ -50,3 +50,5 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - performance testing
 * python-plots-widgets-notebook
    - python notebook with a variety of plots and widgets
+* hvplot-sample
+   - More advanced hvplot sample that goes to the viewer
