@@ -48,3 +48,5 @@ A collection of Projects for testing and demos.  Please keep these organized and
 * bitmap-notebook
    - simple notebook that repeatedly loads a bitmap.  
    - performance testing
+* python-plots-widgets-notebook
+   - python notebook with a variety of plots and widgets
