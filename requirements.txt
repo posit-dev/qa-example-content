@@ -37,3 +37,4 @@ dash
 flask
 seaborn
 nbformat
+nbclient

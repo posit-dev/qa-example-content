@@ -52,3 +52,5 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - python notebook with a variety of plots and widgets
 * hvplot-sample
    - More advanced hvplot sample that goes to the viewer
+* quarto_python
+   - Quarto python sample
