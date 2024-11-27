@@ -54,3 +54,5 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - More advanced hvplot sample that goes to the viewer
 * quarto_python
    - Quarto python sample
+* diagrammeR-sample
+   - Sample DiagrammeR plot

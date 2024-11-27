@@ -26,4 +26,5 @@ Imports:
     reprex,
     shinyjs,
     phonTools,
-    reticulate
+    reticulate,
+    DiagrammeR
