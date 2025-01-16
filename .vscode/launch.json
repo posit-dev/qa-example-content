@@ -1,23 +1,11 @@
 {
     "configurations": [
       {
-        "name": "Streamlit",
+        "name": "Python Debugger: Current File (Integrated Terminal)",
         "type": "debugpy",
         "request": "launch",
-        "module": "streamlit",
-        "args": [
-          "run",
-          "${file}",
-          "--server.headless",
-          "true",
-        ],
-        "console": "integratedTerminal",
-        "serverReadyAction": {
-          "action": "openInViewer",
-          "killOnServerStop": false,
-          "pattern": "Local URL: http://localhost:([0-9]+)",
-          "uriFormat": "http://localhost:%s",
-        }
-      }
+        "program": "${file}",
+        "console": "integratedTerminal"
+      },
     ]
   }
