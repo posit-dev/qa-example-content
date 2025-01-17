@@ -28,4 +28,5 @@ Imports:
     phonTools,
     reticulate,
     DiagrammeR,
-    stringi
+    stringi,
+    stringr
