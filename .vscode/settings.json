@@ -1,5 +1,6 @@
 {
     "interpreters.automaticStartup": false,
+    "interpreters.startupBehavior": "manual",
     "positron.r.kernel.logLevel": "debug",
     "python.languageServerLogLevel": "debug",
     "remote.autoForwardPortsFallback": 0,
