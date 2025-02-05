@@ -1,5 +1,5 @@
 {
-    "interpreters.automaticStartup": false,
+    "python.locator": "native",
     "interpreters.startupBehavior": "manual",
     "positron.r.kernel.logLevel": "debug",
     "python.languageServerLogLevel": "debug",
