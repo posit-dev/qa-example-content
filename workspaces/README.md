@@ -1,5 +1,5 @@
 # Workspaces/Projects
-A collection of Projects for testing and demos.  Please keep these organized and give a brief statment in this README of each projects contents/intent/etc.
+A collection of Projects for testing and demos.  Please keep these organized and give a brief statement in this README of each projects contents/intent/etc.
 
 ## Contents
 
@@ -28,7 +28,7 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - has a requirements.txt
 * python-widgets
    - various python widgets
-* fast-statment-execution
+* fast-statement-execution
    - designated for fast execution tests where editor is driven with Ctrl-Enter
 * python-plots
    - collection of sample plot scripts
@@ -56,3 +56,5 @@ A collection of Projects for testing and demos.  Please keep these organized and
    - Quarto python sample
 * diagrammeR-sample
    - Sample DiagrammeR plot
+* core_ide
+   - Samples to test the core features of the IDE, e.g editor, terminal, etc.
