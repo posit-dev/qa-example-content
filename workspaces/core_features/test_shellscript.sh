@@ -1,0 +1,1 @@
+echo "Positron testing sending a string to the Terminal"
