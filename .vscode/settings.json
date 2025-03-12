@@ -1,7 +1,7 @@
 {
     "python.locator": "native",
     "interpreters.startupBehavior": "manual",
-    "positron.r.kernel.logLevel": "debug",
+    "positron.r.kernel.logLevel": "trace",
     "python.languageServerLogLevel": "debug",
     "remote.autoForwardPortsFallback": 0,
 }
