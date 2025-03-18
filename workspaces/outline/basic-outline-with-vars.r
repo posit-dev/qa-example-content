@@ -1,4 +1,4 @@
-define_scope_example <- function() {
+demonstrate_scope <- function() {
   local_variable <- "visible in outline"
 }
 
