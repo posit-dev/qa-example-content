@@ -1,4 +1,4 @@
 def demonstrate_scope():
-    local_variable = "should not be visible in outline"
+    local_variable = "not visible in outline"
 
 global_variable = "hello"
