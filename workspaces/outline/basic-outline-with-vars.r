@@ -1,5 +1,5 @@
-something <- function() {
-  y <- "should not be visible"
+define_scope_example <- function() {
+  local_variable <- "visible in outline"
 }
 
-x <- "hello"
+global_variable <- "hello"
