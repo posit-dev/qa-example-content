@@ -1,4 +1,4 @@
-def something():
-    y = 'should not be visible'
+def demonstrate_scope():
+    local_variable = "not visible in outline"
 
-x='hello'
+global_variable = "hello"
