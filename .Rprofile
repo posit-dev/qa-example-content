@@ -1,1 +1,1 @@
-cat('Hello!')
+cat('cat from .Rprofile')
