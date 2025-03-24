@@ -33,7 +33,7 @@ vetiver
 great-tables
 gradio==5.14.0
 fastapi
-dash
+dash==2.18.2
 flask
 seaborn
 nbformat
