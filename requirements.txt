@@ -38,3 +38,4 @@ flask
 seaborn
 nbformat
 nbclient
+torch
