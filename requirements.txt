@@ -31,7 +31,7 @@ graphviz
 pydot
 vetiver
 great-tables
-gradio==5.14.0
+gradio
 fastapi
 dash
 flask
