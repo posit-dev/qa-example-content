@@ -29,4 +29,5 @@ Imports:
     reticulate,
     DiagrammeR,
     stringi,
-    stringr
+    stringr,
+    cli
