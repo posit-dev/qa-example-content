@@ -33,4 +33,5 @@ Imports:
     cli,
     corrplot,
     GGally,
-    hexbin
+    hexbin,
+    viridis
