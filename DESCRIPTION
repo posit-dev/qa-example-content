@@ -30,4 +30,7 @@ Imports:
     DiagrammeR,
     stringi,
     stringr,
-    cli
+    cli,
+    corrplot,
+    GGally,
+    hexbin
