@@ -5,5 +5,4 @@
     "python.languageServerLogLevel": "debug",
     "remote.autoForwardPortsFallback": 0,
     "files.simpleDialog.enable": true,
-    "positron.importSettings.enable": false,
 }
