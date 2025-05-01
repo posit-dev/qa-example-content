@@ -34,4 +34,7 @@ Imports:
     corrplot,
     GGally,
     hexbin,
-    viridis
+    viridis,
+    RPostgres,
+    DBI,
+    connections
