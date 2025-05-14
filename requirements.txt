@@ -41,3 +41,4 @@ nbclient
 torch
 SQLAlchemy
 psycopg2-binary
+ipykernel
