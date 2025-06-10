@@ -10,3 +10,5 @@ workspaces/basic-rmd-file/.gitignore
 workspaces/quarto_interactive/.quarto/*
 workspaces/quarto_interactive/quarto_interactive_files/*
 workspaces/quarto_interactive/quarto_interactive.html
+workspaces/quarto_shiny/mini-app_files/*
+workspaces/quarto_shiny/mini-app.html
