@@ -1,0 +1,13 @@
+docker build -f Dockerfile.build -t positron-build-env .
+ 
+ 
+ 
+docker build --platform linux/amd64 -f Dockerfile.envs -t test-env:latest .
+  
+          POSITRON_PY_VER_SEL: 3.12.3
+          POSITRON_R_VER_SEL: 4.4.0
+          POSITRON_PY_ALT_VER_SEL: "3.13.0 (Pyenv)"
+          POSITRON_R_ALT_VER_SEL: 4.4.2
+          POSITRON_HIDDEN_PY: "3.12.10 (Conda)"
+          POSITRON_HIDDEN_R: 4.4.1  
+  

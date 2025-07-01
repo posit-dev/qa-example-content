@@ -1,0 +1,154 @@
+# Dockerfile for Test Environment (amd64)
+# Provides Python and R environments with multiple versions for testing
+
+FROM ubuntu:24.04 as base
+
+# Set environment variables
+ENV DEBIAN_FRONTEND=noninteractive
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+ENV HOME=/root
+ENV PATH="${HOME}/.pyenv/bin:${HOME}/conda/bin:$PATH"
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    wget \
+    git \
+    sudo \
+    ca-certificates \
+    gnupg \
+    lsb-release \
+    software-properties-common \
+    graphviz \
+    libssl-dev \
+    libffi-dev \
+    libbz2-dev \
+    libreadline-dev \
+    libsqlite3-dev \
+    libncurses5-dev \
+    libncursesw5-dev \
+    xz-utils \
+    tk-dev \
+    libxml2-dev \
+    libxmlsec1-dev \
+    libffi-dev \
+    liblzma-dev \
+    zlib1g-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Setup Quarto
+RUN curl -LO https://quarto.org/download/latest/quarto-linux-amd64.deb && \
+    dpkg -i quarto-linux-amd64.deb && \
+    rm quarto-linux-amd64.deb && \
+    quarto install tinytex
+
+# Setup Conda (Miniforge3)
+RUN wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh" && \
+    bash Miniforge3.sh -b -p "${HOME}/conda" && \
+    rm Miniforge3.sh && \
+    echo "source \"${HOME}/conda/etc/profile.d/conda.sh\"" >> ~/.bashrc
+
+# Initialize conda
+RUN /bin/bash -c "source ${HOME}/conda/etc/profile.d/conda.sh && conda init bash"
+
+# Install primary Python version (3.12.x) - matching actions/setup-python@v5 approach
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update && apt-get install -y \
+    python3.12 \
+    python3.12-dev \
+    python3.12-venv \
+    && rm -rf /var/lib/apt/lists/* \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.12 1 \
+    && update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.12 1 \
+    && curl -sS https://bootstrap.pypa.io/get-pip.py | python \
+    && python -m pip install --upgrade pip setuptools wheel
+
+# Install uv and Python dependencies in one step (matching the original workflow)
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    export PATH="${HOME}/.local/bin:$PATH" && \
+    curl https://raw.githubusercontent.com/posit-dev/qa-example-content/main/requirements.txt --output requirements.txt && \
+    uv pip install --python /usr/bin/python --system --break-system-packages -r requirements.txt && \
+    echo "Checking installed packages..." && \
+    /usr/bin/python -m pip list
+
+# Ensure uv is available in subsequent layers
+ENV PATH="${HOME}/.local/bin:$PATH"
+
+# Install pyenv for alternate Python versions (but don't make it default)
+RUN curl https://pyenv.run | bash
+
+# Install Python 3.13.0 via pyenv (without making pyenv active by default)
+RUN export PATH="$HOME/.pyenv/bin:$PATH" && \
+    eval "$(pyenv init --path)" && \
+    eval "$(pyenv virtualenv-init -)" && \
+    pyenv install 3.13.0 && \
+    pyenv global 3.13.0 && \
+    python -m pip install --upgrade pip && \
+    python -m pip install ipykernel && \
+    pyenv global system
+
+# Create undetectable Python interpreter in ~/scratch
+RUN mkdir -p ${HOME}/scratch && \
+    /bin/bash -c "source ${HOME}/conda/etc/profile.d/conda.sh && \
+    conda create -y -p \"${HOME}/scratch/python-env\" python=3.12.10 pip setuptools && \
+    conda activate \"${HOME}/scratch/python-env\" && \
+    python -c \"import venv, distutils, sys; print(f'Python {sys.version} modules are working!')\" && \
+    python -c \"import sys; print(f'Python {sys.version} is working!')\""
+
+# Install Rig (R Installation Manager)
+RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-x86_64-latest.tar.gz | tar xz -C /usr/local
+
+# Install primary R version (4.4.0)
+RUN rig add 4.4.0
+
+# Configure Posit PPM for Ubuntu 24.04
+RUN cat <<EOF > ~/.Rprofile
+options(
+  repos = c(RSPM = "https://packagemanager.posit.co/cran/__linux__/noble/latest"),
+  HTTPUserAgent = sprintf(
+    "R/%s (%s) R (%s)",
+    getRversion(), "ubuntu-2404",
+    paste(getRversion(), R.version\$platform, R.version\$arch, R.version\$os)
+  )
+)
+EOF
+
+# Install R packages
+RUN curl -s https://raw.githubusercontent.com/posit-dev/qa-example-content/main/DESCRIPTION --output DESCRIPTION && \
+    Rscript -e "if (!requireNamespace('pak', quietly = TRUE)) install.packages('pak', repos = 'https://cran.rstudio.com')" && \
+    Rscript -e "options(pak.install_binary = TRUE); pak::local_install_dev_deps(ask = FALSE)"
+
+# Install alternate R version (4.4.2)
+RUN rig add 4.4.2
+
+# Install undetectable R in ~/scratch
+RUN mkdir -p ${HOME}/scratch/R-4.4.1 && \
+    cd ${HOME}/scratch && \
+    curl -fLO "https://cdn.posit.co/r/ubuntu-2404/R-4.4.1-ubuntu-2404.tar.gz" && \
+    tar -xzf R-4.4.1-ubuntu-2404.tar.gz -C R-4.4.1 --strip-components=1 && \
+    rm R-4.4.1-ubuntu-2404.tar.gz && \
+    sed -i "s|/opt/R/4.4.1|${HOME}/scratch/R-4.4.1|g" "${HOME}/scratch/R-4.4.1/bin/R" && \
+    sed -i "s|/opt/R/4.4.1|${HOME}/scratch/R-4.4.1|g" "${HOME}/scratch/R-4.4.1/lib/R/etc/Renviron" && \
+    chmod +x ${HOME}/scratch/R-4.4.1/bin/R
+
+# Verify installations
+RUN echo "=== Verifying Python installations ===" && \
+    /usr/bin/python --version && /usr/bin/python -m pip list && \
+    export PATH="$HOME/.pyenv/bin:$PATH" && eval "$(pyenv init --path)" && pyenv versions && \
+    ${HOME}/scratch/python-env/bin/python --version && \
+    echo "=== Verifying R installations ===" && \
+    R --version && \
+    rig list && \
+    ${HOME}/scratch/R-4.4.1/bin/R --version && \
+    echo "=== Verifying Quarto installation ===" && \
+    quarto --version
+
+# Set working directory
+WORKDIR /workspace
+
+# Default command
+CMD ["/bin/bash"]
