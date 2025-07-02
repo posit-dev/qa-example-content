@@ -10,4 +10,9 @@ docker build --platform linux/amd64 -f Dockerfile.envs -t test-env:latest .
           POSITRON_R_ALT_VER_SEL: 4.4.2
           POSITRON_HIDDEN_PY: "3.12.10 (Conda)"
           POSITRON_HIDDEN_R: 4.4.1  
+
+
+
+docker buildx build -f Dockerfile.pw --platform linux/amd64 -t playwright-test --load .
+docker run --rm --platform linux/amd64 -v $(pwd)/output:/output playwright-test
   
