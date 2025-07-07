@@ -1,0 +1,20 @@
+cd dockerfiles/local-electron-only
+docker build -f Dockerfile.combined -t positron-combined:latest .
+
+docker run -it --rm -p 5900:5900 positron-combined bash
+sudo service xvfb start
+export DISPLAY=:10
+fluxbox &
+sudo x11vnc -forever -nopw -display :10 &
+
+vi test/e2e/infra/playwrightElectron.ts
+	args.push("--disable-dev-shm-usage");
+
+npm --prefix test/e2e ci
+npx playwright test --project "e2e-electron" --workers 1 --grep "Verify Basic Dash App"
+
+
+
+View UI with VNC viewer:
+RealVNC Viewer
+localhost:5900
