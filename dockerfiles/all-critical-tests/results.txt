@@ -1,0 +1,575 @@
+  1) [e2e-electron] › test/e2e/tests/autocomplete/autocomplete.test.ts:21:6 › Autocomplete › Python - Verify autocomplete suggestions in Console and Editor @:web @:win @:console @:sessions @:editor @:critical › Start session via hotkey: Python 3.13.0 (Pyenv)
+
+    TimeoutError: locator.textContent: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.quick-input-widget .quick-input-list .monaco-list-row[aria-label*="Python 3.13.0 (Pyenv)"]').first().locator('.quick-input-list-row').first()
+
+
+       at pages/quickInput.ts:98
+
+       96 | 		const firstMatch = this.code.driver.page.locator(`${QuickInput.QUICK_INPUT_RESULT}[aria-label*="${text}"]`).first();
+       97 |
+    >  98 | 		const firstMatchResult = await firstMatch.locator('.quick-input-list-row').nth(0).textContent() || '';
+          | 		                                                                                  ^
+       99 | 		await firstMatch.click({ force: true, timeout: 10000 });
+      100 | 		await this.code.driver.page.mouse.move(0, 0);
+      101 |
+        at QuickInput.selectQuickInputElementContaining (/usr/src/positron/test/e2e/pages/quickInput.ts:98:85)
+        at /usr/src/positron/test/e2e/pages/sessions.ts:420:26
+        at Sessions.startAndSkipMetadata (/usr/src/positron/test/e2e/pages/sessions.ts:400:10)
+        at createSession (/usr/src/positron/test/e2e/pages/sessions.ts:88:20)
+        at Sessions.start (/usr/src/positron/test/e2e/pages/sessions.ts:106:19)
+        at /usr/src/positron/test/e2e/tests/autocomplete/autocomplete.test.ts:24:50
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-autocomplete-autocom-bd518-tions-in-Console-and-Editor-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-autocomplete-autocom-bd518-tions-in-Console-and-Editor-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-autocomplete.test.ts.zip (application/zip) ─────────────────────────────────
+    test-results/tests-autocomplete-autocom-bd518-tions-in-Console-and-Editor-e2e-electron/attachments/logs-autocomplete-test-ts-zip-d7503cc6d43da9bf32194b382e0a32640f15dad2.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [e2e-electron] › test/e2e/tests/autocomplete/autocomplete.test.ts:58:6 › Autocomplete › Python - Verify autocomplete suggestions (LSP is alive) after restart @:web @:win @:console @:sessions @:editor @:critical › Start session via hotkey: Python 3.13.0 (Pyenv)
+
+    TimeoutError: locator.textContent: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.quick-input-widget .quick-input-list .monaco-list-row[aria-label*="Python 3.13.0 (Pyenv)"]').first().locator('.quick-input-list-row').first()
+
+
+       at pages/quickInput.ts:98
+
+       96 | 		const firstMatch = this.code.driver.page.locator(`${QuickInput.QUICK_INPUT_RESULT}[aria-label*="${text}"]`).first();
+       97 |
+    >  98 | 		const firstMatchResult = await firstMatch.locator('.quick-input-list-row').nth(0).textContent() || '';
+          | 		                                                                                  ^
+       99 | 		await firstMatch.click({ force: true, timeout: 10000 });
+      100 | 		await this.code.driver.page.mouse.move(0, 0);
+      101 |
+        at QuickInput.selectQuickInputElementContaining (/usr/src/positron/test/e2e/pages/quickInput.ts:98:85)
+        at /usr/src/positron/test/e2e/pages/sessions.ts:420:26
+        at Sessions.startAndSkipMetadata (/usr/src/positron/test/e2e/pages/sessions.ts:400:10)
+        at createSession (/usr/src/positron/test/e2e/pages/sessions.ts:88:20)
+        at Sessions.start (/usr/src/positron/test/e2e/pages/sessions.ts:106:19)
+        at /usr/src/positron/test/e2e/tests/autocomplete/autocomplete.test.ts:61:37
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-autocomplete-autocom-3999b--LSP-is-alive-after-restart-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-autocomplete-autocom-3999b--LSP-is-alive-after-restart-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-autocomplete.test.ts.zip (application/zip) ─────────────────────────────────
+    test-results/tests-autocomplete-autocom-3999b--LSP-is-alive-after-restart-e2e-electron/attachments/logs-autocomplete-test-ts-zip-269240fad5fb1831a80e9518e9f95646379307d7.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  3) [e2e-electron] › test/e2e/tests/autocomplete/autocomplete.test.ts:91:6 › Autocomplete › R - Verify autocomplete suggestions in Console and Editor @:web @:win @:console @:sessions @:editor @:critical @:ark › Expect console suggestion list count to be 4
+
+    Error: Timed out 15000ms waiting for expect(locator).toHaveCount(expected)
+
+    Locator: locator('.suggest-widget .monaco-list-row')
+    Expected: 4
+    Received: 0
+    Call log:
+      - Expect "toHaveCount" with timeout 15000ms
+      - waiting for locator('.suggest-widget .monaco-list-row')
+        18 × locator resolved to 0 elements
+           - unexpected value "0"
+
+
+       at pages/console.ts:361
+
+      359 | 	async expectSuggestionListCount(count: number): Promise<void> {
+      360 | 		await test.step(`Expect console suggestion list count to be ${count}`, async () => {
+    > 361 | 			await expect(this.suggestionList).toHaveCount(count);
+          | 			                                  ^
+      362 | 		});
+      363 | 	}
+      364 |
+        at /usr/src/positron/test/e2e/pages/console.ts:361:38
+        at Console.expectSuggestionListCount (/usr/src/positron/test/e2e/pages/console.ts:360:14)
+        at /usr/src/positron/test/e2e/tests/autocomplete/autocomplete.test.ts:102:17
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-autocomplete-autocom-82cb5-tions-in-Console-and-Editor-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-autocomplete-autocom-82cb5-tions-in-Console-and-Editor-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-autocomplete.test.ts.zip (application/zip) ─────────────────────────────────
+    test-results/tests-autocomplete-autocom-82cb5-tions-in-Console-and-Editor-e2e-electron/attachments/logs-autocomplete-test-ts-zip-dafaaa23af16c81b280999902df2837acc0ae845.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  4) [e2e-electron] › test/e2e/tests/connections/connections-sqlite.test.ts:60:6 › SQLite DB Connection › R - Can establish a SQLite connection, disconnect & reconnect @:web @:critical @:connections @:win @:ark
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.connections-list-item').filter({ hasText: 'SQLiteConnection' }).locator(locator('.codicon-arrow-circle-right'))
+
+
+       at pages/connections.ts:53
+
+      51 |
+      52 | 	async viewConnection(name: string) {
+    > 53 | 		await this.connectionItems.filter({ hasText: name }).locator(this.connectIcon).click();
+         | 		                                                                               ^
+      54 | 	}
+      55 |
+      56 | 	async openTree() {
+        at Connections.viewConnection (/usr/src/positron/test/e2e/pages/connections.ts:53:82)
+        at /usr/src/positron/test/e2e/tests/connections/connections-sqlite.test.ts:70:36
+        at /usr/src/positron/test/e2e/tests/connections/connections-sqlite.test.ts:68:3
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Disconnect')
+
+
+      15 | }, () => {
+      16 | 	test.afterEach(async function ({ app }) {
+    > 17 | 		await app.workbench.connections.disconnectButton.click();
+         | 		                                                 ^
+      18 | 		await app.workbench.connections.connectionItems.first().click();
+      19 | 		await app.workbench.connections.deleteConnection();
+      20 | 	});
+        at /usr/src/positron/test/e2e/tests/connections/connections-sqlite.test.ts:17:52
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-connections-connecti-dcc95-ection-disconnect-reconnect-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-connections-connecti-dcc95-ection-disconnect-reconnect-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-connections-sqlite.test.ts.zip (application/zip) ───────────────────────────
+    test-results/tests-connections-connecti-dcc95-ection-disconnect-reconnect-e2e-electron/attachments/logs-connections-sqlite-test-ts-zip-3dc3bdaa2107fe8ca5ea15642226cee43eb54157.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  5) [e2e-electron] › test/e2e/tests/connections/connections-sqlite.test.ts:89:6 › SQLite DB Connection › R - Ensure SQLite connections are updated after adding a database @:web @:critical @:connections @:win @:ark
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.connections-list-item').filter({ hasText: 'SQLiteConnection' }).locator(locator('.codicon-arrow-circle-right'))
+
+
+       at pages/connections.ts:53
+
+      51 |
+      52 | 	async viewConnection(name: string) {
+    > 53 | 		await this.connectionItems.filter({ hasText: name }).locator(this.connectIcon).click();
+         | 		                                                                               ^
+      54 | 	}
+      55 |
+      56 | 	async openTree() {
+        at Connections.viewConnection (/usr/src/positron/test/e2e/pages/connections.ts:53:82)
+        at /usr/src/positron/test/e2e/tests/connections/connections-sqlite.test.ts:101:36
+        at /usr/src/positron/test/e2e/tests/connections/connections-sqlite.test.ts:99:3
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for getByLabel('Disconnect')
+
+
+      15 | }, () => {
+      16 | 	test.afterEach(async function ({ app }) {
+    > 17 | 		await app.workbench.connections.disconnectButton.click();
+         | 		                                                 ^
+      18 | 		await app.workbench.connections.connectionItems.first().click();
+      19 | 		await app.workbench.connections.deleteConnection();
+      20 | 	});
+        at /usr/src/positron/test/e2e/tests/connections/connections-sqlite.test.ts:17:52
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-connections-connecti-c4f90-ted-after-adding-a-database-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-connections-connecti-c4f90-ted-after-adding-a-database-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-connections-sqlite.test.ts.zip (application/zip) ───────────────────────────
+    test-results/tests-connections-connecti-c4f90-ted-after-adding-a-database-e2e-electron/attachments/logs-connections-sqlite-test-ts-zip-f5cefcd03ed9b7ac177c312e3ba1334e479200f1.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  6) [e2e-electron] › test/e2e/tests/data-explorer/data-explorer-python-polars.test.ts:33:6 › Data Explorer - Python Polars › Python Polars - Verify table data, copy to clipboard, sparkline hover, null percentage hover @:win @:web @:critical @:data-explorer
+
+    TimeoutError: locator.dblclick: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.variables-instance[style*="z-index: 1"] .variable-item .name-column').filter({ hasText: 'df' })
+
+
+       at pages/variables.ts:80
+
+      78 | 			await this.hotKeys.showSecondarySidebar();
+      79 | 			const desiredRow = this.code.driver.page.locator(VARIABLES_NAME_COLUMN).filter({ hasText: variableName });
+    > 80 | 			await desiredRow.dblclick();
+         | 			                 ^
+      81 | 		});
+      82 | 	}
+      83 |
+        at /usr/src/positron/test/e2e/pages/variables.ts:80:21
+        at Variables.doubleClickVariableRow (/usr/src/positron/test/e2e/pages/variables.ts:77:3)
+        at /usr/src/positron/test/e2e/tests/data-explorer/data-explorer-python-polars.test.ts:24:3
+
+  7) [e2e-electron] › test/e2e/tests/data-explorer/large-data-frame.test.ts:47:6 › Data Explorer - Large Data Frame › R - Verify data loads and basic filtering with large data frame @:critical @:web @:win @:data-explorer @:web @:critical › Double click variable: df2
+
+    TimeoutError: locator.dblclick: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.variables-instance[style*="z-index: 1"] .variable-item .name-column').filter({ hasText: 'df2' })
+
+
+       at pages/variables.ts:80
+
+      78 | 			await this.hotKeys.showSecondarySidebar();
+      79 | 			const desiredRow = this.code.driver.page.locator(VARIABLES_NAME_COLUMN).filter({ hasText: variableName });
+    > 80 | 			await desiredRow.dblclick();
+         | 			                 ^
+      81 | 		});
+      82 | 	}
+      83 |
+        at /usr/src/positron/test/e2e/pages/variables.ts:80:21
+        at Variables.doubleClickVariableRow (/usr/src/positron/test/e2e/pages/variables.ts:77:3)
+        at /usr/src/positron/test/e2e/tests/data-explorer/large-data-frame.test.ts:56:3
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-data-explorer-large--39ff5-ering-with-large-data-frame-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-data-explorer-large--39ff5-ering-with-large-data-frame-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-large-data-frame.test.ts.zip (application/zip) ─────────────────────────────
+    test-results/tests-data-explorer-large--39ff5-ering-with-large-data-frame-e2e-electron/attachments/logs-large-data-frame-test-ts-zip-03a4e042c2e179d19a720f8e7da2b69585f3a253.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  8) [e2e-electron] › test/e2e/tests/diagnostics/diagnostics.test.ts:20:6 › Diagnostics › Python - Verify diagnostics isolation between sessions in the editor and problems view @:sessions @:problems @:web @:win @:critical › Expect diagnostics - Problems: 0, Errors: 0, Warnings: 0
+
+    Error: Timed out 15000ms waiting for expect(locator).not.toBeVisible()
+
+    Locator: getByRole('tab', { name: 'Problems' }).locator('.badge-content')
+    Expected: not visible
+    Received: visible
+    Call log:
+      - Expect "not toBeVisible" with timeout 15000ms
+      - waiting for getByRole('tab', { name: 'Problems' }).locator('.badge-content')
+        18 × locator resolved to <div class="badge-content">1</div>
+           - unexpected value "visible"
+
+
+       at pages/problems.ts:71
+
+      69 | 			if (badgeCount !== undefined) {
+      70 | 				badgeCount === 0
+    > 71 | 					? await expect(this.problemsCount).not.toBeVisible()
+         | 					                                       ^
+      72 | 					: await expect(this.problemsCount).toHaveText(badgeCount.toString());
+      73 | 			}
+      74 |
+        at /usr/src/positron/test/e2e/pages/problems.ts:71:45
+        at Problems.expectDiagnosticsToBe (/usr/src/positron/test/e2e/pages/problems.ts:64:3)
+        at /usr/src/positron/test/e2e/tests/diagnostics/diagnostics.test.ts:32:3
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-diagnostics-diagnost-e4432-he-editor-and-problems-view-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-diagnostics-diagnost-e4432-he-editor-and-problems-view-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-diagnostics.test.ts.zip (application/zip) ──────────────────────────────────
+    test-results/tests-diagnostics-diagnost-e4432-he-editor-and-problems-view-e2e-electron/attachments/logs-diagnostics-test-ts-zip-35c93e61c86d3fbf0be6c5b764ffb5c39c0fb458.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  9) [e2e-electron] › test/e2e/tests/interpreters/session-picker.test.ts:33:6 › Session Picker › Verify Session Picker updates correctly across multiple active sessions @:web @:critical @:win @:top-action-bar @:sessions @:critical › Start session via session-picker: Python 3.13.0 (Pyenv)
+
+    TimeoutError: locator.textContent: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.quick-input-widget .quick-input-list .monaco-list-row[aria-label*="Python 3.13.0 (Pyenv)"]').first().locator('.quick-input-list-row').first()
+
+
+       at pages/quickInput.ts:98
+
+       96 | 		const firstMatch = this.code.driver.page.locator(`${QuickInput.QUICK_INPUT_RESULT}[aria-label*="${text}"]`).first();
+       97 |
+    >  98 | 		const firstMatchResult = await firstMatch.locator('.quick-input-list-row').nth(0).textContent() || '';
+          | 		                                                                                  ^
+       99 | 		await firstMatch.click({ force: true, timeout: 10000 });
+      100 | 		await this.code.driver.page.mouse.move(0, 0);
+      101 |
+        at QuickInput.selectQuickInputElementContaining (/usr/src/positron/test/e2e/pages/quickInput.ts:98:85)
+        at /usr/src/positron/test/e2e/pages/sessions.ts:420:26
+        at Sessions.startAndSkipMetadata (/usr/src/positron/test/e2e/pages/sessions.ts:400:10)
+        at createSession (/usr/src/positron/test/e2e/pages/sessions.ts:88:20)
+        at Sessions.start (/usr/src/positron/test/e2e/pages/sessions.ts:119:18)
+        at /usr/src/positron/test/e2e/tests/interpreters/session-picker.test.ts:41:24
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-interpreters-session-ff738-ss-multiple-active-sessions-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-interpreters-session-ff738-ss-multiple-active-sessions-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-session-picker.test.ts.zip (application/zip) ───────────────────────────────
+    test-results/tests-interpreters-session-ff738-ss-multiple-active-sessions-e2e-electron/attachments/logs-session-picker-test-ts-zip-211f48fb9b5ad3f09b382423c743edf73ad88b6f.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  10) [e2e-electron] › test/e2e/tests/new-folder-flow/new-folder-flow-python.test.ts:96:6 › New Folder Flow: Python Project › New env: uv environment @:modal @:new-folder-flow @:web @:critical › Create a new folder: new-uv_907910 › Create a new folder: new-uv_907910
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for getByRole('button', { name: 'Create', exact: true })
+        - locator resolved to <button disabled tabindex="0" role="button" aria-disabled="true" class="positron-button action-bar-button default disabled">Create</button>
+      - attempting click action
+        2 × waiting for element to be visible, enabled and stable
+          - element is not enabled
+        - retrying click action
+        - waiting 20ms
+        2 × waiting for element to be visible, enabled and stable
+          - element is not enabled
+        - retrying click action
+          - waiting 100ms
+        58 × waiting for element to be visible, enabled and stable
+           - element is not enabled
+         - retrying click action
+           - waiting 500ms
+
+
+       at pages/newFolderFlow.ts:153
+
+      151 | 		}
+      152 |
+    > 153 | 		await button.click();
+          | 		             ^
+      154 | 	}
+      155 |
+      156 | 	/**
+        at NewFolderFlow.clickFlowButton (/usr/src/positron/test/e2e/pages/newFolderFlow.ts:153:16)
+        at NewFolderFlow.setConfiguration (/usr/src/positron/test/e2e/pages/newFolderFlow.ts:118:14)
+        at /usr/src/positron/test/e2e/pages/newFolderFlow.ts:39:5
+        at NewFolderFlow.createNewFolder (/usr/src/positron/test/e2e/pages/newFolderFlow.ts:32:3)
+        at /usr/src/positron/test/e2e/tests/new-folder-flow/helpers/new-folder-flow.ts:15:3
+        at createNewFolder (/usr/src/positron/test/e2e/tests/new-folder-flow/helpers/new-folder-flow.ts:14:2)
+        at /usr/src/positron/test/e2e/tests/new-folder-flow/new-folder-flow-python.test.ts:99:3
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-new-folder-flow-new--0589d-ject-New-env-uv-environment-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-new-folder-flow-new--0589d-ject-New-env-uv-environment-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-new-folder-flow-python.test.ts.zip (application/zip) ───────────────────────
+    test-results/tests-new-folder-flow-new--0589d-ject-New-env-uv-environment-e2e-electron/attachments/logs-new-folder-flow-python-test-ts-zip-b72d021a12f2e0e048dc6f6ca67962a3f26e5851.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  11) [e2e-electron] › test/e2e/tests/notebook/notebook-create.test.ts:57:7 › Notebooks › Python Notebooks › Python - Save untitled notebook and preserve session @:critical @:web @:win @:notebooks
+
+    TimeoutError: locator.click: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for getByText('Select Another Kernel...')
+
+
+       at pages/notebooks.ts:85
+
+      83 | 			await this.code.driver.page.locator(KERNEL_DROPDOWN).click();
+      84 | 			await this.quickinput.waitForQuickInputOpened();
+    > 85 | 			await this.code.driver.page.getByText('Select Another Kernel...').click();
+         | 			                                                                  ^
+      86 | 			await this.quickinput.selectQuickInputElementContaining(`${kernelGroup} Environments...`);
+      87 | 			await this.quickinput.selectQuickInputElementContaining(desiredKernel);
+      88 | 			await this.quickinput.waitForQuickInputClosed();
+        at /usr/src/positron/test/e2e/pages/notebooks.ts:85:70
+        at Notebooks.selectInterpreter (/usr/src/positron/test/e2e/pages/notebooks.ts:57:3)
+        at /usr/src/positron/test/e2e/tests/notebook/notebook-create.test.ts:31:4
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-notebook-notebook-cr-f2ec2-tebook-and-preserve-session-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-notebook-notebook-cr-f2ec2-tebook-and-preserve-session-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-notebook-create.test.ts.zip (application/zip) ──────────────────────────────
+    test-results/tests-notebook-notebook-cr-f2ec2-tebook-and-preserve-session-e2e-electron/attachments/logs-notebook-create-test-ts-zip-8181467e8f51f62c320fd48083b0a18b8570df4c.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  12) [e2e-electron] › test/e2e/tests/sessions/session-delete.test.ts:56:6 › Sessions: Delete › Python & R - Validate can delete multiple sessions @:web @:critical @:win @:sessions @:critical › Start session via hotkey: Python 3.13.0 (Pyenv)
+
+    TimeoutError: locator.textContent: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.quick-input-widget .quick-input-list .monaco-list-row[aria-label*="Python 3.13.0 (Pyenv)"]').first().locator('.quick-input-list-row').first()
+
+
+       at pages/quickInput.ts:98
+
+       96 | 		const firstMatch = this.code.driver.page.locator(`${QuickInput.QUICK_INPUT_RESULT}[aria-label*="${text}"]`).first();
+       97 |
+    >  98 | 		const firstMatchResult = await firstMatch.locator('.quick-input-list-row').nth(0).textContent() || '';
+          | 		                                                                                  ^
+       99 | 		await firstMatch.click({ force: true, timeout: 10000 });
+      100 | 		await this.code.driver.page.mouse.move(0, 0);
+      101 |
+        at QuickInput.selectQuickInputElementContaining (/usr/src/positron/test/e2e/pages/quickInput.ts:98:85)
+        at /usr/src/positron/test/e2e/pages/sessions.ts:420:26
+        at Sessions.startAndSkipMetadata (/usr/src/positron/test/e2e/pages/sessions.ts:400:10)
+        at createSession (/usr/src/positron/test/e2e/pages/sessions.ts:88:20)
+        at Sessions.start (/usr/src/positron/test/e2e/pages/sessions.ts:106:19)
+        at /usr/src/positron/test/e2e/tests/sessions/session-delete.test.ts:57:3
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-sessions-session-del-b9fae-an-delete-multiple-sessions-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-sessions-session-del-b9fae-an-delete-multiple-sessions-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-session-delete.test.ts.zip (application/zip) ───────────────────────────────
+    test-results/tests-sessions-session-del-b9fae-an-delete-multiple-sessions-e2e-electron/attachments/logs-session-delete-test-ts-zip-c156f5a0c5fb4d57039b58b00605328568920abd.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  13) [e2e-electron] › test/e2e/tests/sessions/session-rename.test.ts:24:6 › Sessions: Rename › Validate can rename sessions and name persists @:win @:console @:sessions @:critical › Start session via hotkey: Python 3.13.0 (Pyenv)
+
+    TimeoutError: locator.textContent: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.quick-input-widget .quick-input-list .monaco-list-row[aria-label*="Python 3.13.0 (Pyenv)"]').first().locator('.quick-input-list-row').first()
+
+
+       at pages/quickInput.ts:98
+
+       96 | 		const firstMatch = this.code.driver.page.locator(`${QuickInput.QUICK_INPUT_RESULT}[aria-label*="${text}"]`).first();
+       97 |
+    >  98 | 		const firstMatchResult = await firstMatch.locator('.quick-input-list-row').nth(0).textContent() || '';
+          | 		                                                                                  ^
+       99 | 		await firstMatch.click({ force: true, timeout: 10000 });
+      100 | 		await this.code.driver.page.mouse.move(0, 0);
+      101 |
+        at QuickInput.selectQuickInputElementContaining (/usr/src/positron/test/e2e/pages/quickInput.ts:98:85)
+        at /usr/src/positron/test/e2e/pages/sessions.ts:420:26
+        at Sessions.startAndSkipMetadata (/usr/src/positron/test/e2e/pages/sessions.ts:400:10)
+        at createSession (/usr/src/positron/test/e2e/pages/sessions.ts:88:20)
+        at Sessions.start (/usr/src/positron/test/e2e/pages/sessions.ts:106:19)
+        at /usr/src/positron/test/e2e/tests/sessions/session-rename.test.ts:25:60
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-sessions-session-ren-99f01--sessions-and-name-persists-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-sessions-session-ren-99f01--sessions-and-name-persists-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-session-rename.test.ts.zip (application/zip) ───────────────────────────────
+    test-results/tests-sessions-session-ren-99f01--sessions-and-name-persists-e2e-electron/attachments/logs-session-rename-test-ts-zip-fc08bb6e1649052799e37afdb51e90f1d1383936.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  14) [e2e-electron] › test/e2e/tests/sessions/session-state.test.ts:98:6 › Sessions: State › Validate metadata between sessions @:win @:web @:console @:sessions @:critical › Start session via hotkey: Python 3.13.0 (Pyenv)
+
+    TimeoutError: locator.textContent: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.quick-input-widget .quick-input-list .monaco-list-row[aria-label*="Python 3.13.0 (Pyenv)"]').first().locator('.quick-input-list-row').first()
+
+
+       at pages/quickInput.ts:98
+
+       96 | 		const firstMatch = this.code.driver.page.locator(`${QuickInput.QUICK_INPUT_RESULT}[aria-label*="${text}"]`).first();
+       97 |
+    >  98 | 		const firstMatchResult = await firstMatch.locator('.quick-input-list-row').nth(0).textContent() || '';
+          | 		                                                                                  ^
+       99 | 		await firstMatch.click({ force: true, timeout: 10000 });
+      100 | 		await this.code.driver.page.mouse.move(0, 0);
+      101 |
+        at QuickInput.selectQuickInputElementContaining (/usr/src/positron/test/e2e/pages/quickInput.ts:98:85)
+        at /usr/src/positron/test/e2e/pages/sessions.ts:420:26
+        at Sessions.startAndSkipMetadata (/usr/src/positron/test/e2e/pages/sessions.ts:400:10)
+        at createSession (/usr/src/positron/test/e2e/pages/sessions.ts:88:20)
+        at Sessions.start (/usr/src/positron/test/e2e/pages/sessions.ts:106:19)
+        at /usr/src/positron/test/e2e/tests/sessions/session-state.test.ts:102:47
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-sessions-session-sta-6f0fb-e-metadata-between-sessions-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-sessions-session-sta-6f0fb-e-metadata-between-sessions-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-session-state.test.ts.zip (application/zip) ────────────────────────────────
+    test-results/tests-sessions-session-sta-6f0fb-e-metadata-between-sessions-e2e-electron/attachments/logs-session-state-test-ts-zip-7868e05d436c10ed1c1b31ab460b21a617e6b57f.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  15) [e2e-electron] › test/e2e/tests/variables/variables-sessions.test.ts:24:6 › Variables: Sessions › Validate variables are isolated between sessions @:win @:web @:critical @:variables @:sessions › Start session via hotkey: Python 3.13.0 (Pyenv)
+
+    TimeoutError: locator.textContent: Timeout 30000ms exceeded.
+    Call log:
+      - waiting for locator('.quick-input-widget .quick-input-list .monaco-list-row[aria-label*="Python 3.13.0 (Pyenv)"]').first().locator('.quick-input-list-row').first()
+
+
+       at pages/quickInput.ts:98
+
+       96 | 		const firstMatch = this.code.driver.page.locator(`${QuickInput.QUICK_INPUT_RESULT}[aria-label*="${text}"]`).first();
+       97 |
+    >  98 | 		const firstMatchResult = await firstMatch.locator('.quick-input-list-row').nth(0).textContent() || '';
+          | 		                                                                                  ^
+       99 | 		await firstMatch.click({ force: true, timeout: 10000 });
+      100 | 		await this.code.driver.page.mouse.move(0, 0);
+      101 |
+        at QuickInput.selectQuickInputElementContaining (/usr/src/positron/test/e2e/pages/quickInput.ts:98:85)
+        at /usr/src/positron/test/e2e/pages/sessions.ts:420:26
+        at Sessions.startAndSkipMetadata (/usr/src/positron/test/e2e/pages/sessions.ts:400:10)
+        at createSession (/usr/src/positron/test/e2e/pages/sessions.ts:88:20)
+        at Sessions.start (/usr/src/positron/test/e2e/pages/sessions.ts:106:19)
+        at /usr/src/positron/test/e2e/tests/variables/variables-sessions.test.ts:28:47
+
+    attachment #1: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results/tests-variables-variables--bfdf1-e-isolated-between-sessions-e2e-electron/_trace.zip
+    Usage:
+
+        npx playwright show-trace test-results/tests-variables-variables--bfdf1-e-isolated-between-sessions-e2e-electron/_trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+    attachment #2: logs-variables-sessions.test.ts.zip (application/zip) ───────────────────────────
+    test-results/tests-variables-variables--bfdf1-e-isolated-between-sessions-e2e-electron/attachments/logs-variables-sessions-test-ts-zip-d9a6f41efa4555ae1f9017c581df8f2e825ed756.zip
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  Slow test file: [e2e-electron] › test/e2e/tests/new-folder-flow/new-folder-flow-python.test.ts (1.6m)
+  Slow test file: [e2e-electron] › test/e2e/tests/sessions/session-state.test.ts (1.3m)
+  Slow test file: [e2e-electron] › test/e2e/tests/sessions/session-delete.test.ts (1.3m)
+  Slow test file: [e2e-electron] › test/e2e/tests/apps/python-apps.test.ts (1.1m)
+  Slow test file: [e2e-electron] › test/e2e/tests/data-explorer/data-explorer-python-pandas.test.ts (1.1m)
+  Slow test file: [e2e-electron] › test/e2e/tests/data-explorer/large-data-frame.test.ts (1.1m)
+  Consider running tests from slow files in parallel. See: https://playwright.dev/docs/test-parallel
+  15 failed
+    [e2e-electron] › test/e2e/tests/autocomplete/autocomplete.test.ts:21:6 › Autocomplete › Python - Verify autocomplete suggestions in Console and Editor @:web @:win @:console @:sessions @:editor @:critical
+    [e2e-electron] › test/e2e/tests/autocomplete/autocomplete.test.ts:58:6 › Autocomplete › Python - Verify autocomplete suggestions (LSP is alive) after restart @:web @:win @:console @:sessions @:editor @:critical
+    [e2e-electron] › test/e2e/tests/autocomplete/autocomplete.test.ts:91:6 › Autocomplete › R - Verify autocomplete suggestions in Console and Editor @:web @:win @:console @:sessions @:editor @:critical @:ark
+    [e2e-electron] › test/e2e/tests/connections/connections-sqlite.test.ts:60:6 › SQLite DB Connection › R - Can establish a SQLite connection, disconnect & reconnect @:web @:critical @:connections @:win @:ark
+    [e2e-electron] › test/e2e/tests/connections/connections-sqlite.test.ts:89:6 › SQLite DB Connection › R - Ensure SQLite connections are updated after adding a database @:web @:critical @:connections @:win @:ark
+    [e2e-electron] › test/e2e/tests/data-explorer/data-explorer-python-polars.test.ts:33:6 › Data Explorer - Python Polars › Python Polars - Verify table data, copy to clipboard, sparkline hover, null percentage hover @:win @:web @:critical @:data-explorer
+    [e2e-electron] › test/e2e/tests/data-explorer/large-data-frame.test.ts:47:6 › Data Explorer - Large Data Frame › R - Verify data loads and basic filtering with large data frame @:critical @:web @:win @:data-explorer @:web @:critical
+    [e2e-electron] › test/e2e/tests/diagnostics/diagnostics.test.ts:20:6 › Diagnostics › Python - Verify diagnostics isolation between sessions in the editor and problems view @:sessions @:problems @:web @:win @:critical
+    [e2e-electron] › test/e2e/tests/interpreters/session-picker.test.ts:33:6 › Session Picker › Verify Session Picker updates correctly across multiple active sessions @:web @:critical @:win @:top-action-bar @:sessions @:critical
+    [e2e-electron] › test/e2e/tests/new-folder-flow/new-folder-flow-python.test.ts:96:6 › New Folder Flow: Python Project › New env: uv environment @:modal @:new-folder-flow @:web @:critical
+    [e2e-electron] › test/e2e/tests/notebook/notebook-create.test.ts:57:7 › Notebooks › Python Notebooks › Python - Save untitled notebook and preserve session @:critical @:web @:win @:notebooks
+    [e2e-electron] › test/e2e/tests/sessions/session-delete.test.ts:56:6 › Sessions: Delete › Python & R - Validate can delete multiple sessions @:web @:critical @:win @:sessions @:critical
+    [e2e-electron] › test/e2e/tests/sessions/session-rename.test.ts:24:6 › Sessions: Rename › Validate can rename sessions and name persists @:win @:console @:sessions @:critical
+    [e2e-electron] › test/e2e/tests/sessions/session-state.test.ts:98:6 › Sessions: State › Validate metadata between sessions @:win @:web @:console @:sessions @:critical
+    [e2e-electron] › test/e2e/tests/variables/variables-sessions.test.ts:24:6 › Variables: Sessions › Validate variables are isolated between sessions @:win @:web @:critical @:variables @:sessions
+  1 skipped
+  3 did not run
+  55 passed (20.5m)

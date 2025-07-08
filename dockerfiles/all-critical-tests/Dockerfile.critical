@@ -9,7 +9,7 @@ ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
 ENV LC_ALL=C.UTF-8
 ENV HOME=/root
-ENV PATH="${HOME}/.pyenv/bin:${HOME}/conda/bin:$PATH"
+ENV PATH="${HOME}/.pyenv/bin:/opt/conda/bin:$PATH"
 
 # Install system dependencies, VNC server, and window manager
 RUN apt-get update && apt-get install -y \
@@ -25,8 +25,8 @@ RUN apt-get update && apt-get install -y \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user for Positron and general use
-RUN useradd --create-home --shell /bin/bash -G sudo positron-user && \
-	echo "positron-user ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+RUN useradd --create-home --shell /bin/bash -G sudo runner && \
+	echo "runner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Install Node.js and npm
 RUN curl -fsSL https://nodejs.org/dist/v20.19.0/node-v20.19.0-linux-x64.tar.xz -o /tmp/node.tar.xz && \
@@ -103,10 +103,10 @@ RUN curl -LO https://quarto.org/download/latest/quarto-linux-amd64.deb && \
 
 # Conda
 RUN wget -O Miniforge3.sh "https://github.com/conda-forge/miniforge/releases/latest/download/Miniforge3-Linux-x86_64.sh" && \
-	bash Miniforge3.sh -b -p "${HOME}/conda" && rm Miniforge3.sh && \
-	echo "source \"${HOME}/conda/etc/profile.d/conda.sh\"" >> ~/.bashrc
+	bash Miniforge3.sh -b -p "/opt/conda" && rm Miniforge3.sh && \
+	echo "source \"/opt/conda/etc/profile.d/conda.sh\"" >> ~/.bashrc
 
-RUN /bin/bash -c "source ${HOME}/conda/etc/profile.d/conda.sh && conda init bash"
+RUN /bin/bash -c "source /opt/conda/etc/profile.d/conda.sh && conda init bash"
 
 # Python 3.12.x
 RUN sudo apt-get update && sudo apt-get install -y software-properties-common && \
@@ -137,13 +137,6 @@ RUN export PATH="$HOME/.pyenv/bin:$PATH" && \
 	python -m pip install --upgrade pip ipykernel && \
 	pyenv global system
 
-# Hidden Python
-RUN mkdir -p ${HOME}/scratch && \
-	/bin/bash -c "source ${HOME}/conda/etc/profile.d/conda.sh && \
-	conda create -y -p \"${HOME}/scratch/python-env\" python=3.12.10 pip setuptools && \
-	conda activate \"${HOME}/scratch/python-env\" && \
-	python -c \"import sys; print(f'Python {sys.version} is working!')\""
-
 # Rig and R
 RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-x86_64-latest.tar.gz | tar xz -C /usr/local
 RUN rig add 4.4.0
@@ -158,19 +151,26 @@ RUN curl -s https://raw.githubusercontent.com/posit-dev/qa-example-content/main/
 
 RUN rig add 4.4.2
 
+# Switch to non-root user
+USER runner
+ENV HOME=/home/runner
+WORKDIR /home/runner
+
+# Hidden Python
+RUN mkdir -p ${HOME}/scratch && \
+	/bin/bash -c "source /opt/conda/etc/profile.d/conda.sh && \
+	conda create -y -p \"${HOME}/scratch/python-env\" python=3.12.10 pip setuptools && \
+	conda activate \"${HOME}/scratch/python-env\" && \
+	python -c \"import sys; print(f'Python {sys.version} is working!')\""
+
 # Hidden R
 RUN mkdir -p ${HOME}/scratch/R-4.4.1 && \
 	cd ${HOME}/scratch && \
-	curl -fLO "https://cdn.posit.co/r/ubuntu-2404/R-4.4.1-ubuntu-2404.tar.gz" && \
-	tar -xzf R-4.4.1-ubuntu-2404.tar.gz -C R-4.4.1 --strip-components=1 && \
-	sed -i "s|/opt/R/4.4.1|${HOME}/scratch/R-4.4.1|g" ${HOME}/scratch/R-4.4.1/bin/R && \
-	sed -i "s|/opt/R/4.4.1|${HOME}/scratch/R-4.4.1|g" ${HOME}/scratch/R-4.4.1/lib/R/etc/Renviron && \
-	chmod +x ${HOME}/scratch/R-4.4.1/bin/R
-
-# Switch to non-root user
-USER positron-user
-ENV HOME=/home/positron-user
-WORKDIR /home/positron-user
+	sudo curl -fLO "https://cdn.posit.co/r/ubuntu-2404/R-4.4.1-ubuntu-2404.tar.gz" && \
+	sudo tar -xzf R-4.4.1-ubuntu-2404.tar.gz -C R-4.4.1 --strip-components=1 && \
+	sudo sed -i "s|/opt/R/4.4.1|${HOME}/scratch/R-4.4.1|g" ${HOME}/scratch/R-4.4.1/bin/R && \
+	sudo sed -i "s|/opt/R/4.4.1|${HOME}/scratch/R-4.4.1|g" ${HOME}/scratch/R-4.4.1/lib/R/etc/Renviron && \
+	sudo chmod +x ${HOME}/scratch/R-4.4.1/bin/R
 
 # Playwright/Electron/Positron
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
@@ -178,7 +178,7 @@ ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
     NODE_OPTIONS="--max-old-space-size=4095"
 
 WORKDIR /usr/src
-RUN sudo chown -R positron-user:positron-user /usr/src && \
+RUN sudo chown -R runner:runner /usr/src && \
 	git clone https://github.com/posit-dev/positron.git
 WORKDIR /usr/src/positron
 RUN npm ci --fetch-timeout 120000 && \
@@ -203,5 +203,5 @@ ENV POSITRON_PY_VER_SEL=3.12.3 \
     POSITRON_HIDDEN_R=4.4.1
 
 # Runtime startup: Xvfb, Fluxbox, VNC, Playwright
-CMD ["bash", "-c", "sudo service xvfb start && export DISPLAY=:10 && fluxbox & sudo x11vnc -forever -nopw -display :10 & npx playwright test --project e2e-electron --grep @:critical"]
+CMD ["bash", "-c", "sudo service xvfb start && export DISPLAY=:10 && fluxbox & sudo x11vnc -forever -nopw -display :10 & DISPLAY=:10 npx playwright test --workers 2 --project e2e-electron --grep @:critical"]
 
