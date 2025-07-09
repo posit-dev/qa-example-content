@@ -121,11 +121,30 @@ RUN sudo apt-get update && sudo apt-get install -y software-properties-common &&
 # uv and dependencies
 RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
 	export PATH="${HOME}/.local/bin:$PATH" && \
-	curl https://raw.githubusercontent.com/posit-dev/qa-example-content/main/requirements.txt --output requirements.txt && \
+	curl https://raw.githubusercontent.com/posit-dev/qa-example-content/d6ecfaf6eb2482e5ecd0cb910d566593271f3f66/requirements.txt --output requirements.txt && \
 	uv pip install --python /usr/bin/python --system --break-system-packages -r requirements.txt && \
 	/usr/bin/python -m pip list
 
 ENV PATH="${HOME}/.local/bin:$PATH"
+
+# Rig and R
+RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-x86_64-latest.tar.gz | tar xz -C /usr/local
+RUN rig add 4.4.0
+
+# PPM config
+RUN echo 'options(\n  repos = c(RSPM = "https://packagemanager.posit.co/cran/__linux__/noble/latest"),\n  HTTPUserAgent = sprintf("R/%s (ubuntu-2404)", getRversion())\n)' > ~/.Rprofile
+
+# R packages
+RUN curl -s https://raw.githubusercontent.com/posit-dev/qa-example-content/d6ecfaf6eb2482e5ecd0cb910d566593271f3f66/DESCRIPTION --output DESCRIPTION && \
+	Rscript -e "if (!requireNamespace('pak', quietly = TRUE)) install.packages('pak', repos = 'https://cran.rstudio.com')" && \
+	Rscript -e "options(pak.install_binary = TRUE); pak::local_install_dev_deps(ask = FALSE)"
+
+RUN rig add 4.4.2
+
+# Switch to non-root user
+USER runner
+ENV HOME=/home/runner
+WORKDIR /home/runner
 
 # pyenv and alt Python
 RUN curl https://pyenv.run | bash
@@ -136,25 +155,6 @@ RUN export PATH="$HOME/.pyenv/bin:$PATH" && \
 	pyenv global 3.13.0 && \
 	python -m pip install --upgrade pip ipykernel && \
 	pyenv global system
-
-# Rig and R
-RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-x86_64-latest.tar.gz | tar xz -C /usr/local
-RUN rig add 4.4.0
-
-# PPM config
-RUN echo 'options(\n  repos = c(RSPM = "https://packagemanager.posit.co/cran/__linux__/noble/latest"),\n  HTTPUserAgent = sprintf("R/%s (ubuntu-2404)", getRversion())\n)' > ~/.Rprofile
-
-# R packages
-RUN curl -s https://raw.githubusercontent.com/posit-dev/qa-example-content/main/DESCRIPTION --output DESCRIPTION && \
-	Rscript -e "if (!requireNamespace('pak', quietly = TRUE)) install.packages('pak', repos = 'https://cran.rstudio.com')" && \
-	Rscript -e "options(pak.install_binary = TRUE); pak::local_install_dev_deps(ask = FALSE)"
-
-RUN rig add 4.4.2
-
-# Switch to non-root user
-USER runner
-ENV HOME=/home/runner
-WORKDIR /home/runner
 
 # Hidden Python
 RUN mkdir -p ${HOME}/scratch && \
@@ -179,7 +179,8 @@ ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
 
 WORKDIR /usr/src
 RUN sudo chown -R runner:runner /usr/src && \
-	git clone https://github.com/posit-dev/positron.git
+	git clone https://github.com/posit-dev/positron.git && \
+	cd positron && git checkout 9f2eb5d065107a4f8978fc4d5e79664040e1982a
 WORKDIR /usr/src/positron
 RUN npm ci --fetch-timeout 120000 && \
 	npm --prefix test/e2e ci && \
@@ -192,7 +193,7 @@ RUN ELECTRON_ROOT=.build/electron && \
 RUN npm run prelaunch
 
 # Expose ports
-EXPOSE 8080 5900
+EXPOSE 8080 5900 9323
 
 # Positron Test Environment Vars
 ENV POSITRON_PY_VER_SEL=3.12.3 \
@@ -203,5 +204,7 @@ ENV POSITRON_PY_VER_SEL=3.12.3 \
     POSITRON_HIDDEN_R=4.4.1
 
 # Runtime startup: Xvfb, Fluxbox, VNC, Playwright
-CMD ["bash", "-c", "sudo service xvfb start && export DISPLAY=:10 && fluxbox & sudo x11vnc -forever -nopw -display :10 & DISPLAY=:10 npx playwright test --workers 2 --project e2e-electron --grep @:critical"]
+COPY startup.sh /home/runner/startup.sh
+RUN sudo chmod +x /home/runner/startup.sh
+CMD ["/home/runner/startup.sh"]
 
