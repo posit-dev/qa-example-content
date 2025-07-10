@@ -1,15 +1,15 @@
 BUILD:
-cd dockerfiles/all-critical-tests
-docker build -f Dockerfile.critical -t positron-critical:latest .
+cd dockerfiles/all-critical-tests/arm64
+docker build -f Dockerfile.critical.arm -t positron-critical-arm:latest .
 
 RUN ELECTRON CRITICAL TESTS:
-docker run -it --rm -p 5900:5900 positron-critical
+docker run -it --rm -p 5900:5900 positron-critical-arm
 
 PASS RATE CURRENTLY:
-90%
+
 
 DEBUG:
-docker run -it --rm -p 5900:5900 positron-critical bash
+docker run -it --rm -p 5900:5900 positron-critical-arm bash
 sudo service xvfb start
 export DISPLAY=:10
 fluxbox &
@@ -21,7 +21,7 @@ RealVNC Viewer
 localhost:5900
 
 ADVANCED LAUNCH:
-docker run -it --rm -p 5900:5900 -p 5432:5432 -p 9323:9323 positron-critical
+docker run -it --rm -p 5900:5900 -p 5432:5432 -p 9323:9323 positron-critical-arm
 (-p 5432:5432 assumes you have a Postgres container running on port 5432)
 
 TO SEE REPORT ON HOST:
