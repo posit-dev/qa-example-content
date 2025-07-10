@@ -22,6 +22,7 @@ RUN apt-get update && apt-get install -y \
 	fonts-liberation libatk-bridge2.0-0 libatk1.0-0 libcups2 libdbus-1-3 libdrm2 \
 	libx11-xcb1 libxcomposite1 libxdamage1 libxrandr2 x11-utils \
 	x11vnc fluxbox \
+	libcurl4-openssl-dev \
 	&& rm -rf /var/lib/apt/lists/*
 
 # Create a non-root user for Positron and general use
@@ -118,33 +119,41 @@ RUN sudo apt-get update && sudo apt-get install -y software-properties-common &&
 	curl -sS https://bootstrap.pypa.io/get-pip.py | python && \
 	python -m pip install --upgrade pip setuptools wheel
 
-# uv and dependencies
-RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
-	export PATH="${HOME}/.local/bin:$PATH" && \
-	curl https://raw.githubusercontent.com/posit-dev/qa-example-content/d6ecfaf6eb2482e5ecd0cb910d566593271f3f66/requirements.txt --output requirements.txt && \
-	uv pip install --python /usr/bin/python --system --break-system-packages -r requirements.txt && \
-	/usr/bin/python -m pip list
-
-ENV PATH="${HOME}/.local/bin:$PATH"
-
 # Rig and R
 RUN curl -Ls https://github.com/r-lib/rig/releases/download/latest/rig-linux-x86_64-latest.tar.gz | tar xz -C /usr/local
 RUN rig add 4.4.0
 
-# PPM config
+# PPM config for root
 RUN echo 'options(\n  repos = c(RSPM = "https://packagemanager.posit.co/cran/__linux__/noble/latest"),\n  HTTPUserAgent = sprintf("R/%s (ubuntu-2404)", getRversion())\n)' > ~/.Rprofile
 
-# R packages
-RUN curl -s https://raw.githubusercontent.com/posit-dev/qa-example-content/d6ecfaf6eb2482e5ecd0cb910d566593271f3f66/DESCRIPTION --output DESCRIPTION && \
-	Rscript -e "if (!requireNamespace('pak', quietly = TRUE)) install.packages('pak', repos = 'https://cran.rstudio.com')" && \
-	Rscript -e "options(pak.install_binary = TRUE); pak::local_install_dev_deps(ask = FALSE)"
-
-RUN rig add 4.4.2
+# Install R 4.4.2 without packages
+RUN rig add 4.4.2 && rig default 4.4.0
 
 # Switch to non-root user
 USER runner
 ENV HOME=/home/runner
 WORKDIR /home/runner
+
+# uv and dependencies
+RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
+    python -m venv $HOME/.venv && \
+    $HOME/.venv/bin/python -m pip install --upgrade pip && \
+    curl -O https://raw.githubusercontent.com/posit-dev/qa-example-content/main/requirements.txt && \
+    $HOME/.local/bin/uv pip install --python $HOME/.venv/bin/python --break-system-packages -r requirements.txt && \
+    $HOME/.venv/bin/python -m pip list
+
+ENV PATH="/home/runner/.venv/bin:/home/runner/.local/bin:$PATH"
+ENV VIRTUAL_ENV="/home/runner/.venv"
+
+# Configure R for runner user
+RUN echo 'options(\n  repos = c(RSPM = "https://packagemanager.posit.co/cran/__linux__/noble/latest"),\n  HTTPUserAgent = sprintf("R/%s (ubuntu-2404)", getRversion())\n)' > ~/.Rprofile
+
+# Install R packages for 4.4.0 only
+RUN sudo rig default 4.4.0 && \
+    git clone --depth 1 https://github.com/posit-dev/qa-example-content.git /tmp/qa-example-content && \
+    Rscript -e "if (!requireNamespace('pak', quietly = TRUE)) install.packages('pak', repos = 'https://packagemanager.posit.co/cran/__linux__/noble/latest')" && \
+    cd /tmp/qa-example-content && \
+    Rscript -e "options(repos = c(RSPM = 'https://packagemanager.posit.co/cran/__linux__/noble/latest'), pak.no_build_vignettes = TRUE, pkg.sysreqs = FALSE, pkg.install.extra = c('--no-multiarch')); pak::local_install_dev_deps(ask = FALSE, dependencies = TRUE)"
 
 # pyenv and alt Python
 RUN curl https://pyenv.run | bash
@@ -180,7 +189,7 @@ ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
 WORKDIR /usr/src
 RUN sudo chown -R runner:runner /usr/src && \
 	git clone https://github.com/posit-dev/positron.git && \
-	cd positron && git checkout 9f2eb5d065107a4f8978fc4d5e79664040e1982a
+	cd positron
 WORKDIR /usr/src/positron
 RUN npm ci --fetch-timeout 120000 && \
 	npm --prefix test/e2e ci && \
@@ -196,7 +205,7 @@ RUN npm run prelaunch
 EXPOSE 8080 5900 9323
 
 # Positron Test Environment Vars
-ENV POSITRON_PY_VER_SEL=3.12.3 \
+ENV POSITRON_PY_VER_SEL="3.12.10 (Venv: .venv)" \
     POSITRON_R_VER_SEL=4.4.0 \
     POSITRON_PY_ALT_VER_SEL="3.13.0 (Pyenv)" \
     POSITRON_R_ALT_VER_SEL=4.4.2 \
