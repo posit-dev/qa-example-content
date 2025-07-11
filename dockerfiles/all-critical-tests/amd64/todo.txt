@@ -1,4 +1,0 @@
-libglpk40
-
-move tinytext install
-

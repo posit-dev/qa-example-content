@@ -1,0 +1,9 @@
+libglpk40
+
+move tinytext install
+
+2560x1440
+
+unset VIRTUAL_ENV
+
+docker compose setup
