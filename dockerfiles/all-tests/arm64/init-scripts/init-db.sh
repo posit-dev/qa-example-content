@@ -1,10 +1,14 @@
 #!/bin/bash
 set -e
 
-echo "Downloading periodic table SQL file..."
-curl -o /tmp/periodic_table.sql https://raw.githubusercontent.com/neondatabase-labs/postgres-sample-dbs/main/periodic_table.sql
+# Set PostgreSQL environment variables if they're not already set
+POSTGRES_USER=${POSTGRES_USER:-postgres}
+POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-postgres}
+POSTGRES_DB=${POSTGRES_DB:-periodic_table}
 
-echo "Importing periodic table SQL file into database..."
-psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -f /tmp/periodic_table.sql
+echo "Database initialization script started..."
+echo "Using database: $POSTGRES_DB"
 
-echo "Database initialization complete!"
+# Note: The SQL files in this directory will be automatically executed by 
+# the PostgreSQL entrypoint script in alphabetical order
+echo "The PostgreSQL entrypoint will execute the SQL files in this directory."
