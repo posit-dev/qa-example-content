@@ -62,7 +62,7 @@ RUN echo '#!/bin/bash\n\
 [ "${NETWORKING}" = "no" ] && exit 0\n\
 \n\
 PROG="/usr/bin/Xvfb"\n\
-PROG_OPTIONS=":10 -ac -screen 0 1920x1080x24"\n\
+PROG_OPTIONS=":10 -ac -screen 0 2560x1440x24"\n\
 PROG_OUTPUT="/tmp/Xvfb.out"\n\
 \n\
 case "$1" in\n\
@@ -146,7 +146,6 @@ RUN curl -LsSf https://astral.sh/uv/install.sh | sh && \
     $HOME/.venv/bin/python -m pip list
 
 ENV PATH="/home/runner/.venv/bin:/home/runner/.local/bin:$PATH"
-ENV VIRTUAL_ENV="/home/runner/.venv"
 
 # Configure R for runner user
 RUN echo 'options(\n  repos = c(RSPM = "https://packagemanager.posit.co/cran/__linux__/noble/latest"),\n  HTTPUserAgent = sprintf("R/%s (ubuntu-2404)", getRversion())\n)' > ~/.Rprofile
