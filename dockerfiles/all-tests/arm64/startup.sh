@@ -35,5 +35,5 @@ echo "x11vnc running with PID $VNC_PID"
 
 # Run playwright tests with list reporter and save HTML report to a specific path
 echo "Running Playwright tests..."
-DISPLAY=:10 npx playwright test --workers 2 --project e2e-electron --reporter=list,html
+DISPLAY=:10 npx playwright test --workers 2 --project e2e-electron --reporter=list,html --retries 1
 

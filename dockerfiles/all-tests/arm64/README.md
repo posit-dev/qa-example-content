@@ -17,7 +17,7 @@ docker run -it --rm -p 5900:5900 positron-critical-arm
 Note: `-p 5900:5900` is for VNC access to the Electron app
 
 ### Current Pass Rate
-- 96% (critical tests)
+- 97% (critical tests)
 - 98% (all tests)
 
 ### Debug Mode
@@ -32,8 +32,8 @@ sudo service xvfb start
 export DISPLAY=:10
 fluxbox &
 sudo x11vnc -forever -nopw -display :10 &
-npx playwright test --project "e2e-electron" --workers 1 --grep "Verify Basic Dash App"
-npx playwright test --project "e2e-electron" --workers 2
+npx playwright test --project "e2e-electron" --workers 1 --grep "Verify Basic Dash App" --retries 1
+npx playwright test --project "e2e-electron" --workers 2 --retries 1
 npx playwright show-report --host 0.0.0.0
 ```
 

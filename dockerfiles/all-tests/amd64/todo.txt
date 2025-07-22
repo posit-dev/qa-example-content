@@ -7,3 +7,9 @@ move tinytext install
 unset VIRTUAL_ENV
 
 docker compose setup
+
+libpq-dev
+
+update node version
+
+add retries
