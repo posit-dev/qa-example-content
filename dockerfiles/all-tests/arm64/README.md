@@ -1,13 +1,34 @@
 # Positron Test Environment
 
+## Required Configuration Files
+
+Before building or running the Docker container, you need to set up two important files:
+
+1. **`.env` file** - Create this file in the same directory as docker-compose.yml with:
+   ```
+   GITHUB_TOKEN=your_github_token_here
+   ```
+   This token is used to clone the private positron-license repository during the build process.
+
+2. **`pdol_rsa` file** - This is a private key file needed for licensing. Place it in the same directory as docker-compose.yml.
+
+Both files are automatically excluded from git via .gitignore for security reasons.
+
 ## Manual Setup Commands
 
 ### Build
 ```bash
 cd dockerfiles/all-tests/arm64
-docker build -f Dockerfile.critical.arm -t positron-critical-arm:latest .
-OR
-docker build --no-cache -f Dockerfile.critical.arm -t positron-critical-arm:latest .
+
+# First, ensure you have the .env and pdol_rsa files in place
+# Then build with docker-compose (which automatically uses GITHUB_TOKEN from .env):
+docker-compose build
+
+# OR if you want to build just the Dockerfile directly:
+export $(cat .env | xargs) && docker build -f Dockerfile.critical.arm -t positron-critical-arm:latest --build-arg TOKEN=${GITHUB_TOKEN} .
+
+# OR for a clean build with docker-compose:
+docker-compose build --no-cache
 ```
 
 ### Run Electron Critical Tests
@@ -17,8 +38,9 @@ docker run -it --rm -p 5900:5900 positron-critical-arm
 Note: `-p 5900:5900` is for VNC access to the Electron app
 
 ### Current Pass Rate
-- 97% (critical tests)
-- 98% (all tests)
+- 97% (critical electron tests)
+- 100% (all electron tests, 4 flakes)
+- 100% (all browser tests, 2 flakes)    
 
 ### Debug Mode
 ```bash
@@ -34,6 +56,8 @@ fluxbox &
 sudo x11vnc -forever -nopw -display :10 &
 npx playwright test --project "e2e-electron" --workers 1 --grep "Verify Basic Dash App" --retries 1
 npx playwright test --project "e2e-electron" --workers 2 --retries 1
+npx playwright test --project "e2e-electron" --workers 2 --grep "@:critical" --retries 1
+npx playwright test --project "e2e-browser" --workers 2 --grep "@:critical" --retries 1
 npx playwright show-report --host 0.0.0.0
 ```
 
@@ -92,6 +116,8 @@ This setup creates two Docker containers:
 
 - Docker and Docker Compose installed
 - Git (to clone the repository)
+- `.env` file with your GitHub token (GITHUB_TOKEN=your_token_here)
+- `pdol_rsa` file for licensing (placed in the same directory)
 
 ### Running the Setup
 
@@ -238,6 +264,26 @@ chmod +x reset-environment.sh
 This is particularly useful when you need to ensure a clean environment or troubleshoot database initialization issues.
 
 ### Troubleshooting
+
+#### Configuration File Issues
+
+If you encounter errors related to missing configuration files:
+
+1. Verify that both `.env` and `pdol_rsa` files exist in the same directory as your docker-compose.yml file.
+
+2. Ensure your `.env` file contains a valid GitHub token:
+   ```
+   GITHUB_TOKEN=your_github_token_here
+   ```
+   
+3. If you get "permission denied" errors related to the pdol_rsa file, check its permissions:
+   ```bash
+   # View current permissions
+   ls -la pdol_rsa
+   
+   # Set correct permissions if needed
+   chmod 600 pdol_rsa
+   ```
 
 #### Database Initialization Issues
 

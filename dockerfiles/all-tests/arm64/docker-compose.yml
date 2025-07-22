@@ -31,6 +31,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.critical.arm
+      args:
+        TOKEN: ${GITHUB_TOKEN}
     container_name: test
     ports:
       - "8080:8080"
@@ -47,6 +49,10 @@ services:
       - POSTGRES_USER=testuser
       - POSTGRES_PASSWORD=testpassword
       - POSTGRES_DB=testdb
+    volumes:
+      - ./pdol_rsa:/usr/src/positron-license/pdol/target/debug/pdol_rsa
+    command: >
+      bash -c "chmod 600 /usr/src/positron-license/pdol/target/debug/pdol_rsa && /home/runner/startup.sh"
 
 volumes:
   postgres-data:

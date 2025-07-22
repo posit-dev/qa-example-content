@@ -1,6 +1,9 @@
 # Combined Dockerfile for Positron with Python/R environments, Playwright, and VNC/X11 support
 FROM ubuntu:24.04
 
+# Arguments
+ARG TOKEN
+
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
@@ -184,14 +187,25 @@ RUN mkdir -p ${HOME}/scratch/R-4.4.1 && \
 	sudo sed -i "s|/opt/R/4.4.1|${HOME}/scratch/R-4.4.1|g" ${HOME}/scratch/R-4.4.1/lib/R/etc/Renviron && \
 	sudo chmod +x ${HOME}/scratch/R-4.4.1/bin/R
 
+# Positron License
+WORKDIR /usr/src
+RUN sudo chown -R runner:runner /usr/src && \
+	mkdir positron-license && \
+    cd positron-license && \
+    git clone https://${TOKEN}@github.com/posit-dev/positron-license.git . && \
+    curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly && \
+    export PATH="/home/runner/.cargo/bin:${PATH}" && \
+    cd pdol && \
+    cargo build && \
+    mkdir -p target/debug/
+
 # Playwright/Electron/Positron
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
     ELECTRON_SKIP_BINARY_DOWNLOAD=1 \
     NODE_OPTIONS="--max-old-space-size=4095"
 
 WORKDIR /usr/src
-RUN sudo chown -R runner:runner /usr/src && \
-	git clone https://github.com/posit-dev/positron.git && \
+RUN git clone https://github.com/posit-dev/positron.git && \
 	cd positron
 WORKDIR /usr/src/positron
 RUN npm ci --fetch-timeout 120000 && \
