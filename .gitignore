@@ -12,5 +12,5 @@ workspaces/quarto_interactive/quarto_interactive_files/*
 workspaces/quarto_interactive/quarto_interactive.html
 workspaces/quarto_shiny/mini-app_files/*
 workspaces/quarto_shiny/mini-app.html
-dockerfiles/all-tests/arm64/pdol_rsa
-dockerfiles/all-tests/arm64/.env
+dockerfiles/all-tests/deps/pdol_rsa
+dockerfiles/all-tests/deps/.env

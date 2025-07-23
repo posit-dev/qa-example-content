@@ -27,13 +27,16 @@ services:
       - ./init-scripts:/docker-entrypoint-initdb.d
 
   test:
-    image: positron-critical-arm:latest
+    image: positron-critical-amd:latest
     build:
       context: .
-      dockerfile: Dockerfile.critical.arm
+      dockerfile: Dockerfile.ubuntu24_04.amd
       args:
+        # This will use the token from the env file
         TOKEN: ${GITHUB_TOKEN}
-    container_name: test
+        # Alternatively, you can hardcode the token value here (not recommended for security)
+        # TOKEN: "your-token-value"
+    container_name: test-amd64
     ports:
       - "8080:8080"
       - "5900:5900"
@@ -50,7 +53,7 @@ services:
       - POSTGRES_PASSWORD=testpassword
       - POSTGRES_DB=testdb
     volumes:
-      - ./pdol_rsa:/usr/src/positron-license/pdol/target/debug/pdol_rsa
+      - ./deps/pdol_rsa:/usr/src/positron-license/pdol/target/debug/pdol_rsa
     command: >
       bash -c "chmod 600 /usr/src/positron-license/pdol/target/debug/pdol_rsa && /home/runner/startup.sh"
 
