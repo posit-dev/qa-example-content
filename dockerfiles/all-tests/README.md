@@ -35,7 +35,7 @@ Both files are automatically excluded from git via .gitignore for security reaso
 docker-compose -f docker-compose.arm64.yml --env-file deps/.env build
 ```
 
-### AMD64 Architecture Run Electron Tests (No Build)
+### ARM64 Architecture Run Electron Tests (No Build)
 ```bash
 docker-compose -f docker-compose.arm64.yml up --no-build 
 ```
@@ -105,6 +105,29 @@ test-arm64  |     [e2e-electron] › test/e2e/tests/quarto/quarto-python.test.ts
     [e2e-browser] › test/e2e/tests/reticulate/reticulate-restart.test.ts:31:6 › Reticulate › R - Verify Reticulate Restart @:reticulate @:web @:reticulate @:console
     [e2e-browser] › test/e2e/tests/reticulate/reticulate-stop-start.test.ts:32:6 › Reticulate › R - Verify Reticulate Stop/Start Functionality @:reticulate @:web @:ark
     [e2e-browser] › test/e2e/tests/sessions/session-mgmt.test.ts:25:6 › Sessions: Management › Validate active session list in console matches active session list in session picker @:win @:web @:console @:sessions @:critical
+```
+
+### Electron All
+
+97% passing
+
+```bash
+  2 failed
+    [e2e-electron] › test/e2e/tests/data-explorer/data-explorer-python-pandas.test.ts:140:6 › Data Explorer - Python Pandas › Python Pandas - Verify blank spaces in data explorer and disconnect behavior @:web @:win @:critical @:data-explorer
+    [e2e-electron] › test/e2e/tests/new-folder-flow/new-folder-flow-jupyter.test.ts:24:6 › New Folder Flow: Jupyter Project › Jupyter Folder Defaults @:modal @:new-folder-flow @:critical @:win
+```
+
+### Browser Critical
+
+100% passing
+
+### Electron Critical
+
+99% passing
+
+```bash
+    1 failed
+    [e2e-electron] › test/e2e/tests/new-folder-flow/new-folder-flow-jupyter.test.ts:24:6 › New Folder Flow: Jupyter Project › Jupyter Folder Defaults @:modal @:new-folder-flow @:critical @:win
 ```
 
 ## Troubleshooting
