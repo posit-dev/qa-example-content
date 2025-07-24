@@ -1,5 +1,8 @@
 # Combined Dockerfile for Positron with Python/R environments, Playwright, and VNC/X11 support
-FROM ubuntu:24.04
+FROM --platform=linux/arm64 ubuntu:24.04
+
+# Set platform to arm64
+ARG TARGETPLATFORM=linux/arm64
 
 # Arguments
 ARG TOKEN

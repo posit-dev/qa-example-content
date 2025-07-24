@@ -4,6 +4,9 @@ FROM --platform=linux/amd64 ubuntu:24.04
 # Set platform to amd64
 ARG TARGETPLATFORM=linux/amd64
 
+# Arguments
+ARG TOKEN
+
 # Set environment variables
 ENV DEBIAN_FRONTEND=noninteractive
 ENV LANG=C.UTF-8
@@ -23,7 +26,7 @@ RUN useradd --create-home --shell /bin/bash -G sudo runner && \
 	echo "runner ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Install Node.js and npm
-RUN curl -fsSL https://nodejs.org/dist/v20.19.0/node-v22.15.1-linux-x64.tar.xz -o /tmp/node.tar.xz && \
+RUN curl -fsSL https://nodejs.org/dist/v22.15.1/node-v22.15.1-linux-x64.tar.xz -o /tmp/node.tar.xz && \
 	tar -xJf /tmp/node.tar.xz -C /usr/local --strip-components=1 && \
 	rm /tmp/node.tar.xz && \
 	ln -sf /usr/local/bin/node /usr/bin/node && \
@@ -123,14 +126,25 @@ RUN mkdir -p ${HOME}/scratch/R-4.4.1 && \
 	sudo sed -i "s|/opt/R/4.4.1|${HOME}/scratch/R-4.4.1|g" ${HOME}/scratch/R-4.4.1/lib/R/etc/Renviron && \
 	sudo chmod +x ${HOME}/scratch/R-4.4.1/bin/R
 
+# Positron License
+WORKDIR /usr/src
+RUN sudo chown -R runner:runner /usr/src && \
+	mkdir positron-license && \
+    cd positron-license && \
+    git clone https://${TOKEN}@github.com/posit-dev/positron-license.git . && \
+    curl https://sh.rustup.rs -sSf | sh -s -- -y --default-toolchain nightly && \
+    export PATH="/home/runner/.cargo/bin:${PATH}" && \
+    cd pdol && \
+    cargo build && \
+    mkdir -p target/debug/
+
 # Playwright/Electron/Positron
 ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 \
     ELECTRON_SKIP_BINARY_DOWNLOAD=1 \
     NODE_OPTIONS="--max-old-space-size=4095"
 
 WORKDIR /usr/src
-RUN sudo chown -R runner:runner /usr/src && \
-	git clone https://github.com/posit-dev/positron.git && \
+RUN git clone https://github.com/posit-dev/positron.git && \
 	cd positron
 WORKDIR /usr/src/positron
 RUN npm ci --fetch-timeout 120000 && \

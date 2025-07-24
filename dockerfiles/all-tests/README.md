@@ -33,6 +33,8 @@ Both files are automatically excluded from git via .gitignore for security reaso
 ### ARM64 Architecture Build
 ```bash
 docker-compose -f docker-compose.arm64.yml --env-file deps/.env build
+OR 
+docker-compose -f docker-compose.arm64.yml --env-file deps/.env build --no-cache
 ```
 
 ### ARM64 Architecture Run Electron Tests (No Build)
