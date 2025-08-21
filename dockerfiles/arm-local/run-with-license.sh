@@ -20,9 +20,9 @@ fi
 
 # Check for command line arguments
 if [ "$1" = "-d" ] || [ "$1" = "--detach" ]; then
-  # Run docker-compose detached
-  echo "Starting docker-compose with license loaded in detached mode..."
-  docker-compose up -d
+  # Run docker compose detached
+  echo "Starting docker compose with license loaded in detached mode..."
+  docker compose up -d
   
   # Copy scripts to container
   if [ -f "./setup-test-env.sh" ]; then
@@ -42,21 +42,21 @@ if [ "$1" = "-d" ] || [ "$1" = "--detach" ]; then
   echo "source ~/.bashrc"
   echo ""
   echo "To view logs, run:"
-  echo "docker-compose logs -f"
+  echo "docker compose logs -f"
   echo ""
   echo "To stop and remove containers, run:"
   echo "./stop-container.sh"
 else
-  # Run docker-compose with the exported variables
-  echo "Starting docker-compose with license loaded..."
+  # Run docker compose with the exported variables
+  echo "Starting docker compose with license loaded..."
   echo "Press Ctrl+C to stop the containers"
   echo "The 'test' container will keep running in the background"
   echo "To connect to it after stopping this view, run: ./connect.sh"
   echo ""
-  docker-compose up
+  docker compose up
   COMPOSE_STATUS=$?
   
-  # If docker-compose finished without error, copy scripts to container
+  # If docker compose finished without error, copy scripts to container
   if [ $COMPOSE_STATUS -eq 0 ] && docker ps | grep -q "test"; then
     if [ -f "./setup-test-env.sh" ]; then
       echo "Copying test environment setup script to container..."
