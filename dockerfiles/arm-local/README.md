@@ -22,6 +22,17 @@ You will need two terminal windows open to dockerfiles/arm-local for this proces
 In the first terminal, run:
 
 ```bash
+docker login ghcr.io -u <github_username>
+```
+(as your password, use a GitHub Personal Access Token with the `read:packages` scope).
+
+Then run:
+
+```bash
+
+Then run:
+
+```bash
 ./run-with-license.sh
 ```
 
