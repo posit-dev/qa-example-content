@@ -11,9 +11,9 @@ E2E_POSTGRES_USER=
 E2E_POSTGRES_PASSWORD=
 E2E_POSTGRES_DB=
 ```
-(the values to use are in 1Password under POsitron > E2E Postgres DB Connection info)
+(the values to use are in 1Password under Positron > E2E Postgres DB Connection info)
 
-In the license.txt file, add your the Positron Workbench License from the 1Password IDE/Workbench vault.
+In the license.txt file, add the Positron Workbench License from the 1Password IDE/Workbench vault.
 
 # Execution
 
@@ -48,13 +48,13 @@ npx playwright test --project e2e-electron --workers 2 --grep @:connections --re
 npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer --repeat-each 1 --max-failures 10
 ```
 
-When you are done, you can run:
+When you are done, you can run (in the second terminal):
 
 ```bash
 exit
 ```
 
-In the second terminal.  Then go back to the first and use CTRL-C.  Optionally, you can run:
+Then go back to the first and use CTRL-C.  Optionally, you can then run:
 
 ```bash
  ./stop-containers.sh
