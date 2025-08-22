@@ -135,14 +135,7 @@ chmod +x /usr/local/bin/run-tests
 echo ""
 echo "===== Test Environment Setup Complete ====="
 echo ""
-echo "Environment is ready for running tests."
-echo "Current directory: $REPO_DIR"
-echo ""
-echo "You can run tests with:"
+echo "You can run tests by doing:"
+echo "  cd /__w/positron/positron"
+echo "  source ~/.bashrc"
 echo "  npx playwright test [test-options]"
-echo "  or simply: run-tests [test-options]"
-echo ""
-echo "To view the UI, connect to VNC at localhost:5900"
-
-# Make sure we end up in the repo directory
-cd "$REPO_DIR"
