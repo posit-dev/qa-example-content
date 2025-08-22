@@ -29,10 +29,6 @@ docker login ghcr.io -u <github_username>
 Then run:
 
 ```bash
-
-Then run:
-
-```bash
 ./run-with-license.sh
 ```
 
