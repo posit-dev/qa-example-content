@@ -81,14 +81,6 @@ for i in {1..10}; do
     sleep 1
 done
 
-# Start window manager
-echo "Starting window manager..."
-fluxbox &
-
-# Start VNC server for remote viewing
-echo "Starting VNC server..."
-sudo x11vnc -forever -nopw -display :10 &
-
 # Move license files
 echo "Setting up license..."
 if [ -d "/positron-license" ]; then
