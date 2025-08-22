@@ -51,6 +51,7 @@ Then inside the container, run:
 cd /__w/positron/positron
 source ~/.bashrc
 ```
+(Note that the /__w/positron/positron path is where the Positron code is located inside the container inside CI and we are matching that here).
 
 At this point you will be ready to run tests. Here are a couple sample command lines:
 
@@ -71,3 +72,20 @@ Then go back to the first and use CTRL-C.  Optionally, you can then run:
  ./stop-containers.sh
  ```
  (if you don't want to leave the containers running).
+
+ # View Report on Host
+Run:
+```bash
+npx playwright show-report --host 0.0.0.0
+```
+Then go to http://localhost:9323 in your host browser to view the test report.
+
+# View Running Tests via VNC
+
+Inside the container, run:
+```bash
+fluxbox &
+sudo x11vnc -forever -nopw -display :10 &
+```
+Then use a VNC viewer to connect to localhost:5900 on your host machine.
+(RealVNC Viewer is a good free option)
