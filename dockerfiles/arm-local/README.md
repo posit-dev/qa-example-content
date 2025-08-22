@@ -83,5 +83,7 @@ Inside the container, run:
 fluxbox &
 sudo x11vnc -forever -nopw -display :10 &
 ```
+(note that these commands are run in the background so it may look like you didn't get your prompt back, so just hit Enter).
+
 Then use a VNC viewer to connect to localhost:5900 on your host machine.
 (RealVNC Viewer is a good free option)
