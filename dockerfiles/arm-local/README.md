@@ -52,9 +52,10 @@ source ~/.bashrc
 At this point you will be ready to run tests. Here are a couple sample command lines:
 
 ```bash
-npx playwright test --project e2e-electron --workers 2 --grep @:connections --repeat-each 1 --max-failures 10
-npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer --repeat-each 1 --max-failures 10
+npx playwright test --project e2e-electron --workers 2 --grep @:connections --retries 1 --max-failures 10
+npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer --retries 1 --max-failures 10
 ```
+Note that if tests fail, playwright will try to show you the report, but it needs to be on host 0.0.0.0, so CTRL-C out of the default report process and see `View Report on Host` below.
 
 When you are done, you can run (in the second terminal):
 
