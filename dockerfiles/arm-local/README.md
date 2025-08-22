@@ -1,4 +1,4 @@
-# Setup for Positron ARM64 Local Development
+# Setup for Positron ARM64 Local Testing
 
 Create the following files in the `dockerfiles/arm-local` directory:
 
