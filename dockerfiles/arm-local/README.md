@@ -68,7 +68,7 @@ Then go back to the first and use CTRL-C.  Optionally, you can then run:
 ```bash
  ./stop-containers.sh
  ```
- (if you don't want to leave the containers running).
+ (if you don't want to leave the containers running).  This will reset your environment for next time.
 
  # View Report on Host
 Run:
@@ -88,3 +88,18 @@ sudo x11vnc -forever -nopw -display :10 &
 
 Then use a VNC viewer to connect to localhost:5900 on your host machine.
 (RealVNC Viewer is a good free option)
+
+# Code Changes and Retesting
+
+If you make code changes and want to retest, push your changes from your local machine to github, then inside the container run:
+
+```bash
+git pull
+npm run compile
+```
+
+Then rerun your tests, unless you also changed tests, in which case also run:
+
+```bash
+npm --prefix test/e2e compile
+```
