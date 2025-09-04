@@ -1,6 +1,23 @@
 #!/bin/sh
 
 # This script helps you set up a multiline POSITRON_DEV_LICENSE environment variable
+# and run docker-compose with either Ubuntu 24 or Rocky 8 configuration
+
+# Default to ubuntu24 if no OS argument is provided
+OS_TYPE="ubuntu24"
+
+# Check for OS type argument
+if [ "$1" = "ubuntu24" ] || [ "$1" = "rocky8" ]; then
+  OS_TYPE="$1"
+  shift # Remove the OS argument from parameters
+elif [ "$1" != "-d" ] && [ "$1" != "--detach" ]; then
+  echo "Usage: $0 [ubuntu24|rocky8] [-d|--detach]"
+  echo "       Default is ubuntu24 if not specified"
+  echo ""
+fi
+
+# Set docker-compose file based on OS type
+COMPOSE_FILE="docker-compose.${OS_TYPE}.yml"
 
 # Check if license.txt exists
 if [ ! -f license.txt ]; then
@@ -21,8 +38,8 @@ fi
 # Check for command line arguments
 if [ "$1" = "-d" ] || [ "$1" = "--detach" ]; then
   # Run docker compose detached
-  echo "Starting docker compose with license loaded in detached mode..."
-  docker compose up -d
+  echo "Starting docker compose (${OS_TYPE}) with license loaded in detached mode..."
+  docker compose -f ${COMPOSE_FILE} up -d
   
   # Copy scripts to container
   if [ -f "./setup-test-env.sh" ]; then
@@ -42,18 +59,18 @@ if [ "$1" = "-d" ] || [ "$1" = "--detach" ]; then
   echo "source ~/.bashrc"
   echo ""
   echo "To view logs, run:"
-  echo "docker compose logs -f"
+  echo "docker compose -f ${COMPOSE_FILE} logs -f"
   echo ""
   echo "To stop and remove containers, run:"
   echo "./stop-container.sh"
 else
   # Run docker compose with the exported variables
-  echo "Starting docker compose with license loaded..."
+  echo "Starting docker compose (${OS_TYPE}) with license loaded..."
   echo "Press Ctrl+C to stop the containers"
   echo "The 'test' container will keep running in the background"
   echo "To connect to it after stopping this view, run: ./connect.sh"
   echo ""
-  docker compose up
+  docker compose -f ${COMPOSE_FILE} up
   COMPOSE_STATUS=$?
   
   # If docker compose finished without error, copy scripts to container

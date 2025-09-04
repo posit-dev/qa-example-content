@@ -29,7 +29,7 @@ docker login ghcr.io -u <github_username>
 Then run:
 
 ```bash
-./run-with-license.sh
+./run-with-license.sh <ubuntu24|rocky8>
 ```
 
 This will start the containers and keep them alive.
@@ -66,7 +66,7 @@ exit
 Then go back to the first and use CTRL-C.  Optionally, you can then run:
 
 ```bash
- ./stop-containers.sh
+ ./stop-containers.sh <ubuntu24|rocky8>
  ```
  (if you don't want to leave the containers running).  This will reset your environment for next time.
 
@@ -77,7 +77,7 @@ npx playwright show-report --host 0.0.0.0
 ```
 Then go to http://localhost:9323 in your host browser to view the test report.
 
-# View Running Tests via VNC
+# View Running Tests via VNC - Ubuntu 24 Only
 
 Inside the container, run:
 ```bash
@@ -85,6 +85,20 @@ fluxbox &
 sudo x11vnc -forever -nopw -display :10 &
 ```
 (note that these commands are run in the background so it may look like you didn't get your prompt back, so just hit Enter).
+
+Then use a VNC viewer to connect to localhost:5900 on your host machine.
+(RealVNC Viewer is a good free option)
+
+# View Running Tests via VNC - Rocky 8 Only
+
+Inside the container, run:
+```bash
+dnf -y install xauth xset xkbcomp fluxbox
+dnf clean all
+mkdir -p /run/vnc
+x0vncserver -display :10 -SecurityTypes None -rfbport 5900 -AlwaysShared &
+```
+(note that the last command is run in the background so it may look like you didn't get your prompt back, so just hit Enter).
 
 Then use a VNC viewer to connect to localhost:5900 on your host machine.
 (RealVNC Viewer is a good free option)
