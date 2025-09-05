@@ -98,7 +98,7 @@ Inside the container, run:
 ```bash
 x0vncserver -display :10 -SecurityTypes None -rfbport 5900 -AlwaysShared &
 ```
-(note that the last command is run in the background so it may look like you didn't get your prompt back, so just hit Enter).
+(note that this command is run in the background so it may look like you didn't get your prompt back, so just hit Enter).
 
 Then use a VNC viewer to connect to localhost:5900 on your host machine.
 (RealVNC Viewer is a good free option)
