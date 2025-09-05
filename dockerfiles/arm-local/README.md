@@ -29,8 +29,11 @@ docker login ghcr.io -u <github_username>
 Then run:
 
 ```bash
-./run-with-license.sh <ubuntu24|rocky8>
+./run-with-license.sh ubuntu24
+OR
+./run-with-license.sh rocky8
 ```
+(depending on which OS you want to test with - both are supported).
 
 This will start the containers and keep them alive.
 
@@ -115,5 +118,15 @@ npm run compile
 Then rerun your tests, unless you also changed tests, in which case also run:
 
 ```bash
-npm --prefix test/e2e compile
+npm --prefix test/e2e run compile
 ```
+
+If you happen to have added dependencies, you can run:
+
+```bash
+npm run ci
+```
+
+## Warnings
+
+The file test/e2e/fixtures/settings.json will be updated by test runs. Please do not commit this file.
