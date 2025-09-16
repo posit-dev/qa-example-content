@@ -32,10 +32,10 @@ if [ -f "./install-workbench.sh" ]; then
   docker exec test chmod +x /tmp/install-workbench.sh
 fi
 
-if [ -f "./download.sh" ]; then
+if [ -f "./positronDownload.sh" ]; then
   echo "Copying download script to container..."
-  docker cp ./download.sh test:/tmp/download.sh
-  docker exec test chmod +x /tmp/download.sh
+  docker cp ./positronDownload.sh test:/tmp/positronDownload.sh
+  docker exec test chmod +x /tmp/positronDownload.sh
 fi
 
 # Connect to the container
