@@ -53,23 +53,3 @@ WB_URL=https://s3.amazonaws.com/rstudio-ide-build/server/jammy/arm64/rstudio-wor
 * Note that POSITRON_TAG can be set to whichever Positron tag you want to test with, or it can be omitted to use the default version in the script.
 
 At this point you will be ready to launch Workbench and log in with user1 and the password you set in the .env file. Go to http://localhost:8787 in your browser to access Workbench.
-
-
-
-
-
-
-
-
-
-
-Terminal One
-./run.sh ubuntu24
-
-Terminal Two
-./connect.sh
-
-Example commands:
-WB_URL=https://s3.amazonaws.com/rstudio-ide-build/server/jammy/arm64/rstudio-workbench-2025.11.0-daily-131.pro5-arm64.deb POSITRON_TAG=2025.10.0-88 GITHUB_TOKEN={your token} /tmp/install-workbench.sh
-
-GITHUB_TOKEN={your token} /tmp/install-workbench.sh
