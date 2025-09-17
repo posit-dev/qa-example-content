@@ -1,4 +1,4 @@
-# Setup for Positron ARM64 Local Testing
+# Setup for Positron ARM64 Local Workbench Testing
 
 Create the following file in the `dockerfiles/wb-local` directory:
 
