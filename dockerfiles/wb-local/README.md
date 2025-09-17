@@ -53,3 +53,25 @@ WB_URL=https://s3.amazonaws.com/rstudio-ide-build/server/jammy/arm64/rstudio-wor
 * Note that POSITRON_TAG can be set to whichever Positron tag you want to test with, or it can be omitted to use the default version in the script.
 
 At this point you will be ready to launch Workbench and log in with user1 and the password you set in the .env file. Go to http://localhost:8787 in your browser to access Workbench.
+
+When you are done, you can run (in the second terminal):
+
+```bash
+exit
+```
+
+Then go back to the first and use CTRL-C.  Optionally, you can then run:
+
+```bash
+ ./stop-containers.sh <ubuntu24|rocky8>
+ ```
+ (if you don't want to leave the containers running).  This will reset your environment for next time.
+
+# Debugging
+## Getting Forbidden Error
+
+You will need to delete the cookie for vscode-tkn for http://localhost. See the image below:
+
+![RForbidden Fix](doc-images/forbidden.png)
+
+Refresh the page and you should be logged in.
