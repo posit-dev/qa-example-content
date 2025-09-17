@@ -63,7 +63,9 @@ exit
 Then go back to the first and use CTRL-C.  Optionally, you can then run:
 
 ```bash
- ./stop-containers.sh <ubuntu24|rocky8>
+ ./stop-containers.sh ubuntu24
+ OR
+  ./stop-containers.sh rocky8
  ```
  (if you don't want to leave the containers running).  This will reset your environment for next time.
 
