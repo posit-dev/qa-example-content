@@ -117,6 +117,14 @@ sudo groupadd -g ${Q_GID} ${Q_GROUP}
 sudo useradd --create-home --shell /bin/bash --home-dir /home/${Q_USER} -u ${Q_UID} -g ${Q_GROUP} ${Q_USER}
 echo "${Q_USER}":"${Q_PASSWORD}" | sudo chpasswd
 
+echo "Configuring ~/.Renviron for ${Q_USER}..."
+sudo mkdir -p "/home/${Q_USER}"
+sudo tee "/home/${Q_USER}/.Renviron" >/dev/null <<EOF
+R_LIBS_SITE=/usr/local/lib/R/site-library
+R_LIBS_USER=/usr/local/lib/R/site-library
+EOF
+sudo chown "${Q_USER}:${Q_GROUP}" "/home/${Q_USER}/.Renviron"
+
 # Configure RStudio
 echo "Configuring RStudio..."
 sudo mkdir -p /etc/rstudio
