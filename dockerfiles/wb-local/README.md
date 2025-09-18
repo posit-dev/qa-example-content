@@ -35,8 +35,6 @@ docker login ghcr.io -u <your_github_username>
    - Database services (PostgreSQL) for Workbench
    - Network configuration to access via localhost:8787
 
-> Keep this terminal running - it maintains the containers*
-
 ### Terminal 2: Connect & Install
 
 ```bash
