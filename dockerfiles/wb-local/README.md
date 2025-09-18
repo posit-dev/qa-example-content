@@ -1,78 +1,72 @@
 # Setup for Positron ARM64 Local Workbench Testing
 
-Create the following file in the `dockerfiles/wb-local` directory:
+## Prerequisites
 
-![Required Secrets Files](doc-images/secrets.png)
-
-In this .env file, set the following variables:
+Create a `.env` file in the `dockerfiles/wb-local` directory with these variables:
 
 ```bash
 E2E_POSTGRES_USER=
 E2E_POSTGRES_PASSWORD=
 E2E_POSTGRES_DB=
 Q_PASSWORD=
-
 ```
-* The values to use for the E2E_POSTGRES vars are in 1Password under Positron > E2E Postgres DB Connection info
-* The Q_PASSWORD value is the password you would like to be set for the user `user1` in Workbench
 
-# Execution
+**Where to find values:**
+* **E2E_POSTGRES vars**: 1Password under `Positron > E2E Postgres DB Connection info`  
+* **Q_PASSWORD**: Your desired password for the `user1` account in Workbench
+* **GitHub Token**: Personal Access Token with `read:packages` scope
 
-You will need two terminal windows open to dockerfiles/wb-local for this process.  
+## Installation
 
-In the first terminal, run:
+Open **two terminal windows** in the `dockerfiles/wb-local` directory:
+
+### Terminal 1: Start Docker Containers
 
 ```bash
-docker login ghcr.io -u <github_username>
-```
-(as your password, use a GitHub Personal Access Token with the `read:packages` scope).
-
-Then run:
-
-```bash
+docker login ghcr.io -u <your_github_username>
 ./run.sh ubuntu24
 ```
 
-This will start the containers and keep them alive.
+**What this does:**
+1. **Docker login** - Authenticates with GitHub's container registry to download the test images
+2. **./run.sh ubuntu24** - Starts Ubuntu 24 containers that include:
+   - A clean Ubuntu environment for testing
+   - Pre-installed development tools and dependencies
+   - Database services (PostgreSQL) for Workbench
+   - Network configuration to access via localhost:8787
 
-In the second terminal, run:
+### Terminal 2: Connect & Install
 
 ```bash
-./connect.sh
+GITHUB_TOKEN=your_personal_access_token_here ./connect.sh
 ```
 
-Then inside the container, run:
+**What this does:**
+1. **Connects** to the running Ubuntu container
+2. **Copies** installation scripts into the container  
+3. **Automatically runs** the installation script, which will prompt:
+   1. Latest versions
+   2. Specific versions -  *enter custom URLs/tags when prompted*
+   3. **Skip installation**  - *connect only for inspection/debugging*
 
-```bash
-GITHUB_TOKEN={your token} /tmp/install-workbench.sh
-OR
-WB_URL=https://s3.amazonaws.com/rstudio-ide-build/server/jammy/arm64/rstudio-workbench-2025.11.0-daily-131.pro5-arm64.deb POSITRON_TAG=2025.10.0-88 GITHUB_TOKEN={your token} /tmp/install-workbench.sh
+### Access Workbench
 
-```
-* Note that WB_URL can be set to whichever Workbench deb you want to test with, or it can be omitted to use the default version in the script.
-* Note that POSITRON_TAG can be set to whichever Positron tag you want to test with, or it can be omitted to use the default version in the script.
+Open <http://localhost:8787> and login:
+* **Username**: `user1`
+* **Password**: Your `.env` Q_PASSWORD value
 
-At this point you will be ready to launch Workbench and log in with user1 and the password you set in the .env file. Go to http://localhost:8787 in your browser to access Workbench.
+## Cleanup
 
-When you are done, you can run (in the second terminal):
+**When finished:**
+1. Terminal 2: `exit`
+2. Terminal 1: Press `Ctrl+C`
+3. Optional: `./stop-containers.sh ubuntu24` (resets environment)
 
-```bash
-exit
-```
+## Troubleshooting
 
-Then go back to the first and use CTRL-C.  Optionally, you can then run:
+### Getting Forbidden Error
 
-```bash
- ./stop-containers.sh ubuntu24
- OR
-  ./stop-containers.sh rocky8
- ```
- (if you don't want to leave the containers running).  This will reset your environment for next time.
-
-# Debugging
-## Getting Forbidden Error
-
-You will need to delete the cookie for vscode-tkn for http://localhost. See the image below:
+You will need to delete the cookie for vscode-tkn for <http://localhost>. See the image below:
 
 ![RForbidden Fix](doc-images/forbidden.png)
 

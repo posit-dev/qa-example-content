@@ -1,5 +1,44 @@
 #!/bin/bash
 
+# Interactive installation prompt
+if [ -z "${WB_URL}" ] && [ -z "${POSITRON_TAG}" ]; then
+    echo ""
+    echo "Workbench + Positron Installation"
+    echo "---------------------------------"
+    echo "1) Latest versions     [recommended]"
+    echo "2) Specific versions"
+    echo "3) Skip to shell"
+    echo ""
+    read -p "Enter your choice [1-3, default = 1]: " choice
+    
+    case ${choice:-1} in
+        1)
+            echo "Installing latest versions..."
+            ;;
+        2)
+            echo ""
+            echo "Enter specific versions (or press Enter for defaults):"
+            read -p "Workbench URL [press Enter for latest]: " user_wb_url
+            read -p "Positron tag (e.g., 2025.10.0-88) [press Enter for latest]: " user_positron_tag
+            
+            if [ -n "$user_wb_url" ]; then
+                export WB_URL="$user_wb_url"
+            fi
+            if [ -n "$user_positron_tag" ]; then
+                export POSITRON_TAG="$user_positron_tag"
+            fi
+            ;;
+        3)
+            echo "Skipping installation. Going to shell..."
+            exec /bin/bash
+            ;;
+        *)
+            echo "Invalid choice. Using latest versions..."
+            ;;
+    esac
+    echo ""
+fi
+
 # Function to fetch the latest Workbench URL based on architecture
 fetch_latest_wb_url() {
     local arch=$1

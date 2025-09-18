@@ -38,5 +38,5 @@ if [ -f "./positronDownload.sh" ]; then
   docker exec test chmod +x /tmp/positronDownload.sh
 fi
 
-# Connect to the container
-docker exec -it test /bin/bash
+# Connect to the container and auto-run the install script
+docker exec -it -e GITHUB_TOKEN="$GITHUB_TOKEN" test /bin/bash -c "/tmp/install-workbench.sh; exec /bin/bash"
