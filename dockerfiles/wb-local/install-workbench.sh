@@ -1,7 +1,35 @@
 #!/bin/bash
 
-# Interactive installation prompt
-if [ -z "${WB_URL}" ] && [ -z "${POSITRON_TAG}" ]; then
+# Initialize error tracking
+ERRORS=()
+
+# Function to log errors
+log_error() {
+    ERRORS+=("$1")
+    echo "❌ ERROR: $1"
+}
+
+# Parse command line arguments
+CI_MODE=false
+while [ $# -gt 0 ]; do
+  case $1 in
+    --ci)
+      CI_MODE=true
+      shift
+      ;;
+    *)
+      echo "Unknown option: $1"
+      exit 1
+      ;;
+  esac
+done
+
+# Interactive installation prompt (skip in CI mode)
+if [ "$CI_MODE" = true ]; then
+    echo ""
+    echo "CI Mode: Installing latest versions..."
+    echo "======================================"
+elif [ -z "${WB_URL}" ] && [ -z "${POSITRON_TAG}" ]; then
     echo ""
     echo "Workbench + Positron Installation"
     echo "---------------------------------"
@@ -78,10 +106,18 @@ Q_PASSWORD=${Q_PASSWORD:-"testpassword"}
 
 # Install required packages early so we have jq for URL fetching
 echo "Installing required packages..."
-sudo apt-get update
-sudo add-apt-repository -y universe
-sudo apt-get update
-sudo apt-get install -y acl jq curl
+if ! sudo apt-get update; then
+    log_error "Failed to update package lists"
+fi
+if ! sudo add-apt-repository -y universe; then
+    log_error "Failed to add universe repository"
+fi
+if ! sudo apt-get update; then
+    log_error "Failed to update package lists after adding universe"
+fi
+if ! sudo apt-get install -y acl jq curl; then
+    log_error "Failed to install required packages (acl, jq, curl)"
+fi
 
 # Now we can fetch the WB_URL if it wasn't provided
 if [ -z "${WB_URL}" ]; then
@@ -132,11 +168,15 @@ echo "unprivileged=1" | sudo tee /etc/rstudio/launcher.local.conf > /dev/null
 
 # Download Workbench
 echo "Downloading Workbench..."
-curl ${WB_URL} --output workbench.deb
+if ! curl ${WB_URL} --output workbench.deb; then
+    log_error "Failed to download Workbench from ${WB_URL}"
+fi
 
 # Install Workbench
 echo "Installing Workbench..."
-sudo apt install -y ./workbench.deb
+if ! sudo apt install -y ./workbench.deb; then
+    log_error "Failed to install Workbench package"
+fi
 
 # Set access permissions
 echo "Setting access permissions..."
@@ -146,22 +186,64 @@ sudo setfacl -R -m d:u:${Q_USER}:rx /root/.venv /root/.pyenv
 
 # Update positron-server
 echo "Updating positron-server..."
-sudo rstudio-server stop
+if ! sudo rstudio-server stop; then
+    log_error "Failed to stop RStudio server"
+fi
+
 cd /usr/lib/rstudio-server/bin/
-sudo mv positron-server positron-server-old
-sudo mkdir -p positron-server
+
+# Clean up any existing backup and move current version
+if [ -d "positron-server-old" ]; then
+    echo "Removing existing positron-server-old backup..."
+    sudo rm -rf positron-server-old
+fi
+
+if ! sudo mv positron-server positron-server-old; then
+    log_error "Failed to backup existing positron-server"
+fi
+
+if ! sudo mkdir -p positron-server; then
+    log_error "Failed to create new positron-server directory"
+fi
+
 cd positron-server
 
 # Run download script
 if [ -n "${POSITRON_TAG}" ]; then
-    echo "Running download script with TAG=${POSITRON_TAG}, ARCH_SUFFIX=${ARCH_SUFFIX}, GITHUB_TOKEN=${GITHUB_TOKEN}..."
+    echo "Running download script with TAG=${POSITRON_TAG}, ARCH_SUFFIX=${ARCH_SUFFIX}, GITHUB_TOKEN=***..."
 else
-    echo "Running download script with latest Positron release, ARCH_SUFFIX=${ARCH_SUFFIX}, GITHUB_TOKEN=${GITHUB_TOKEN}..."
+    echo "Running download script with latest Positron release, ARCH_SUFFIX=${ARCH_SUFFIX}, GITHUB_TOKEN=***..."
 fi
-TAG=${POSITRON_TAG} ARCH_SUFFIX=${ARCH_SUFFIX} GITHUB_TOKEN=${GITHUB_TOKEN} /tmp/positronDownload.sh
+if ! TAG=${POSITRON_TAG} ARCH_SUFFIX=${ARCH_SUFFIX} GITHUB_TOKEN=${GITHUB_TOKEN} /tmp/positronDownload.sh; then
+    log_error "Failed to download/install Positron"
+fi
 
 # Start RStudio server
 echo "Starting RStudio server..."
-sudo rstudio-server start
+if ! sudo rstudio-server start; then
+    log_error "Failed to start RStudio server"
+fi
 
-echo "Installation complete."
+# Log completion and versions
+echo ""
+echo "Installation complete 🎉"
+
+# Extract Workbench version - just get the first word from "2025.11.0-daily+151.pro2 Workbench..."
+WB_VERSION=$(sudo rstudio-server version 2>/dev/null | head -1 | awk '{print $1}')
+
+echo "Workbench version:   ${WB_VERSION}"
+POSITRON_VERSION=$(cd /usr/lib/rstudio-server/bin/positron-server && grep '"positronVersion"' product.json 2>/dev/null | sed 's/.*"positronVersion": *"\([^"]*\)".*/\1/' || echo "Unknown")
+echo "Positron version:    ${POSITRON_VERSION}"
+echo "Workbench URL:       http://localhost:8787"
+
+# Report any errors that occurred
+if [ ${#ERRORS[@]} -gt 0 ]; then
+    echo ""
+    echo "⚠️  WARNING: ${#ERRORS[@]} error(s) occurred during installation:"
+    for error in "${ERRORS[@]}"; do
+        echo "   • $error"
+    done
+    echo ""
+    echo "Installation may not be fully functional. Check logs above for details."
+fi
+echo ""
