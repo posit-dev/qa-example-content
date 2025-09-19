@@ -230,10 +230,10 @@ echo "Installation complete 🎉"
 
 # Extract Workbench version - just get the first word from "2025.11.0-daily+151.pro2 Workbench..."
 WB_VERSION=$(sudo rstudio-server version 2>/dev/null | head -1 | awk '{print $1}')
-
-echo "Workbench version:   ${WB_VERSION}"
 POSITRON_VERSION=$(cd /usr/lib/rstudio-server/bin/positron-server && grep '"positronVersion"' product.json 2>/dev/null | sed 's/.*"positronVersion": *"\([^"]*\)".*/\1/' || echo "Unknown")
+
 echo "Positron version:    ${POSITRON_VERSION}"
+echo "Workbench version:   ${WB_VERSION}"
 echo "Workbench URL:       http://localhost:8787"
 
 # Report any errors that occurred
