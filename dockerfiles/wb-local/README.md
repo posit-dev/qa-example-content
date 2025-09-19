@@ -49,6 +49,12 @@ GITHUB_TOKEN=your_personal_access_token_here ./connect.sh
    2. Specific versions -  *enter custom URLs/tags when prompted*
    3. **Skip installation**  - *connect only for inspection/debugging*
 
+**For CI/Automated Usage:**
+```bash
+GITHUB_TOKEN=your_token ./connect.sh --ci
+```
+This bypasses all prompts and automatically installs the latest versions.
+
 ### Access Workbench
 
 Open <http://localhost:8787> and login:
