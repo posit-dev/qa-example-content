@@ -22,7 +22,7 @@ services:
       - E2E_POSTGRES_USER=${E2E_POSTGRES_USER:-testuser}
       - E2E_POSTGRES_PASSWORD=${E2E_POSTGRES_PASSWORD:-testpassword}
       - E2E_POSTGRES_DB=${E2E_POSTGRES_DB:-testdb}
-      - Q_PASSWORD=${Q_PASSWORD:-testpassword}
+      - WB_PASSWORD=${WB_PASSWORD:-testpassword}
 
   postgres:
     image: ghcr.io/posit-dev/positron-postgres-initialized-arm64:7

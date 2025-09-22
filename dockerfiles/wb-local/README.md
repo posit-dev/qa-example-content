@@ -8,12 +8,12 @@ Create a `.env` file in the `dockerfiles/wb-local` directory with these variable
 E2E_POSTGRES_USER=
 E2E_POSTGRES_PASSWORD=
 E2E_POSTGRES_DB=
-Q_PASSWORD=
+WB_PASSWORD=
 ```
 
 **Where to find values:**
 * **E2E_POSTGRES vars**: 1Password under `Positron > E2E Postgres DB Connection info`  
-* **Q_PASSWORD**: Your desired password for the `user1` account in Workbench
+* **WB_PASSWORD**: Your desired password for the `user1` account in Workbench
 * **GitHub Token**: Personal Access Token with `read:packages` scope
 
 ## Installation
@@ -59,7 +59,7 @@ This bypasses all prompts and automatically installs the latest versions.
 
 Open <http://localhost:8787> and login:
 * **Username**: `user1`
-* **Password**: Your `.env` Q_PASSWORD value
+* **Password**: Your `.env` WB_PASSWORD value
 
 ## Cleanup
 
