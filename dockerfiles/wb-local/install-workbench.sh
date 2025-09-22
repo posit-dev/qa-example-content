@@ -102,7 +102,7 @@ Q_USER=${Q_USER:-"user1"}
 Q_UID=${Q_UID:-1100}
 Q_GID=${Q_GID:-1100}
 Q_GROUP=${Q_GROUP:-"user1g"}
-Q_PASSWORD=${Q_PASSWORD:-"testpassword"}
+WB_PASSWORD=${WB_PASSWORD:-"testpassword"}
 
 # Install required packages early so we have jq for URL fetching
 echo "Installing required packages..."
@@ -145,13 +145,13 @@ echo "  Q_USER: ${Q_USER}"
 echo "  Q_UID: ${Q_UID}"
 echo "  Q_GID: ${Q_GID}"
 echo "  Q_GROUP: ${Q_GROUP}"
-echo "  Q_PASSWORD: [HIDDEN]"
+echo "  WB_PASSWORD: [HIDDEN]"
 
 # Create the user
 echo "Creating user ${Q_USER}..."
 sudo groupadd -g ${Q_GID} ${Q_GROUP}
 sudo useradd --create-home --shell /bin/bash --home-dir /home/${Q_USER} -u ${Q_UID} -g ${Q_GROUP} ${Q_USER}
-echo "${Q_USER}":"${Q_PASSWORD}" | sudo chpasswd
+echo "${Q_USER}":"${WB_PASSWORD}" | sudo chpasswd
 
 echo "Configuring ~/.Renviron for ${Q_USER}..."
 sudo mkdir -p "/home/${Q_USER}"
