@@ -12,7 +12,7 @@ TAG="${TAG:-}"
 # (arm64 -> arm64, x86_64/amd64 -> x64)
 if [[ -n "${ARCH_SUFFIX:-}" ]]; then
   case "$ARCH_SUFFIX" in
-    amd64)         ARCH="x64"   ;;
+    amd64|x86_64)  ARCH="x64"   ;;
     *)             ARCH="$ARCH_SUFFIX" ;;
   esac
 else
