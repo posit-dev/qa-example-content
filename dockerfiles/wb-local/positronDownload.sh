@@ -9,9 +9,12 @@ REPO="positron-builds"
 TAG="${TAG:-}"                             
 
 # Detect/override architecture suffix for asset name
-# (arm64 -> arm64, x86_64 -> x64)
+# (arm64 -> arm64, x86_64/amd64 -> x64)
 if [[ -n "${ARCH_SUFFIX:-}" ]]; then
-  ARCH="$ARCH_SUFFIX"
+  case "$ARCH_SUFFIX" in
+    amd64)         ARCH="x64"   ;;
+    *)             ARCH="$ARCH_SUFFIX" ;;
+  esac
 else
   case "$(uname -m)" in
     aarch64|arm64) ARCH="arm64" ;;
