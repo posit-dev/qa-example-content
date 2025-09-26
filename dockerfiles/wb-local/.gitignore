@@ -4,3 +4,4 @@
 # Ignore any backup files that might be created
 *.bak
 *~
+license.lic
