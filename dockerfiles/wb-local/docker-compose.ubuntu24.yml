@@ -43,6 +43,30 @@ services:
     restart: unless-stopped
     volumes:
       - postgres-data:/var/lib/postgresql/data
+  
+  connect:
+    image: rstudio/rstudio-connect
+    platform: linux/amd64
+    container_name: connect
+    networks:
+      - mynetwork
+    ports:
+      - "3939:3939"
+    environment:
+      - CONNECT_BOOTSTRAP_ENABLED=true
+      - CONNECT_BOOTSTRAP_SECRETKEY=${CONNECT_BOOTSTRAP_SECRETKEY:-testkey}
+      - CONNECT_APPLICATIONS_PACKAGEAUDITINGENABLED=true
+      - CONNECT_TENSORFLOW_ENABLED=false
+    privileged: true
+    volumes:
+      - /var/lib/rstudio-connect
+      - ./license.lic:/var/lib/rstudio-connect/rstudio-connect.lic:ro
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3939"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
 
 networks:
   mynetwork:
@@ -50,3 +74,4 @@ networks:
 
 volumes:
   postgres-data:
+  connect-data:
