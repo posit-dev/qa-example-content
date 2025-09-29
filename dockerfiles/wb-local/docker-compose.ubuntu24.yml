@@ -23,6 +23,7 @@ services:
       - E2E_POSTGRES_PASSWORD=${E2E_POSTGRES_PASSWORD:-testpassword}
       - E2E_POSTGRES_DB=${E2E_POSTGRES_DB:-testdb}
       - WB_PASSWORD=${WB_PASSWORD:-testpassword}
+      - CONNECT_BOOTSTRAP_SECRETKEY=${CONNECT_BOOTSTRAP_SECRETKEY:-testkey}
 
   postgres:
     image: ghcr.io/posit-dev/positron-postgres-initialized-arm64:7
@@ -60,7 +61,7 @@ services:
     privileged: true
     volumes:
       - /var/lib/rstudio-connect
-      - ./license.lic:/var/lib/rstudio-connect/rstudio-connect.lic:ro
+      - ./connect/rstudio-connect.gcfg:/etc/rstudio-connect/rstudio-connect.gcfg:ro
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:3939"]
       interval: 10s
