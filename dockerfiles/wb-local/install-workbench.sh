@@ -92,6 +92,55 @@ fetch_latest_wb_url() {
     echo "$url"
 }
 
+ensure_connect_token() {
+  local token_dir="/tokens"
+  local token_file="${token_dir}/connect_bootstrap_token"
+  local tmp_file="${token_dir}/.tmp_token"
+  local connect_url="${CONNECT_URL:-http://connect:3939}"
+
+  # Reuse if already present
+  if [ -s "$token_file" ]; then
+    echo "Bootstrap token already present at $token_file"
+    export CONNECT_TOKEN="$(cat "$token_file")"
+    return 0
+  fi
+
+  echo "Waiting for Posit Connect at ${connect_url}..."
+  local ok=0
+  for i in {1..60}; do
+    if curl -fsS "${connect_url}/__ping__" >/dev/null 2>&1 || curl -fsS "${connect_url}" >/dev/null 2>&1; then
+      ok=1; break
+    fi
+    sleep 1
+  done
+  if [ "$ok" -ne 1 ]; then
+    log_error "Connect not reachable at ${connect_url} after 60s"
+    return 1
+  fi
+
+  echo "Bootstrapping token with rsconnect..."
+  umask 077
+  mkdir -p "$token_dir"
+
+  # Correct command (no --secret)
+  if ! rsconnect bootstrap --server "${connect_url}" --raw > "$tmp_file"; then
+    log_error "rsconnect bootstrap failed"
+    # optional: print tool version for debugging
+    rsconnect --version || true
+    return 1
+  fi
+
+  # sanity-check non-empty
+  if ! [ -s "$tmp_file" ]; then
+    log_error "rsconnect returned empty token"
+    return 1
+  fi
+
+  mv "$tmp_file" "$token_file"
+  echo "Wrote bootstrap token to $token_file"
+  export CONNECT_TOKEN="$(cat "$token_file")"
+}
+
 # Initial parameter setup
 ARCH_SUFFIX=${ARCH_SUFFIX:-"arm64"}
 POSITRON_TAG=${POSITRON_TAG:-""}  # Empty default will get the latest release
@@ -223,6 +272,9 @@ echo "Starting RStudio server..."
 if ! sudo rstudio-server start; then
     log_error "Failed to start RStudio server"
 fi
+
+# Ensure (fetch once) + export CONNECT_TOKEN for subsequent steps/tests
+ensure_connect_token || true
 
 # Log completion and versions
 echo ""
