@@ -23,7 +23,7 @@ services:
       - POSITRON_DEV_LICENSE=${POSITRON_DEV_LICENSE}
 
   postgres:
-    image: ghcr.io/posit-dev/positron-postgres-ubunut24-arm64:51
+    image: ghcr.io/posit-dev/positron-postgres-ubuntu24-arm64:51
     container_name: postgres
     ports:
       - "5432:5432"
