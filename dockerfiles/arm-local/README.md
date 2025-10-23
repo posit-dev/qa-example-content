@@ -129,3 +129,41 @@ npm run ci
 ## Warnings
 
 The file test/e2e/fixtures/settings.json will be updated by test runs. Please do not commit this file.
+
+# Running Positron By Itself (no E2E Tests)
+
+In the `/__w/positron/positron` directory inside the container, run:
+```bash
+./scripts/code.sh --no-sandbox
+```
+
+Then access Positron via VNC as described above.
+
+# Connecting via SSH
+
+Inside the container, run:
+```bash
+apt-get install -y openssh-server
+mkdir -p /var/run/sshd
+echo 'root:root' | chpasswd
+sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
+service ssh restart
+```
+
+On your host machine, edit your SSH config file (usually `~/.ssh/config`) to add the following:
+
+```
+Host docker
+  HostName 127.0.0.1
+  Port 3456
+  User root
+  UserKnownHostsFile /tmp/known_hosts
+  StrictHostKeyChecking yes
+```
+
+Then run:
+```bash
+ssh-keyscan -p 3456 127.0.0.1 >> /tmp/known_hosts
+```
+
+Then connect to `docker` from VS Code (by clicking the very left bottom most part of the VSCode IDE). Note that the password is `root`. You should then be able to modify the code easily. Refer to the Code Changes and Retesting section above for rebuilding notes (the watchers are not running in the container).
