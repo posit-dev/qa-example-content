@@ -1,4 +1,4 @@
-import helper
+import workspaces.references_tests.python.math_stuff.helper
 
-result = helper.add(5, 7)
+result = workspaces.references_tests.python.math_stuff.helper.add(5, 7)
 print(f"Result from another_script.py: {result}")
