@@ -8,6 +8,7 @@ services:
       - "8080:8080"
       - "5900:5900"
       - "9323:9323"
+      - "3456:22"
     command: /bin/bash -c "while true; do sleep 3600; done"
     tty: true
     stdin_open: true

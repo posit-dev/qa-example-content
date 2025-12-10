@@ -141,6 +141,7 @@ Then access Positron via VNC as described above.
 
 # Connecting via SSH
 
+## Ubuntu 24
 Inside the container, run:
 ```bash
 apt-get install -y openssh-server
@@ -148,6 +149,17 @@ mkdir -p /var/run/sshd
 echo 'root:root' | chpasswd
 sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config
 service ssh restart
+```
+
+## Rocky 8
+```
+yum install -y openssh-server
+mkdir -p /var/run/sshd
+echo 'root:root' | chpasswd
+sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+ssh-keygen -A
+/usr/sbin/sshd
 ```
 
 On your host machine, edit your SSH config file (usually `~/.ssh/config`) to add the following:
