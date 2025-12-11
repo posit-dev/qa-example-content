@@ -1,0 +1,4 @@
+{
+    "name": "Ubuntu CI Container",
+    "image": "ghcr.io/posit-dev/positron-ubuntu24-arm64:59"
+}
