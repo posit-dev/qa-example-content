@@ -105,6 +105,17 @@ x0vncserver -display :10 -SecurityTypes None -rfbport 5900 -AlwaysShared &
 Then use a VNC viewer to connect to localhost:5900 on your host machine.
 (RealVNC Viewer is a good free option)
 
+# View Running Tests via VNC - OpemSUSE Only
+
+Inside the container, run:
+```bash
+x11vnc -display :10 -forever -nopw -shared -rfbport 5900 &
+```
+(note that this command is run in the background so it may look like you didn't get your prompt back, so just hit Enter).
+
+Then use a VNC viewer to connect to localhost:5900 on your host machine.
+(RealVNC Viewer is a good free option)
+
 # Code Changes and Retesting
 
 If you make code changes and want to retest, push your changes from your local machine to github, then inside the container run:
