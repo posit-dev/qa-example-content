@@ -6,10 +6,10 @@
 OS_TYPE="ubuntu24"
 
 # Check for OS type argument
-if [ "$1" = "ubuntu24" ] || [ "$1" = "rocky8" ] || [ "$1" = "opensuse156" ]; then
+if [ "$1" = "ubuntu24" ] || [ "$1" = "rocky8" ] || [ "$1" = "opensuse156" ] || [ "$1" = "sles156" ]; then
   OS_TYPE="$1"
 else
-  echo "Usage: $0 [ubuntu24|rocky8|opensuse156]"
+  echo "Usage: $0 [ubuntu24|rocky8|opensuse156|sles156]"
   echo "       Default is ubuntu24 if not specified"
   echo ""
 fi
