@@ -105,13 +105,28 @@ x0vncserver -display :10 -SecurityTypes None -rfbport 5900 -AlwaysShared &
 Then use a VNC viewer to connect to localhost:5900 on your host machine.
 (RealVNC Viewer is a good free option)
 
-# View Running Tests via VNC - OpemSUSE Only
+# View Running Tests via VNC - OpenSUSE Only
 
 Inside the container, run:
 ```bash
 x11vnc -display :10 -forever -nopw -shared -rfbport 5900 &
 ```
 (note that this command is run in the background so it may look like you didn't get your prompt back, so just hit Enter).
+
+Then use a VNC viewer to connect to localhost:5900 on your host machine.
+(RealVNC Viewer is a good free option)
+
+# View Running Tests via VNC - SLES Only
+
+Inside the container, run:
+```bash
+export PATH=/usr/bin:/bin:$PATH
+zypper refresh
+zypper install x11vnc
+DISPLAY=:10 fluxbox &
+x11vnc -display :10 -forever -nopw -shared -rfbport 5900 &
+```
+(note that these commands are run in the background so it may look like you didn't get your prompt back, so just hit Enter).
 
 Then use a VNC viewer to connect to localhost:5900 on your host machine.
 (RealVNC Viewer is a good free option)
