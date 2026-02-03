@@ -11,10 +11,15 @@ log_error() {
 
 # Parse command line arguments
 CI_MODE=false
+CI_STABLE_MODE=false
 while [ $# -gt 0 ]; do
   case $1 in
     --ci)
       CI_MODE=true
+      shift
+      ;;
+    --ci-stable)
+      CI_STABLE_MODE=true
       shift
       ;;
     *)
@@ -29,6 +34,10 @@ if [ "$CI_MODE" = true ]; then
     echo ""
     echo "CI Mode: Installing latest versions..."
     echo "======================================"
+elif [ "$CI_STABLE_MODE" = true ]; then
+    echo ""
+    echo "CI Stable Mode: Installing latest Positron + released Workbench..."
+    echo "======================================================================"
 elif [ -z "${WB_URL}" ] && [ -z "${POSITRON_TAG}" ]; then
     echo ""
     echo "Workbench + Positron Installation"
@@ -170,13 +179,24 @@ fi
 
 # Now we can fetch the WB_URL if it wasn't provided
 if [ -z "${WB_URL}" ]; then
-    echo "No WB_URL provided, fetching latest Workbench URL for ${ARCH_SUFFIX} architecture..."
-    WB_URL=$(fetch_latest_wb_url "${ARCH_SUFFIX}")
-    if [ $? -ne 0 ]; then
-        echo "Failed to fetch Workbench URL. Using fallback URL."
-        WB_URL="https://s3.amazonaws.com/rstudio-ide-build/server/jammy/${ARCH_SUFFIX}/rstudio-workbench-2025.11.0-daily-131.pro5-${ARCH_SUFFIX}.deb"
+    if [ "$CI_STABLE_MODE" = true ]; then
+        echo "CI Stable Mode: Fetching latest released Workbench URL..."
+        # Get the directory where this script is located
+        SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+        WB_URL=$("${SCRIPT_DIR}/get-latest-wb-noble-url.sh")
+        if [ $? -ne 0 ] || [ -z "${WB_URL}" ]; then
+            log_error "Failed to fetch released Workbench URL from get-latest-wb-noble-url.sh"
+        fi
+        echo "Using released Workbench URL: ${WB_URL}"
+    else
+        echo "No WB_URL provided, fetching latest Workbench URL for ${ARCH_SUFFIX} architecture..."
+        WB_URL=$(fetch_latest_wb_url "${ARCH_SUFFIX}")
+        if [ $? -ne 0 ]; then
+            echo "Failed to fetch Workbench URL. Using fallback URL."
+            WB_URL="https://s3.amazonaws.com/rstudio-ide-build/server/jammy/${ARCH_SUFFIX}/rstudio-workbench-2025.11.0-daily-131.pro5-${ARCH_SUFFIX}.deb"
+        fi
+        echo "Using Workbench URL: ${WB_URL}"
     fi
-    echo "Using Workbench URL: ${WB_URL}"
 else
     echo "Using provided Workbench URL: ${WB_URL}"
 fi
