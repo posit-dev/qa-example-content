@@ -1,0 +1,15 @@
+---
+title: "Images and Equations"
+format: html
+---
+
+Here is an image of the Mandelbrot set:
+
+![The Mandlebrot Set](mandelbrot.jpg)
+
+And the equation that governs it:
+
+$$
+z_{n+1} = z_n^2 + c
+$$
+
