@@ -20,3 +20,12 @@ import os
 os.getpid()
 ```
 
+## Bash
+
+And this code cell uses bash.
+
+```{bash}
+echo "Your home directory is $HOME"
+```
+
+
