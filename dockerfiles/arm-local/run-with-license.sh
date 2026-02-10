@@ -1,13 +1,13 @@
 #!/bin/sh
 
 # This script helps you set up a multiline POSITRON_DEV_LICENSE environment variable
-# and run docker-compose with Ubuntu 24, Rocky 8, or OpenSUSE 15.6 configuration
+# and run docker-compose with Ubuntu 24, Rocky 8, OpenSUSE 15.6, SLES 15.6, or Debian 12 configuration
 
 # Default to ubuntu24 if no OS argument is provided
 OS_TYPE="ubuntu24"
 
 # Check for OS type argument
-if [ "$1" = "ubuntu24" ] || [ "$1" = "rocky8" ] || [ "$1" = "opensuse156" ] || [ "$1" = "sles156" ]; then
+if [ "$1" = "ubuntu24" ] || [ "$1" = "rocky8" ] || [ "$1" = "opensuse156" ] || [ "$1" = "sles156" ] || [ "$1" = "debian12" ]; then
   OS_TYPE="$1"
 fi
 
