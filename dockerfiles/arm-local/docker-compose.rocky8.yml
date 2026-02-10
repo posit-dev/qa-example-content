@@ -2,8 +2,9 @@ version: '3.8'
 
 services:
   test:
-    image: ghcr.io/posit-dev/positron-rocky8-arm64:58
+    image: ghcr.io/posit-dev/positron-rocky8-arm64:103
     container_name: test
+    init: true
     ports:
       - "8080:8080"
       - "5900:5900"
@@ -24,7 +25,7 @@ services:
       - POSITRON_DEV_LICENSE=${POSITRON_DEV_LICENSE}
 
   postgres:
-    image: ghcr.io/posit-dev/positron-postgres-rocky8-arm64:58
+    image: ghcr.io/posit-dev/positron-postgres-rocky8-arm64:103
     container_name: postgres
     ports:
       - "5432:5432"
