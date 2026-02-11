@@ -38,7 +38,6 @@ flask
 seaborn
 nbformat
 nbclient
-torch
 SQLAlchemy
 psycopg2-binary
 ipykernel
