@@ -261,21 +261,41 @@ fi
 
 cd /usr/lib/rstudio-server/bin/
 
-# Clean up any existing backup and move current version
-if [ -d "positron-server-old" ]; then
-    echo "Removing existing positron-server-old backup..."
-    sudo rm -rf positron-server-old
-fi
+# Check if positron-server/bundled exists
+if [ -d "positron-server/bundled" ]; then
+    echo "Found positron-server/bundled directory - extracting to positron-server/new..."
 
-if ! sudo mv positron-server positron-server-old; then
-    log_error "Failed to backup existing positron-server"
-fi
+    # Remove existing new directory if it exists
+    if [ -d "positron-server/new" ]; then
+        echo "Removing existing positron-server/new directory..."
+        sudo rm -rf positron-server/new
+    fi
 
-if ! sudo mkdir -p positron-server; then
-    log_error "Failed to create new positron-server directory"
-fi
+    # Create the new directory
+    if ! sudo mkdir -p positron-server/new; then
+        log_error "Failed to create positron-server/new directory"
+    fi
 
-cd positron-server
+    cd positron-server/new
+else
+    echo "No bundled directory found - using legacy extraction method..."
+
+    # Clean up any existing backup and move current version
+    if [ -d "positron-server-old" ]; then
+        echo "Removing existing positron-server-old backup..."
+        sudo rm -rf positron-server-old
+    fi
+
+    if ! sudo mv positron-server positron-server-old; then
+        log_error "Failed to backup existing positron-server"
+    fi
+
+    if ! sudo mkdir -p positron-server; then
+        log_error "Failed to create new positron-server directory"
+    fi
+
+    cd positron-server
+fi
 
 # Run download script
 if [ -n "${POSITRON_TAG}" ]; then
@@ -304,8 +324,15 @@ echo "Installation complete 🎉"
 WB_VERSION=$(sudo rstudio-server version 2>/dev/null | head -1 | awk '{print $1}')
 
 # Extract Positron version and build number, combine them
-POSITRON_VERSION=$(cd /usr/lib/rstudio-server/bin/positron-server && grep '"positronVersion"' product.json 2>/dev/null | sed 's/.*"positronVersion": *"\([^"]*\)".*/\1/' || echo "Unknown")
-POSITRON_BUILD=$(cd /usr/lib/rstudio-server/bin/positron-server && grep '"positronBuildNumber"' product.json 2>/dev/null | sed 's/.*"positronBuildNumber": *"\([^"]*\)".*/\1/' || echo "")
+# Check if we extracted to the 'new' directory (when bundled exists) or directly to positron-server
+if [ -d "/usr/lib/rstudio-server/bin/positron-server/new" ]; then
+    POSITRON_DIR="/usr/lib/rstudio-server/bin/positron-server/new"
+else
+    POSITRON_DIR="/usr/lib/rstudio-server/bin/positron-server"
+fi
+
+POSITRON_VERSION=$(cd "${POSITRON_DIR}" && grep '"positronVersion"' product.json 2>/dev/null | sed 's/.*"positronVersion": *"\([^"]*\)".*/\1/' || echo "Unknown")
+POSITRON_BUILD=$(cd "${POSITRON_DIR}" && grep '"positronBuildNumber"' product.json 2>/dev/null | sed 's/.*"positronBuildNumber": *"\([^"]*\)".*/\1/' || echo "")
 POSITRON_FULL_VERSION="${POSITRON_VERSION}-${POSITRON_BUILD}"
 
 echo "Positron version:    ${POSITRON_FULL_VERSION}"
