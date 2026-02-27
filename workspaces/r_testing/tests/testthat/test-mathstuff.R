@@ -9,7 +9,9 @@ describe("top-level describe with describe inside", {
     it("can multiply two numbers", {
       expect_equal(10 * 2, multiplication(10, 2))
     })
-    it("can handle division by 0") #not yet implemented
+    it("can handle division by 0", {
+      skip("Testing a skip")
+    })
   })
 })
 
