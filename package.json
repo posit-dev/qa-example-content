@@ -10,7 +10,7 @@
     "arm:stop:rocky": "cd dockerfiles/arm-local && ./stop-containers.sh rocky8",
     "arm:status": "cd dockerfiles/arm-local && ./status.sh",
     "wb:start": "cd dockerfiles/wb-local && ./run.sh ubuntu24",
-    "wb:connect": "cd dockerfiles/wb-local && ./connect.sh",
+    "wb:connect": "if [ -z \"$GITHUB_TOKEN\" ]; then echo 'Error: GITHUB_TOKEN not set'; echo ''; echo 'Run with: GITHUB_TOKEN=xxx npm run wb:connect'; echo 'Or export: export GITHUB_TOKEN=xxx'; exit 1; fi && cd dockerfiles/wb-local && ./connect.sh",
     "wb:stop": "cd dockerfiles/wb-local && ./stop-containers.sh ubuntu24",
     "wb:status": "cd dockerfiles/wb-local && ./status.sh"
   }
