@@ -50,23 +50,13 @@ if ! docker ps | grep -q "test"; then
   exit 1
 fi
 
-# Copy scripts to container
-echo "Copying scripts to container..."
-
-if [ -f "./setup-test-env.sh" ]; then
-  docker cp ./setup-test-env.sh test:/tmp/setup-test-env.sh
-  docker exec test chmod +x /tmp/setup-test-env.sh
-fi
-
-if [ -f "./start-vnc.sh" ]; then
-  docker cp ./start-vnc.sh test:/tmp/start-vnc.sh
-  docker exec test chmod +x /tmp/start-vnc.sh
-fi
-
-if [ -f "./ssh-install.sh" ]; then
-  docker cp ./ssh-install.sh test:/tmp/ssh-install.sh
-  docker exec test chmod +x /tmp/ssh-install.sh
-fi
+# Copy scripts to container (quietly)
+for script in setup-test-env.sh start-vnc.sh ssh-install.sh; do
+  if [ -f "./$script" ]; then
+    docker cp "./$script" "test:/tmp/$script" >/dev/null 2>&1
+    docker exec test chmod +x "/tmp/$script" 2>/dev/null
+  fi
+done
 
 # Connect to the container and run setup
 if [ "$CI_MODE" = true ]; then
@@ -75,75 +65,90 @@ if [ "$CI_MODE" = true ]; then
 else
   # Interactive mode - show status and menu
   docker exec -it test /bin/bash -c '
-    echo ""
-    echo "=== Current Status ==="
+    # Check setup status
     if [ -d "/__w/positron/positron/.git" ]; then
         BRANCH=$(cd /__w/positron/positron && git branch --show-current 2>/dev/null)
         COMMIT=$(cd /__w/positron/positron && git log -1 --format="%h %s" 2>/dev/null)
-        echo "Branch: $BRANCH"
-        echo "Commit: $COMMIT"
         SETUP_DONE=true
     else
-        echo "Repo: Not cloned yet"
         SETUP_DONE=false
     fi
 
     # Check Xvfb
     if pgrep -x Xvfb >/dev/null 2>&1; then
-        echo "Display: running"
+        DISPLAY_STATUS="running"
     else
-        echo "Display: not running"
+        DISPLAY_STATUS="not running"
     fi
 
     echo ""
-    echo "=== Options ==="
+    echo "┌─────────────────────────────────────────┐"
+    echo "│       Positron Test Environment        │"
+    echo "└─────────────────────────────────────────┘"
+    echo ""
     if [ "$SETUP_DONE" = true ]; then
-        echo "1) Update environment        [pull + reinstall deps]"
+        echo "  Status:  Ready"
+        echo "  Branch:  $BRANCH"
+        echo "  Commit:  $COMMIT"
+        echo "  Display: $DISPLAY_STATUS"
     else
-        echo "1) Setup environment         [clone + install deps]"
+        echo "  Status:  Not set up"
+        echo "  Display: $DISPLAY_STATUS"
     fi
-    echo "2) Skip to shell             [quick reconnect, no changes]"
     echo ""
-    read -p "Enter your choice [1-2, default=2 if setup done, else 1]: " choice
+    echo "─────────────────────────────────────────"
+    if [ "$SETUP_DONE" = true ]; then
+        echo "  1) Update environment  [git pull + reinstall]"
+    else
+        echo "  1) Setup environment   [clone + install]"
+    fi
+    echo "  2) Skip to shell"
+    echo ""
 
-    # Smart default: skip to shell if already set up
-    if [ -z "$choice" ]; then
-        if [ "$SETUP_DONE" = true ]; then
-            choice=2
-        else
-            choice=1
-        fi
+    if [ "$SETUP_DONE" = true ]; then
+        read -p "Choice [1-2, default=2]: " choice
+        choice=${choice:-2}
+    else
+        read -p "Choice [1-2, default=1]: " choice
+        choice=${choice:-1}
     fi
 
-    case ${choice:-1} in
+    case $choice in
       1)
-        read -p "Enter branch name [default=main]: " branch
+        echo ""
+        read -p "Branch [default=main]: " branch
         branch=${branch:-main}
         /tmp/setup-test-env.sh "$branch"
         ;;
       2)
         if [ "$SETUP_DONE" = true ]; then
             echo ""
-            echo "Setup complete. Ready to run tests:"
-            echo "  npx playwright test --project e2e-electron --workers 2 --grep @:connections"
-            echo "  npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer"
+            echo "─────────────────────────────────────────"
+            echo "  Example test commands:"
+            echo "    npx playwright test --project e2e-electron --workers 2 --grep @:connections"
+            echo "    npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer"
             echo ""
-            echo "Other commands:"
-            echo "  /tmp/start-vnc.sh     - Start VNC server"
-            echo "  /tmp/ssh-install.sh   - Install SSH server"
+            echo "  Other commands:"
+            echo "    /tmp/start-vnc.sh    - Start VNC server"
+            echo "    /tmp/ssh-install.sh  - Install SSH server"
+            echo "─────────────────────────────────────────"
+            echo ""
             cd /__w/positron/positron
         else
             echo ""
-            echo "Setup not complete. Run option 1 to set up, or manually:"
-            echo "  /tmp/setup-test-env.sh <branch>"
+            echo "─────────────────────────────────────────"
+            echo "  To set up, run:"
+            echo "    /tmp/setup-test-env.sh <branch>"
             echo ""
-            echo "Other commands:"
-            echo "  /tmp/start-vnc.sh     - Start VNC server"
-            echo "  /tmp/ssh-install.sh   - Install SSH server"
+            echo "  Other commands:"
+            echo "    /tmp/start-vnc.sh    - Start VNC server"
+            echo "    /tmp/ssh-install.sh  - Install SSH server"
+            echo "─────────────────────────────────────────"
+            echo ""
         fi
         ;;
       *)
-        echo "Invalid choice. Going to shell..."
+        echo "Invalid choice."
         ;;
     esac
     exec /bin/bash -l
