@@ -42,22 +42,34 @@ elif [ -z "${WB_URL}" ] && [ -z "${POSITRON_TAG}" ]; then
     echo ""
     echo "Workbench + Positron Installation"
     echo "---------------------------------"
-    echo "1) Latest versions     [recommended]"
-    echo "2) Specific versions"
-    echo "3) Skip to shell"
+    if [ "$ALREADY_INSTALLED" = "true" ]; then
+        echo "1) Update to latest versions"
+        echo "2) Specific versions"
+        echo "3) Skip to shell           [recommended - already installed]"
+        DEFAULT_CHOICE=3
+    else
+        echo "1) Latest versions         [recommended]"
+        echo "2) Specific versions"
+        echo "3) Skip to shell"
+        DEFAULT_CHOICE=1
+    fi
     echo ""
-    read -p "Enter your choice [1-3, default = 1]: " choice
-    
-    case ${choice:-1} in
+    read -p "Enter your choice [1-3, default = $DEFAULT_CHOICE]: " choice
+
+    case ${choice:-$DEFAULT_CHOICE} in
         1)
-            echo "Installing latest versions..."
+            if [ "$ALREADY_INSTALLED" = "true" ]; then
+                echo "Updating to latest versions..."
+            else
+                echo "Installing latest versions..."
+            fi
             ;;
         2)
             echo ""
             echo "Enter specific versions (or press Enter for defaults):"
             read -p "Workbench URL [press Enter for latest]: " user_wb_url
             read -p "Positron tag (e.g., 2025.10.0-88) [press Enter for latest]: " user_positron_tag
-            
+
             if [ -n "$user_wb_url" ]; then
                 export WB_URL="$user_wb_url"
             fi
@@ -216,10 +228,18 @@ echo "  Q_GID: ${Q_GID}"
 echo "  Q_GROUP: ${Q_GROUP}"
 echo "  WB_PASSWORD: [HIDDEN]"
 
-# Create the user
+# Create the user (skip if already exists)
 echo "Creating user ${Q_USER}..."
-sudo groupadd -g ${Q_GID} ${Q_GROUP}
-sudo useradd --create-home --shell /bin/bash --home-dir /home/${Q_USER} -u ${Q_UID} -g ${Q_GROUP} ${Q_USER}
+if ! getent group ${Q_GROUP} > /dev/null 2>&1; then
+    sudo groupadd -g ${Q_GID} ${Q_GROUP}
+else
+    echo "  Group ${Q_GROUP} already exists, skipping..."
+fi
+if ! id -u ${Q_USER} > /dev/null 2>&1; then
+    sudo useradd --create-home --shell /bin/bash --home-dir /home/${Q_USER} -u ${Q_UID} -g ${Q_GROUP} ${Q_USER}
+else
+    echo "  User ${Q_USER} already exists, skipping..."
+fi
 echo "${Q_USER}":"${WB_PASSWORD}" | sudo chpasswd
 
 echo "Configuring ~/.Renviron for ${Q_USER}..."
@@ -286,8 +306,10 @@ else
         sudo rm -rf positron-server-old
     fi
 
-    if ! sudo mv positron-server positron-server-old; then
-        log_error "Failed to backup existing positron-server"
+    if [ -d "positron-server" ]; then
+        if ! sudo mv positron-server positron-server-old; then
+            log_error "Failed to backup existing positron-server"
+        fi
     fi
 
     if ! sudo mkdir -p positron-server; then

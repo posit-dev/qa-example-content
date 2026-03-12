@@ -1,174 +1,135 @@
 # Setup for Positron ARM64 Local Testing
 
-Create the following files in the `dockerfiles/arm-local` directory:
+## Prerequisites
 
-![Required Secrets Files](doc-images/secrets.png)
-
-In the .env file, set the following variables:
+### 1. Create Configuration Files
 
 ```bash
-E2E_POSTGRES_USER=
-E2E_POSTGRES_PASSWORD=
-E2E_POSTGRES_DB=
-```
-(the values to use are in 1Password under Positron > E2E Postgres DB Connection info)
-
-In the license.txt file, add the Positron Workbench License from the 1Password IDE/Workbench vault.
-
-# Execution
-
-You will need two terminal windows open to dockerfiles/arm-local for this process.  
-
-In the first terminal, run:
-
-```bash
-docker login ghcr.io -u <github_username>
-```
-(as your password, use a GitHub Personal Access Token with the `read:packages` scope).
-
-Then run:
-
-```bash
-./run-with-license.sh ubuntu24
-OR
-./run-with-license.sh rocky8
-```
-(depending on which OS you want to test with - both are supported).
-
-This will start the containers and keep them alive.
-
-In the second terminal, run:
-
-```bash
-./connect.sh
+cd dockerfiles/arm-local
+cp .env.example .env
 ```
 
-Then inside the container, run:
+Fill in the values from 1Password under `Positron > E2E Postgres DB Connection info`.
+
+### 2. Create License File
+
+Create a `license.txt` file in this directory with the Positron Workbench License from 1Password (IDE/Workbench vault).
+
+### 3. Docker Login
 
 ```bash
-/tmp/setup-test-env.sh <branch_name>
-cd /__w/positron/positron
-source ~/.bashrc
-```
-(Note that the /__w/positron/positron path is where the Positron code is located inside the container inside CI and we are matching that here).
-
-At this point you will be ready to run tests. Here are a couple sample command lines:
-
-```bash
-npx playwright test --project e2e-electron --workers 2 --grep @:connections --retries 1 --max-failures 10
-npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer --retries 1 --max-failures 10
-```
-Note that if tests fail, playwright will try to show you the report, but it needs to be on host 0.0.0.0, so CTRL-C out of the default report process and see `View Report on Host` below.
-
-When you are done, you can run (in the second terminal):
-
-```bash
-exit
+docker login ghcr.io -u <your_github_username>
 ```
 
-Then go back to the first and use CTRL-C.  Optionally, you can then run:
+Use a GitHub Personal Access Token with `read:packages` scope as your password.
+
+## Quick Start
+
+Open **two terminal windows** from the repo root:
+
+### Terminal 1: Start Containers
 
 ```bash
- ./stop-containers.sh ubuntu24
- OR
- ./stop-containers.sh rocky8
- ```
- (if you don't want to leave the containers running).  This will reset your environment for next time.
+npm run arm:start
+```
 
- # View Report on Host
-Run:
+Or for Rocky 8: `npm run arm:start:rocky`
+
+### Terminal 2: Connect & Setup
+
+```bash
+npm run arm:connect
+```
+
+You'll see a menu:
+1. **Setup test environment** - Clones repo and installs dependencies (prompts for branch)
+2. **Skip to shell** - For reconnecting or manual setup
+
+After setup completes, you're ready to run tests:
+
+```bash
+npx playwright test --project e2e-electron --workers 2 --grep @:connections
+npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer
+```
+
+## All npm Scripts
+
+```bash
+npm run arm:start        # Start containers (ubuntu24)
+npm run arm:start:rocky  # Start containers (rocky8)
+npm run arm:connect      # Connect to container
+npm run arm:stop         # Stop containers
+npm run arm:status       # Check status
+```
+
+## CI/Automated Usage
+
+```bash
+cd dockerfiles/arm-local && ./connect.sh --ci main
+```
+
+This bypasses prompts and automatically sets up the specified branch.
+
+## Cleanup
+
+1. Terminal 2: `exit`
+2. Terminal 1: `Ctrl+C`
+3. Optional: `npm run arm:stop`
+
+## View Test Reports
+
+If tests fail, view the report at http://localhost:9323:
+
 ```bash
 npx playwright show-report --host 0.0.0.0
 ```
-Then go to http://localhost:9323 in your host browser to view the test report.
 
-# View Running Tests via VNC - Ubuntu 24 Only
-
-Inside the container, run:
-```bash
-fluxbox &
-sudo x11vnc -forever -nopw -display :10 &
-```
-(note that these commands are run in the background so it may look like you didn't get your prompt back, so just hit Enter).
-
-Then use a VNC viewer to connect to localhost:5900 on your host machine.
-(RealVNC Viewer is a good free option)
-
-# View Running Tests via VNC - Rocky 8 Only
+## View Running Tests via VNC
 
 Inside the container, run:
+
 ```bash
-x0vncserver -display :10 -SecurityTypes None -rfbport 5900 -AlwaysShared &
+/tmp/start-vnc.sh
 ```
-(note that this command is run in the background so it may look like you didn't get your prompt back, so just hit Enter).
 
-Then use a VNC viewer to connect to localhost:5900 on your host machine.
-(RealVNC Viewer is a good free option)
+Then connect to `localhost:5900` with a VNC viewer (RealVNC Viewer is a good free option).
 
-# View Running Tests via VNC - OpenSUSE Only
+## Running Positron Manually (no E2E Tests)
 
-Inside the container, run:
+Inside the container:
+
 ```bash
-x11vnc -display :10 -forever -nopw -shared -rfbport 5900 &
+./scripts/code.sh --no-sandbox
 ```
-(note that this command is run in the background so it may look like you didn't get your prompt back, so just hit Enter).
 
-Then use a VNC viewer to connect to localhost:5900 on your host machine.
-(RealVNC Viewer is a good free option)
+Then access via VNC as described above.
 
-# View Running Tests via VNC - SLES Only
+## Code Changes and Retesting
 
-Inside the container, run:
-```bash
-export PATH=/usr/bin:/bin:$PATH
-zypper refresh
-zypper install x11vnc
-DISPLAY=:10 fluxbox &
-x11vnc -display :10 -forever -nopw -shared -rfbport 5900 &
-```
-(note that these commands are run in the background so it may look like you didn't get your prompt back, so just hit Enter).
-
-Then use a VNC viewer to connect to localhost:5900 on your host machine.
-(RealVNC Viewer is a good free option)
-
-# Code Changes and Retesting
-
-If you make code changes and want to retest, push your changes from your local machine to github, then inside the container run:
+Push changes from your local machine, then inside the container:
 
 ```bash
 git pull
 npm run compile
 ```
 
-Then rerun your tests, unless you also changed tests, in which case also run:
+If you also changed tests:
 
 ```bash
 npm --prefix test/e2e run compile
 ```
 
-If you happen to have added dependencies, you can run:
+If you added dependencies:
 
 ```bash
 npm run ci
 ```
 
-## Warnings
+## Connecting via SSH
 
-The file test/e2e/fixtures/settings.json will be updated by test runs. Please do not commit this file.
+Inside the container, run `/tmp/ssh-install.sh` (if available) or:
 
-# Running Positron By Itself (no E2E Tests)
-
-In the `/__w/positron/positron` directory inside the container, run:
-```bash
-./scripts/code.sh --no-sandbox
-```
-
-Then access Positron via VNC as described above.
-
-# Connecting via SSH
-
-## Ubuntu 24
-Inside the container, run:
+**Ubuntu/Debian:**
 ```bash
 apt-get install -y openssh-server
 mkdir -p /var/run/sshd
@@ -177,8 +138,8 @@ sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd
 service ssh restart
 ```
 
-## Rocky 8
-```
+**Rocky/RHEL:**
+```bash
 yum install -y openssh-server
 mkdir -p /var/run/sshd
 echo 'root:root' | chpasswd
@@ -188,7 +149,7 @@ ssh-keygen -A
 /usr/sbin/sshd
 ```
 
-On your host machine, edit your SSH config file (usually `~/.ssh/config`) to add the following:
+On your host, add to `~/.ssh/config`:
 
 ```
 Host docker
@@ -199,9 +160,14 @@ Host docker
   StrictHostKeyChecking yes
 ```
 
-Then run:
+Then:
+
 ```bash
 ssh-keyscan -p 3456 127.0.0.1 >> /tmp/known_hosts
 ```
 
-Then connect to `docker` from VS Code (by clicking the very left bottom most part of the VSCode IDE). Note that the password is `root`. You should then be able to modify the code easily. Refer to the Code Changes and Retesting section above for rebuilding notes (the watchers are not running in the container).
+Connect from VS Code using the Remote SSH extension. Password is `root`.
+
+## Warnings
+
+The file `test/e2e/fixtures/settings.json` will be updated by test runs. Do not commit this file.

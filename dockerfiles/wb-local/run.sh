@@ -17,5 +17,11 @@ if [ -f .env ]; then
   export $(grep -v '^#' .env | xargs)
 fi
 
+# Generate Connect bootstrap secret if not set
+if [ -z "$CONNECT_BOOTSTRAP_SECRETKEY" ]; then
+  export CONNECT_BOOTSTRAP_SECRETKEY=$(openssl rand -base64 32)
+  echo "Generated CONNECT_BOOTSTRAP_SECRETKEY"
+fi
+
 docker compose -f ${COMPOSE_FILE} up
 
