@@ -122,12 +122,25 @@ else
         /tmp/setup-test-env.sh "$branch"
         ;;
       2)
-        echo "Skipping setup. Going to shell..."
-        echo ""
-        echo "Available commands:"
-        echo "  /tmp/setup-test-env.sh <branch>  - Set up test environment"
-        echo "  /tmp/start-vnc.sh                - Start VNC server"
-        echo "  /tmp/ssh-install.sh              - Install and start SSH server"
+        if [ "$SETUP_DONE" = true ]; then
+            echo ""
+            echo "Setup complete. Ready to run tests:"
+            echo "  npx playwright test --project e2e-electron --workers 2 --grep @:connections"
+            echo "  npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer"
+            echo ""
+            echo "Other commands:"
+            echo "  /tmp/start-vnc.sh     - Start VNC server"
+            echo "  /tmp/ssh-install.sh   - Install SSH server"
+            cd /__w/positron/positron
+        else
+            echo ""
+            echo "Setup not complete. Run option 1 to set up, or manually:"
+            echo "  /tmp/setup-test-env.sh <branch>"
+            echo ""
+            echo "Other commands:"
+            echo "  /tmp/start-vnc.sh     - Start VNC server"
+            echo "  /tmp/ssh-install.sh   - Install SSH server"
+        fi
         ;;
       *)
         echo "Invalid choice. Going to shell..."
