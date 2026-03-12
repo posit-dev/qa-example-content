@@ -14,3 +14,4 @@ workspaces/quarto_shiny/mini-app_files/*
 workspaces/quarto_shiny/mini-app.html
 dockerfiles/all-tests/deps/pdol_rsa
 dockerfiles/all-tests/deps/.env
+**/.claude/*

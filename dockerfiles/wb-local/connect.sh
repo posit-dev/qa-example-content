@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# Prevent MINGW/Git Bash from converting Unix paths to Windows paths
+export MSYS_NO_PATHCONV=1
+
 # This script connects to the running test container
 
 # Parse command line arguments
@@ -47,10 +50,11 @@ if ! docker ps | grep -q "test"; then
   exit 1
 fi
 
-# Copy scripts to container (quietly)
+# Copy scripts to container (quietly), stripping Windows line endings
 for script in install-workbench.sh positronDownload.sh get-latest-wb-noble-url.sh; do
   if [ -f "./$script" ]; then
     docker cp "./$script" "test:/tmp/$script" >/dev/null 2>&1
+    docker exec test sed -i 's/\r$//' "/tmp/$script" 2>/dev/null
     docker exec test chmod +x "/tmp/$script" 2>/dev/null
   fi
 done

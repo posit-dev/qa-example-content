@@ -162,8 +162,14 @@ ensure_connect_token() {
   export CONNECT_TOKEN="$(cat "$token_file")"
 }
 
-# Initial parameter setup
-ARCH_SUFFIX=${ARCH_SUFFIX:-"arm64"}
+# Initial parameter setup - auto-detect architecture if not set
+if [ -z "${ARCH_SUFFIX:-}" ]; then
+  case "$(uname -m)" in
+    aarch64|arm64) ARCH_SUFFIX="arm64" ;;
+    x86_64|amd64)  ARCH_SUFFIX="amd64" ;;
+    *)             ARCH_SUFFIX="arm64" ;;
+  esac
+fi
 POSITRON_TAG=${POSITRON_TAG:-""}  # Empty default will get the latest release
 GITHUB_TOKEN=${GITHUB_TOKEN:-"myToken"}
 
