@@ -24,7 +24,7 @@ matplotlib
 streamlit-aggrid
 streamlit
 click
-bokeh
+bokeh==3.8.2
 altair
 hvplot
 graphviz
