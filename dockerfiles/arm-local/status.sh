@@ -5,21 +5,21 @@ echo "ARM-Local Test Environment Status"
 echo "=================================="
 echo ""
 
-# Check running containers
-echo "Containers:"
-if docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null | grep -E "^(NAMES|test|postgres)" ; then
-    :
-else
-    echo "  No containers running"
+# Check if containers are running
+if ! docker ps --format "{{.Names}}" | grep -qE "^(test|postgres)$"; then
+    echo "Containers: None running"
     echo ""
-    echo "Start with: ./run-with-license.sh [ubuntu24|rocky8|...]"
+    echo "Start with: npm run arm:start"
     exit 0
 fi
 
+# Show running containers
+echo "Containers:"
+docker ps --format "  {{.Names}}: {{.Status}}" | grep -E "test|postgres"
 echo ""
 
 # If test container is running, get more info
-if docker ps | grep -q "test"; then
+if docker ps --format "{{.Names}}" | grep -q "^test$"; then
     echo "Test Environment:"
 
     # Check if repo exists and get branch
@@ -34,7 +34,7 @@ if docker ps | grep -q "test"; then
         fi
     else
         echo "  Repo: Not cloned yet"
-        echo "  Run ./connect.sh to set up"
+        echo "  Run: npm run arm:connect"
     fi
 
     # Check if Xvfb is running

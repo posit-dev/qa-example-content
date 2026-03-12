@@ -5,21 +5,21 @@ echo "WB-Local Test Environment Status"
 echo "================================="
 echo ""
 
-# Check running containers
-echo "Containers:"
-if docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}" 2>/dev/null | grep -E "^(NAMES|test|postgres|connect)" ; then
-    :
-else
-    echo "  No containers running"
+# Check if containers are running
+if ! docker ps --format "{{.Names}}" | grep -qE "^(test|postgres|connect)$"; then
+    echo "Containers: None running"
     echo ""
-    echo "Start with: ./run.sh [ubuntu24|rocky8]"
+    echo "Start with: npm run wb:start"
     exit 0
 fi
 
+# Show running containers
+echo "Containers:"
+docker ps --format "  {{.Names}}: {{.Status}}" | grep -E "test|postgres|connect"
 echo ""
 
 # If test container is running, get more info
-if docker ps | grep -q "test"; then
+if docker ps --format "{{.Names}}" | grep -q "^test$"; then
     echo "Versions:"
 
     # Get Workbench version
@@ -28,7 +28,7 @@ if docker ps | grep -q "test"; then
         echo "  Workbench: $WB_VERSION"
     else
         echo "  Workbench: Not installed"
-        echo "  Run ./connect.sh to install"
+        echo "  Run: npm run wb:connect"
     fi
 
     # Get Positron version
@@ -45,8 +45,6 @@ if docker ps | grep -q "test"; then
     ' 2>/dev/null)
     if [ -n "$POSITRON_VERSION" ] && [ "$POSITRON_VERSION" != "-" ]; then
         echo "  Positron:  $POSITRON_VERSION"
-    else
-        echo "  Positron:  Not installed"
     fi
 
     # Check RStudio server status
