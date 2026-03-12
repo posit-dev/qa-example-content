@@ -43,7 +43,10 @@ fi
 # Check if the container is running
 if ! docker ps | grep -q "test"; then
   echo "Error: test container is not running!"
-  echo "Please start it first with: ./run.sh [ubuntu24|rocky8]"
+  echo ""
+  echo "Start with:"
+  echo "  npm run wb:start    (from repo root)"
+  echo "  ./run.sh            (from this directory)"
   exit 1
 fi
 
