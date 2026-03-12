@@ -65,32 +65,35 @@ SCRIPTS_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
 # ---------------------------------------------------------------------------
 # .env loading (connect.sh)
 # ---------------------------------------------------------------------------
+# Helper: create a mock docker binary in $1/bin that:
+#   - ps: prints "test" so the container-running check passes
+#   - cp: exits 0 silently
+#   - exec: prints all env vars whose name starts with TEST_ or ends in _VAR,
+#           then exits 0 (simulates entering the container)
+_setup_mock_docker() {
+  local bindir="$1/bin"
+  mkdir -p "$bindir"
+  cat > "$bindir/docker" << 'DOCKEREOF'
+#!/bin/bash
+case "$1" in
+  ps)   echo "test container" ;;
+  cp)   exit 0 ;;
+  exec) env | grep -E '^(MY_TEST_VAR|MY_VAR|SAFE_VAR)=' ; exit 0 ;;
+  *)    exit 0 ;;
+esac
+DOCKEREOF
+  chmod +x "$bindir/docker"
+}
 
 @test "connect.sh loads plain KEY=VALUE from .env" {
   local tmpdir
   tmpdir="$(mktemp -d)"
   echo "MY_TEST_VAR=hello_world" > "$tmpdir/.env"
+  _setup_mock_docker "$tmpdir"
 
-  # Run connect.sh from tmpdir so it finds the .env; it will fail at the
-  # docker-not-running check, but the env-loading line should execute first.
-  run bash -c "
-    cd '$tmpdir'
-    # Patch connect.sh to print the var and exit early after loading .env
-    bash -c '
-      if [ -f .env ]; then
-        while IFS= read -r line || [ -n \"\$line\" ]; do
-          [[ \"\$line\" =~ ^[[:space:]]*# ]] && continue
-          [[ -z \"\${line// }\" ]] && continue
-          if [[ \"\$line\" =~ ^[A-Za-z_][A-Za-z0-9_]*=(.*)$ ]]; then
-            export \"\$line\"
-          fi
-        done < .env
-      fi
-      echo \"VAR=\$MY_TEST_VAR\"
-    '
-  "
+  run env PATH="$tmpdir/bin:$PATH" bash -c "cd '$tmpdir' && '$SCRIPTS_DIR/connect.sh' --ci dummy-branch"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"VAR=hello_world"* ]]
+  [[ "$output" == *"MY_TEST_VAR=hello_world"* ]]
   rm -rf "$tmpdir"
 }
 
@@ -98,24 +101,11 @@ SCRIPTS_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
   local tmpdir
   tmpdir="$(mktemp -d)"
   printf 'SAFE_VAR=ok\n$(touch /tmp/pwned)=bad\n' > "$tmpdir/.env"
+  _setup_mock_docker "$tmpdir"
 
-  run bash -c "
-    cd '$tmpdir'
-    bash -c '
-      if [ -f .env ]; then
-        while IFS= read -r line || [ -n \"\$line\" ]; do
-          [[ \"\$line\" =~ ^[[:space:]]*# ]] && continue
-          [[ -z \"\${line// }\" ]] && continue
-          if [[ \"\$line\" =~ ^[A-Za-z_][A-Za-z0-9_]*=(.*)$ ]]; then
-            export \"\$line\"
-          fi
-        done < .env
-      fi
-      echo \"SAFE=\$SAFE_VAR\"
-    '
-  "
+  run env PATH="$tmpdir/bin:$PATH" bash -c "cd '$tmpdir' && '$SCRIPTS_DIR/connect.sh' --ci dummy-branch"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"SAFE=ok"* ]]
+  [[ "$output" == *"SAFE_VAR=ok"* ]]
   # Malicious key must not have been executed
   [ ! -f /tmp/pwned ]
   rm -rf "$tmpdir"
@@ -125,80 +115,94 @@ SCRIPTS_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
   local tmpdir
   tmpdir="$(mktemp -d)"
   echo 'MY_VAR=hello world' > "$tmpdir/.env"
+  _setup_mock_docker "$tmpdir"
 
-  run bash -c "
-    cd '$tmpdir'
-    bash -c '
-      if [ -f .env ]; then
-        while IFS= read -r line || [ -n \"\$line\" ]; do
-          [[ \"\$line\" =~ ^[[:space:]]*# ]] && continue
-          [[ -z \"\${line// }\" ]] && continue
-          if [[ \"\$line\" =~ ^[A-Za-z_][A-Za-z0-9_]*=(.*)$ ]]; then
-            export \"\$line\"
-          fi
-        done < .env
-      fi
-      echo \"VAR=\$MY_VAR\"
-    '
-  "
+  run env PATH="$tmpdir/bin:$PATH" bash -c "cd '$tmpdir' && '$SCRIPTS_DIR/connect.sh' --ci dummy-branch"
   [ "$status" -eq 0 ]
-  [[ "$output" == *"VAR=hello world"* ]]
+  [[ "$output" == *"MY_VAR=hello world"* ]]
   rm -rf "$tmpdir"
 }
 
 # ---------------------------------------------------------------------------
 # GHCR image extraction (run-with-license.sh)
 # ---------------------------------------------------------------------------
+# Helper: set up a temp dir to run run-with-license.sh with a given compose content.
+# The mock docker records the image passed to "docker pull" in $tmpdir/pulled_image.
+_run_with_license_setup() {
+  local tmpdir="$1"
+  local compose_content="$2"
+
+  echo "license content" > "$tmpdir/license.txt"
+  printf 'E2E_POSTGRES_USER=user\nE2E_POSTGRES_PASSWORD=pass\nE2E_POSTGRES_DB=db\n' > "$tmpdir/.env"
+  printf '%s' "$compose_content" > "$tmpdir/docker-compose.ubuntu24.yml"
+
+  mkdir -p "$tmpdir/bin"
+  cat > "$tmpdir/bin/docker" << 'DOCKEREOF'
+#!/bin/bash
+case "$1" in
+  pull)
+    echo "PULLED_IMAGE=$2"
+    exit 0
+    ;;
+  compose)
+    exit 0
+    ;;
+  *)
+    exit 0
+    ;;
+esac
+DOCKEREOF
+  chmod +x "$tmpdir/bin/docker"
+}
 
 @test "GHCR image extraction handles unquoted image value" {
-  local tmpfile
-  tmpfile="$(mktemp)"
-  printf 'services:\n  test:\n    image: ghcr.io/org/image:tag\n' > "$tmpfile"
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  _run_with_license_setup "$tmpdir" \
+    "$(printf 'services:\n  test:\n    image: ghcr.io/org/image:tag\n')"
 
-  run awk '/image:.*ghcr\.io/{
-    sub(/^[[:space:]]*image:[[:space:]]*/, "")
-    gsub(/^["'"'"']|["'"'"']$/, "")
-    gsub(/[[:space:]].*$/, "")
-    print; exit
-  }' "$tmpfile"
-
+  run env PATH="$tmpdir/bin:$PATH" bash -c "cd '$tmpdir' && '$SCRIPTS_DIR/run-with-license.sh' ubuntu24"
   [ "$status" -eq 0 ]
-  [ "$output" = "ghcr.io/org/image:tag" ]
-  rm -f "$tmpfile"
+  [[ "$output" == *"PULLED_IMAGE=ghcr.io/org/image:tag"* ]]
+  rm -rf "$tmpdir"
 }
 
 @test "GHCR image extraction handles double-quoted image value" {
-  local tmpfile
-  tmpfile="$(mktemp)"
-  printf 'services:\n  test:\n    image: "ghcr.io/org/image:tag"\n' > "$tmpfile"
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  _run_with_license_setup "$tmpdir" \
+    "$(printf 'services:\n  test:\n    image: "ghcr.io/org/image:tag"\n')"
 
-  run awk '/image:.*ghcr\.io/{
-    sub(/^[[:space:]]*image:[[:space:]]*/, "")
-    gsub(/^["'"'"']|["'"'"']$/, "")
-    gsub(/[[:space:]].*$/, "")
-    print; exit
-  }' "$tmpfile"
-
+  run env PATH="$tmpdir/bin:$PATH" bash -c "cd '$tmpdir' && '$SCRIPTS_DIR/run-with-license.sh' ubuntu24"
   [ "$status" -eq 0 ]
-  [ "$output" = "ghcr.io/org/image:tag" ]
-  rm -f "$tmpfile"
+  [[ "$output" == *"PULLED_IMAGE=ghcr.io/org/image:tag"* ]]
+  rm -rf "$tmpdir"
 }
 
 @test "GHCR image extraction handles single-quoted image value" {
-  local tmpfile
-  tmpfile="$(mktemp)"
-  printf "services:\n  test:\n    image: 'ghcr.io/org/image:tag'\n" > "$tmpfile"
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  _run_with_license_setup "$tmpdir" \
+    "$(printf "services:\n  test:\n    image: 'ghcr.io/org/image:tag'\n")"
 
-  run awk '/image:.*ghcr\.io/{
-    sub(/^[[:space:]]*image:[[:space:]]*/, "")
-    gsub(/^["'"'"']|["'"'"']$/, "")
-    gsub(/[[:space:]].*$/, "")
-    print; exit
-  }' "$tmpfile"
-
+  run env PATH="$tmpdir/bin:$PATH" bash -c "cd '$tmpdir' && '$SCRIPTS_DIR/run-with-license.sh' ubuntu24"
   [ "$status" -eq 0 ]
-  [ "$output" = "ghcr.io/org/image:tag" ]
-  rm -f "$tmpfile"
+  [[ "$output" == *"PULLED_IMAGE=ghcr.io/org/image:tag"* ]]
+  rm -rf "$tmpdir"
+}
+
+@test "GHCR image extraction strips inline YAML comment" {
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  _run_with_license_setup "$tmpdir" \
+    "$(printf 'services:\n  test:\n    image: "ghcr.io/org/image:tag" # inline comment\n')"
+
+  run env PATH="$tmpdir/bin:$PATH" bash -c "cd '$tmpdir' && '$SCRIPTS_DIR/run-with-license.sh' ubuntu24"
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"PULLED_IMAGE=ghcr.io/org/image:tag"* ]]
+  # Ensure no trailing quote leaked through
+  [[ "$output" != *'PULLED_IMAGE=ghcr.io/org/image:tag"'* ]]
+  rm -rf "$tmpdir"
 }
 
 # ---------------------------------------------------------------------------

@@ -78,10 +78,11 @@ fi
 # Check docker login status for ghcr.io by pulling the selected OS image
 echo "Checking GitHub Container Registry authentication..."
 GHCR_IMAGE=$(awk '/image:.*ghcr\.io/{
-  # Extract the value after "image:", strip leading/trailing whitespace and quotes
+  # Extract the value after "image:", strip inline comments, then quotes
   sub(/^[[:space:]]*image:[[:space:]]*/, "")
+  gsub(/[[:space:]]+#.*$/, "")
   gsub(/^["'"'"']|["'"'"']$/, "")
-  gsub(/[[:space:]].*$/, "")
+  gsub(/[[:space:]]+$/, "")
   print; exit
 }' "$COMPOSE_FILE")
 if [ -z "$GHCR_IMAGE" ]; then
