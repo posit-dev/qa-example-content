@@ -47,23 +47,17 @@ if ! docker ps | grep -q "test"; then
   exit 1
 fi
 
-# Copy setup script to container
-
-if [ -f "./install-workbench.sh" ]; then
-  echo "Copying workbench setup script to container..."
-  docker cp ./install-workbench.sh test:/tmp/install-workbench.sh
-  docker exec test chmod +x /tmp/install-workbench.sh
-fi
-
-if [ -f "./positronDownload.sh" ]; then
-  echo "Copying download script to container..."
-  docker cp ./positronDownload.sh test:/tmp/positronDownload.sh
-  docker exec test chmod +x /tmp/positronDownload.sh
-fi
+# Copy scripts to container (quietly)
+for script in install-workbench.sh positronDownload.sh get-latest-wb-noble-url.sh; do
+  if [ -f "./$script" ]; then
+    docker cp "./$script" "test:/tmp/$script" >/dev/null 2>&1
+    docker exec test chmod +x "/tmp/$script" 2>/dev/null
+  fi
+done
 
 # Show current status
 echo ""
-echo "=== Current Status ==="
+echo "=== Status ==="
 WB_VERSION=$(docker exec test bash -c 'rstudio-server version 2>/dev/null | head -1 | awk "{print \$1}"' 2>/dev/null)
 if [ -n "$WB_VERSION" ] && [ "$WB_VERSION" != "" ]; then
     echo "Workbench: $WB_VERSION"
@@ -87,10 +81,28 @@ else
 fi
 echo ""
 
-# Connect to the container and auto-run the install script
+# Connect to the container and run install script
 if [ "$CI_MODE" = true ]; then
   echo "Running in CI mode - using latest versions without prompts..."
   docker exec -it -e GITHUB_TOKEN="$GITHUB_TOKEN" test /bin/bash -c "/tmp/install-workbench.sh --ci; exec /bin/bash"
 else
-  docker exec -it -e GITHUB_TOKEN="$GITHUB_TOKEN" -e ALREADY_INSTALLED="$ALREADY_INSTALLED" test /bin/bash -c "/tmp/install-workbench.sh; exec /bin/bash"
+  docker exec -it -e GITHUB_TOKEN="$GITHUB_TOKEN" -e ALREADY_INSTALLED="$ALREADY_INSTALLED" test /bin/bash -c '
+    /tmp/install-workbench.sh
+
+    # Show quick reference before dropping to shell
+    echo ""
+    echo "=== Quick Reference ==="
+    if rstudio-server status >/dev/null 2>&1; then
+        echo "Access Workbench: http://localhost:8787"
+        echo "  Username: user1"
+        echo "  Password: (your WB_PASSWORD from .env)"
+        echo ""
+        echo "Access Connect:   http://localhost:3939"
+    else
+        echo "To install, run:"
+        echo "  /tmp/install-workbench.sh"
+    fi
+    echo ""
+    exec /bin/bash
+  '
 fi
