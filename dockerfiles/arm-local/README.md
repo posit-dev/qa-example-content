@@ -4,18 +4,16 @@
 
 ### 1. Create Configuration Files
 
-Copy the example environment file and fill in the values:
-
 ```bash
+cd dockerfiles/arm-local
 cp .env.example .env
 ```
 
-**Where to find values:**
-- **E2E_POSTGRES vars**: 1Password under `Positron > E2E Postgres DB Connection info`
+Fill in the values from 1Password under `Positron > E2E Postgres DB Connection info`.
 
 ### 2. Create License File
 
-Create a `license.txt` file with the Positron Workbench License from 1Password (IDE/Workbench vault).
+Create a `license.txt` file in this directory with the Positron Workbench License from 1Password (IDE/Workbench vault).
 
 ### 3. Docker Login
 
@@ -27,20 +25,20 @@ Use a GitHub Personal Access Token with `read:packages` scope as your password.
 
 ## Quick Start
 
-Open **two terminal windows** in the `dockerfiles/arm-local` directory:
+Open **two terminal windows** from the repo root:
 
 ### Terminal 1: Start Containers
 
 ```bash
-./run-with-license.sh ubuntu24
+npm run arm:start
 ```
 
-Supported OS types: `ubuntu24`, `rocky8`, `opensuse156`, `sles156`, `debian12`
+Or for Rocky 8: `npm run arm:start:rocky`
 
 ### Terminal 2: Connect & Setup
 
 ```bash
-./connect.sh
+npm run arm:connect
 ```
 
 You'll see a menu:
@@ -54,10 +52,20 @@ npx playwright test --project e2e-electron --workers 2 --grep @:connections
 npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer
 ```
 
+## All npm Scripts
+
+```bash
+npm run arm:start        # Start containers (ubuntu24)
+npm run arm:start:rocky  # Start containers (rocky8)
+npm run arm:connect      # Connect to container
+npm run arm:stop         # Stop containers
+npm run arm:status       # Check status
+```
+
 ## CI/Automated Usage
 
 ```bash
-./connect.sh --ci main
+cd dockerfiles/arm-local && ./connect.sh --ci main
 ```
 
 This bypasses prompts and automatically sets up the specified branch.
@@ -66,7 +74,7 @@ This bypasses prompts and automatically sets up the specified branch.
 
 1. Terminal 2: `exit`
 2. Terminal 1: `Ctrl+C`
-3. Optional: `./stop-containers.sh ubuntu24`
+3. Optional: `npm run arm:stop`
 
 ## View Test Reports
 

@@ -2,78 +2,90 @@
 
 ## Prerequisites
 
-Create a `.env` file in the `dockerfiles/wb-local` directory with these variables:
+### 1. Create Configuration Files
 
 ```bash
-E2E_POSTGRES_USER=
-E2E_POSTGRES_PASSWORD=
-E2E_POSTGRES_DB=
-WB_PASSWORD=
+cd dockerfiles/wb-local
+cp .env.example .env
 ```
 
-**Where to find values:**
-* **E2E_POSTGRES vars**: 1Password under `Positron > E2E Postgres DB Connection info`  
+Fill in the values:
+* **E2E_POSTGRES vars**: 1Password under `Positron > E2E Postgres DB Connection info`
 * **WB_PASSWORD**: Your desired password for the `user1` account in Workbench
-* **GitHub Token**: Personal Access Token with `read:packages` scope
 
-## Installation
-
-Open **two terminal windows** in the `dockerfiles/wb-local` directory:
-
-### Terminal 1: Start Docker Containers
+### 2. Docker Login
 
 ```bash
 docker login ghcr.io -u <your_github_username>
-./run.sh ubuntu24
 ```
 
-**What this does:**
-1. **Docker login** - Authenticates with GitHub's container registry to download the test images
-2. **./run.sh ubuntu24** - Starts Ubuntu 24 containers that include:
-   - A clean Ubuntu environment for testing
-   - Pre-installed development tools and dependencies
-   - Database services (PostgreSQL) for Workbench
-   - Network configuration to access via localhost:8787
+Use a GitHub Personal Access Token with `read:packages` scope as your password.
+
+### 3. GitHub Token
+
+You'll need a GitHub Personal Access Token with `read:packages` scope for downloading Positron releases.
+
+## Quick Start
+
+Open **two terminal windows** from the repo root:
+
+### Terminal 1: Start Containers
+
+```bash
+npm run wb:start
+```
 
 ### Terminal 2: Connect & Install
 
 ```bash
-GITHUB_TOKEN=your_personal_access_token_here ./connect.sh
+GITHUB_TOKEN=your_token npm run wb:connect
 ```
 
-**What this does:**
-1. **Connects** to the running Ubuntu container
-2. **Copies** installation scripts into the container  
-3. **Automatically runs** the installation script, which will prompt:
-   1. Latest versions
-   2. Specific versions -  *enter custom URLs/tags when prompted*
-   3. **Skip installation**  - *connect only for inspection/debugging*
-
-**For CI/Automated Usage:**
-```bash
-GITHUB_TOKEN=your_token ./connect.sh --ci
-```
-This bypasses all prompts and automatically installs the latest versions.
+You'll see a menu:
+1. **Latest versions** - Install latest Workbench + Positron
+2. **Specific versions** - Enter custom URLs/tags
+3. **Skip to shell** - For reconnecting or manual setup
 
 ### Access Workbench
 
-Open <http://localhost:8787> and login:
+Open http://localhost:8787 and login:
 * **Username**: `user1`
 * **Password**: Your `.env` WB_PASSWORD value
 
+## All npm Scripts
+
+```bash
+npm run wb:start     # Start containers
+npm run wb:connect   # Connect (requires GITHUB_TOKEN)
+npm run wb:stop      # Stop containers
+npm run wb:status    # Check status
+```
+
+## CI/Automated Usage
+
+```bash
+GITHUB_TOKEN=your_token npm run wb:connect -- --ci
+```
+
+Or from this directory:
+```bash
+GITHUB_TOKEN=your_token ./connect.sh --ci
+```
+
+This bypasses all prompts and automatically installs the latest versions.
+
 ## Cleanup
 
-**When finished:**
 1. Terminal 2: `exit`
-2. Terminal 1: Press `Ctrl+C`
-3. Optional: `./stop-containers.sh ubuntu24` (resets environment)
+2. Terminal 1: `Ctrl+C`
+3. Optional: `npm run wb:stop`
 
 ## Troubleshooting
 
 ### Getting Forbidden Error
 
-You will need to delete the cookie for vscode-tkn for <http://localhost>. See the image below:
+Delete the cookie for vscode-tkn for http://localhost:
 
-![RForbidden Fix](doc-images/forbidden.png)
+![Forbidden Fix](doc-images/forbidden.png)
 
 Refresh the page and you should be logged in.
