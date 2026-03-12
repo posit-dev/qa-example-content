@@ -233,7 +233,5 @@ echo "Other useful commands:"
 echo "  /tmp/start-vnc.sh                        - Start VNC server (connect to localhost:5900)"
 echo "  npx playwright show-report --host 0.0.0.0 - View test report (localhost:9323)"
 echo ""
-
-# Source bashrc and change to repo directory for the user
-cd "$REPO_DIR"
-source ~/.bashrc
+echo "NOTE: If you open a new terminal/shell, run: source ~/.bashrc"
+echo ""
