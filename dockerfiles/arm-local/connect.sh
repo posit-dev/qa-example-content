@@ -82,27 +82,24 @@ else
     fi
 
     echo ""
-    echo "┌─────────────────────────────────────────┐"
-    echo "│       Positron Test Environment        │"
-    echo "└─────────────────────────────────────────┘"
-    echo ""
+    echo "=== Status ==="
     if [ "$SETUP_DONE" = true ]; then
-        echo "  Status:  Ready"
-        echo "  Branch:  $BRANCH"
-        echo "  Commit:  $COMMIT"
-        echo "  Display: $DISPLAY_STATUS"
+        echo "Branch:  $BRANCH"
+        echo "Commit:  $COMMIT"
+        echo "Display: $DISPLAY_STATUS"
     else
-        echo "  Status:  Not set up"
-        echo "  Display: $DISPLAY_STATUS"
+        echo "Setup:   Not complete"
+        echo "Display: $DISPLAY_STATUS"
     fi
+
     echo ""
-    echo "─────────────────────────────────────────"
+    echo "=== Options ==="
     if [ "$SETUP_DONE" = true ]; then
-        echo "  1) Update environment  [git pull + reinstall]"
+        echo "1) Update environment  [git pull + reinstall]"
     else
-        echo "  1) Setup environment   [clone + install]"
+        echo "1) Setup environment   [clone + install]"
     fi
-    echo "  2) Skip to shell"
+    echo "2) Skip to shell"
     echo ""
 
     if [ "$SETUP_DONE" = true ]; then
@@ -121,31 +118,27 @@ else
         /tmp/setup-test-env.sh "$branch"
         ;;
       2)
+        echo ""
         if [ "$SETUP_DONE" = true ]; then
+            echo "=== Quick Reference ==="
+            echo "Example test commands:"
+            echo "  npx playwright test --project e2e-electron --workers 2 --grep @:connections"
+            echo "  npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer"
             echo ""
-            echo "─────────────────────────────────────────"
-            echo "  Example test commands:"
-            echo "    npx playwright test --project e2e-electron --workers 2 --grep @:connections"
-            echo "    npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer"
-            echo ""
-            echo "  Other commands:"
-            echo "    /tmp/start-vnc.sh    - Start VNC server"
-            echo "    /tmp/ssh-install.sh  - Install SSH server"
-            echo "─────────────────────────────────────────"
-            echo ""
+            echo "Other commands:"
+            echo "  /tmp/start-vnc.sh    - Start VNC server"
+            echo "  /tmp/ssh-install.sh  - Install SSH server"
             cd /__w/positron/positron
         else
+            echo "=== Quick Reference ==="
+            echo "To set up, run:"
+            echo "  /tmp/setup-test-env.sh <branch>"
             echo ""
-            echo "─────────────────────────────────────────"
-            echo "  To set up, run:"
-            echo "    /tmp/setup-test-env.sh <branch>"
-            echo ""
-            echo "  Other commands:"
-            echo "    /tmp/start-vnc.sh    - Start VNC server"
-            echo "    /tmp/ssh-install.sh  - Install SSH server"
-            echo "─────────────────────────────────────────"
-            echo ""
+            echo "Other commands:"
+            echo "  /tmp/start-vnc.sh    - Start VNC server"
+            echo "  /tmp/ssh-install.sh  - Install SSH server"
         fi
+        echo ""
         ;;
       *)
         echo "Invalid choice."
