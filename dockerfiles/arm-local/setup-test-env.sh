@@ -80,7 +80,7 @@ if [ -d "$REPO_DIR/.git" ]; then
     fi
 
     # Validate and checkout branch
-    BRANCH=$(prompt_for_branch "$BRANCH")
+    BRANCH=$(prompt_for_branch "$BRANCH") || exit 1
     echo "Checking out branch: $BRANCH"
     if ! git checkout "$BRANCH"; then
         log_error "Failed to checkout branch: $BRANCH"
@@ -103,7 +103,7 @@ else
     git fetch --all
 
     # Validate and checkout branch
-    BRANCH=$(prompt_for_branch "$BRANCH")
+    BRANCH=$(prompt_for_branch "$BRANCH") || exit 1
     echo "Checking out branch: $BRANCH"
     if ! git checkout "$BRANCH"; then
         log_error "Failed to checkout branch: $BRANCH"
