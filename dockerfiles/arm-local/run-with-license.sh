@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 # This script helps you set up a multiline POSITRON_DEV_LICENSE environment variable
 # and run docker-compose with Ubuntu 24, Rocky 8, OpenSUSE 15.6, SLES 15.6, or Debian 12 configuration
@@ -18,16 +18,71 @@ COMPOSE_FILE="docker-compose.${OS_TYPE}.yml"
 if [ ! -f license.txt ]; then
   echo "Error: license.txt not found!"
   echo "Please create a license.txt file with your POSITRON_DEV_LICENSE content"
+  echo "(Found in 1Password IDE/Workbench vault)"
   exit 1
 fi
+
+# Check if .env exists
+if [ ! -f .env ]; then
+  echo "Error: .env file not found!"
+  echo ""
+  if [ -f .env.example ]; then
+    echo "Copy the example file and fill in the values:"
+    echo "  cp .env.example .env"
+  else
+    echo "Create a .env file with:"
+    echo "  E2E_POSTGRES_USER="
+    echo "  E2E_POSTGRES_PASSWORD="
+    echo "  E2E_POSTGRES_DB="
+  fi
+  echo ""
+  echo "(Values found in 1Password: Positron > E2E Postgres DB Connection info)"
+  exit 1
+fi
+
+# Load environment variables from .env file
+echo "Loading environment variables from .env file..."
+export $(grep -v '^#' .env | xargs)
+
+# Validate required environment variables
+MISSING_VARS=()
+if [ -z "$E2E_POSTGRES_USER" ]; then
+  MISSING_VARS+=("E2E_POSTGRES_USER")
+fi
+if [ -z "$E2E_POSTGRES_PASSWORD" ]; then
+  MISSING_VARS+=("E2E_POSTGRES_PASSWORD")
+fi
+if [ -z "$E2E_POSTGRES_DB" ]; then
+  MISSING_VARS+=("E2E_POSTGRES_DB")
+fi
+
+if [ ${#MISSING_VARS[@]} -gt 0 ]; then
+  echo "Error: Missing required environment variables in .env:"
+  for var in "${MISSING_VARS[@]}"; do
+    echo "  - $var"
+  done
+  echo ""
+  echo "(Values found in 1Password: Positron > E2E Postgres DB Connection info)"
+  exit 1
+fi
+
+# Check docker login status for ghcr.io
+echo "Checking GitHub Container Registry authentication..."
+if ! docker pull ghcr.io/posit-dev/positron-ubuntu24-arm64:101 --quiet 2>/dev/null; then
+  echo ""
+  echo "Error: Not authenticated with GitHub Container Registry (ghcr.io)"
+  echo ""
+  echo "Please run:"
+  echo "  docker login ghcr.io -u <your_github_username>"
+  echo ""
+  echo "Use a GitHub Personal Access Token with 'read:packages' scope as your password."
+  exit 1
+fi
+echo "Docker authentication OK"
 
 # Export the license as an environment variable, preserving newlines
 export POSITRON_DEV_LICENSE=$(cat license.txt)
 
-# Load other environment variables from .env file if it exists
-if [ -f .env ]; then
-  echo "Loading environment variables from .env file..."
-  export $(grep -v '^#' .env | xargs)
-fi
-
+echo ""
+echo "Starting containers for: $OS_TYPE"
 docker compose -f ${COMPOSE_FILE} up

@@ -61,10 +61,36 @@ if [ -f "./positronDownload.sh" ]; then
   docker exec test chmod +x /tmp/positronDownload.sh
 fi
 
+# Show current status
+echo ""
+echo "=== Current Status ==="
+WB_VERSION=$(docker exec test bash -c 'rstudio-server version 2>/dev/null | head -1 | awk "{print \$1}"' 2>/dev/null)
+if [ -n "$WB_VERSION" ] && [ "$WB_VERSION" != "" ]; then
+    echo "Workbench: $WB_VERSION"
+    POSITRON_VERSION=$(docker exec test bash -c '
+        for dir in /usr/lib/rstudio-server/bin/positron-server/new /usr/lib/rstudio-server/bin/positron-server; do
+            if [ -f "$dir/product.json" ]; then
+                VER=$(grep "positronVersion" "$dir/product.json" 2>/dev/null | sed "s/.*\"positronVersion\": *\"\([^\"]*\)\".*/\1/")
+                BUILD=$(grep "positronBuildNumber" "$dir/product.json" 2>/dev/null | sed "s/.*\"positronBuildNumber\": *\"\([^\"]*\)\".*/\1/")
+                echo "${VER}-${BUILD}"
+                exit 0
+            fi
+        done
+    ' 2>/dev/null)
+    if [ -n "$POSITRON_VERSION" ] && [ "$POSITRON_VERSION" != "-" ]; then
+        echo "Positron:  $POSITRON_VERSION"
+    fi
+    ALREADY_INSTALLED=true
+else
+    echo "Workbench: Not installed"
+    ALREADY_INSTALLED=false
+fi
+echo ""
+
 # Connect to the container and auto-run the install script
 if [ "$CI_MODE" = true ]; then
   echo "Running in CI mode - using latest versions without prompts..."
   docker exec -it -e GITHUB_TOKEN="$GITHUB_TOKEN" test /bin/bash -c "/tmp/install-workbench.sh --ci; exec /bin/bash"
 else
-  docker exec -it -e GITHUB_TOKEN="$GITHUB_TOKEN" test /bin/bash -c "/tmp/install-workbench.sh; exec /bin/bash"
+  docker exec -it -e GITHUB_TOKEN="$GITHUB_TOKEN" -e ALREADY_INSTALLED="$ALREADY_INSTALLED" test /bin/bash -c "/tmp/install-workbench.sh; exec /bin/bash"
 fi

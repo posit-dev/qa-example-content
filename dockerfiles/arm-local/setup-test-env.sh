@@ -3,6 +3,15 @@
 # setup-test-env.sh - Script to set up testing environment in the container
 # This script gets copied into the container and can be run to set up the test environment
 
+# Initialize error tracking
+ERRORS=()
+
+# Function to log errors
+log_error() {
+    ERRORS+=("$1")
+    echo "ERROR: $1"
+}
+
 # Display usage instructions if no branch is provided
 if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <branch_name>"
@@ -31,26 +40,61 @@ echo "Creating work directory..."
 mkdir -p "$WORK_DIR"
 cd "$WORK_DIR"
 
-# Clone repository
-echo "Cloning Positron repository..."
-git clone https://github.com/posit-dev/positron.git
-cd "$REPO_DIR" || { echo "Failed to enter repository directory"; exit 1; }
+# Clone or update repository
+if [ -d "$REPO_DIR/.git" ]; then
+    echo "Repository already exists. Updating..."
+    cd "$REPO_DIR" || { log_error "Failed to enter repository directory"; exit 1; }
 
-# Checkout specified branch
-echo "Checking out branch: $BRANCH"
-git checkout "$BRANCH"
+    # Fetch all branches
+    echo "Fetching latest changes..."
+    if ! git fetch --all; then
+        log_error "Failed to fetch from remote"
+    fi
+
+    # Checkout specified branch
+    echo "Checking out branch: $BRANCH"
+    if ! git checkout "$BRANCH"; then
+        log_error "Failed to checkout branch: $BRANCH"
+    fi
+
+    # Pull latest changes
+    echo "Pulling latest changes..."
+    if ! git pull; then
+        log_error "Failed to pull latest changes"
+    fi
+else
+    echo "Cloning Positron repository..."
+    if ! git clone https://github.com/posit-dev/positron.git; then
+        log_error "Failed to clone Positron repository"
+    fi
+    cd "$REPO_DIR" || { log_error "Failed to enter repository directory"; exit 1; }
+
+    # Checkout specified branch
+    echo "Checking out branch: $BRANCH"
+    if ! git checkout "$BRANCH"; then
+        log_error "Failed to checkout branch: $BRANCH"
+    fi
+fi
 
 # Install dependencies
 echo "Installing dependencies..."
-npm ci --fetch-timeout 120000
+if ! npm ci --fetch-timeout 120000; then
+    log_error "Failed to install npm dependencies"
+fi
 
 echo "Installing E2E test dependencies..."
-cd "$REPO_DIR" && npm --prefix test/e2e ci
+if ! (cd "$REPO_DIR" && npm --prefix test/e2e ci); then
+    log_error "Failed to install E2E test dependencies"
+fi
 
 # Compile and setup electron
 echo "Compiling and setting up Electron..."
-cd "$REPO_DIR" && npm exec -- npm-run-all --max_old_space_size=4095 -lp compile "electron arm64"
-cd "$REPO_DIR" && npm exec -- playwright install
+if ! (cd "$REPO_DIR" && npm exec -- npm-run-all --max_old_space_size=4095 -lp compile "electron arm64"); then
+    log_error "Failed to compile Positron"
+fi
+if ! (cd "$REPO_DIR" && npm exec -- playwright install); then
+    log_error "Failed to install Playwright"
+fi
 
 # Set correct permissions for chrome-sandbox
 echo "Setting up chrome-sandbox permissions..."
@@ -134,8 +178,28 @@ chmod +x /usr/local/bin/run-tests
 
 echo ""
 echo "===== Test Environment Setup Complete ====="
+
+# Report any errors that occurred
+if [ ${#ERRORS[@]} -gt 0 ]; then
+    echo ""
+    echo "WARNING: ${#ERRORS[@]} error(s) occurred during setup:"
+    for error in "${ERRORS[@]}"; do
+        echo "   - $error"
+    done
+    echo ""
+    echo "Setup may not be fully functional. Check logs above for details."
+fi
+
 echo ""
-echo "You can run tests by doing:"
-echo "  cd /__w/positron/positron"
-echo "  source ~/.bashrc"
-echo "  npx playwright test [test-options]"
+echo "Ready to run tests. Example commands:"
+echo "  npx playwright test --project e2e-electron --workers 2 --grep @:connections"
+echo "  npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer"
+echo ""
+echo "Other useful commands:"
+echo "  /tmp/start-vnc.sh                        - Start VNC server (connect to localhost:5900)"
+echo "  npx playwright show-report --host 0.0.0.0 - View test report (localhost:9323)"
+echo ""
+
+# Source bashrc and change to repo directory for the user
+cd "$REPO_DIR"
+source ~/.bashrc
