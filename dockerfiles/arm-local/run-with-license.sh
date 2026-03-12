@@ -42,7 +42,10 @@ fi
 
 # Load environment variables from .env file
 echo "Loading environment variables from .env file..."
-export $(grep -v '^#' .env | xargs)
+set -a
+# shellcheck source=.env
+. ./.env
+set +a
 
 # Validate required environment variables
 MISSING_VARS=()
@@ -66,9 +69,14 @@ if [ ${#MISSING_VARS[@]} -gt 0 ]; then
   exit 1
 fi
 
-# Check docker login status for ghcr.io
+# Check docker login status for ghcr.io by pulling the selected OS image
 echo "Checking GitHub Container Registry authentication..."
-if ! docker pull ghcr.io/posit-dev/positron-ubuntu24-arm64:101 --quiet 2>/dev/null; then
+GHCR_IMAGE=$(awk '/image: ghcr\.io/{print $2; exit}' "$COMPOSE_FILE")
+if [ -z "$GHCR_IMAGE" ]; then
+  echo "Error: Could not determine ghcr.io image from $COMPOSE_FILE"
+  exit 1
+fi
+if ! docker pull "$GHCR_IMAGE" --quiet 2>/dev/null; then
   echo ""
   echo "Error: Not authenticated with GitHub Container Registry (ghcr.io)"
   echo ""

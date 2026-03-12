@@ -40,7 +40,10 @@ done
 # Load environment variables from .env file if it exists
 if [ -f .env ]; then
   echo "Loading environment variables from .env file..."
-  export $(grep -v '^#' .env | xargs)
+  set -a
+  # shellcheck source=.env
+  . ./.env
+  set +a
 fi
 
 # Check if the container is running
