@@ -46,10 +46,7 @@ fi
 # Check if the container is running
 if ! docker ps | grep -q "test"; then
   echo "Error: test container is not running!"
-  echo ""
-  echo "Start with:"
-  echo "  npm run arm:start          (from repo root)"
-  echo "  ./run-with-license.sh      (from this directory)"
+  echo "Start with: npm run arm:start"
   exit 1
 fi
 
