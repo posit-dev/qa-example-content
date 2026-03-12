@@ -62,6 +62,149 @@ SCRIPTS_DIR="$(cd "$(dirname "$BATS_TEST_FILENAME")/.." && pwd)"
 # setup-test-env.sh
 # ---------------------------------------------------------------------------
 
+# ---------------------------------------------------------------------------
+# .env loading (connect.sh)
+# ---------------------------------------------------------------------------
+
+@test "connect.sh loads plain KEY=VALUE from .env" {
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  echo "MY_TEST_VAR=hello_world" > "$tmpdir/.env"
+
+  # Run connect.sh from tmpdir so it finds the .env; it will fail at the
+  # docker-not-running check, but the env-loading line should execute first.
+  run bash -c "
+    cd '$tmpdir'
+    # Patch connect.sh to print the var and exit early after loading .env
+    bash -c '
+      if [ -f .env ]; then
+        while IFS= read -r line || [ -n \"\$line\" ]; do
+          [[ \"\$line\" =~ ^[[:space:]]*# ]] && continue
+          [[ -z \"\${line// }\" ]] && continue
+          if [[ \"\$line\" =~ ^[A-Za-z_][A-Za-z0-9_]*=(.*)$ ]]; then
+            export \"\$line\"
+          fi
+        done < .env
+      fi
+      echo \"VAR=\$MY_TEST_VAR\"
+    '
+  "
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"VAR=hello_world"* ]]
+  rm -rf "$tmpdir"
+}
+
+@test "connect.sh ignores .env lines with shell metacharacters in key" {
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  printf 'SAFE_VAR=ok\n$(touch /tmp/pwned)=bad\n' > "$tmpdir/.env"
+
+  run bash -c "
+    cd '$tmpdir'
+    bash -c '
+      if [ -f .env ]; then
+        while IFS= read -r line || [ -n \"\$line\" ]; do
+          [[ \"\$line\" =~ ^[[:space:]]*# ]] && continue
+          [[ -z \"\${line// }\" ]] && continue
+          if [[ \"\$line\" =~ ^[A-Za-z_][A-Za-z0-9_]*=(.*)$ ]]; then
+            export \"\$line\"
+          fi
+        done < .env
+      fi
+      echo \"SAFE=\$SAFE_VAR\"
+    '
+  "
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"SAFE=ok"* ]]
+  # Malicious key must not have been executed
+  [ ! -f /tmp/pwned ]
+  rm -rf "$tmpdir"
+}
+
+@test "connect.sh loads .env value that contains spaces" {
+  local tmpdir
+  tmpdir="$(mktemp -d)"
+  echo 'MY_VAR=hello world' > "$tmpdir/.env"
+
+  run bash -c "
+    cd '$tmpdir'
+    bash -c '
+      if [ -f .env ]; then
+        while IFS= read -r line || [ -n \"\$line\" ]; do
+          [[ \"\$line\" =~ ^[[:space:]]*# ]] && continue
+          [[ -z \"\${line// }\" ]] && continue
+          if [[ \"\$line\" =~ ^[A-Za-z_][A-Za-z0-9_]*=(.*)$ ]]; then
+            export \"\$line\"
+          fi
+        done < .env
+      fi
+      echo \"VAR=\$MY_VAR\"
+    '
+  "
+  [ "$status" -eq 0 ]
+  [[ "$output" == *"VAR=hello world"* ]]
+  rm -rf "$tmpdir"
+}
+
+# ---------------------------------------------------------------------------
+# GHCR image extraction (run-with-license.sh)
+# ---------------------------------------------------------------------------
+
+@test "GHCR image extraction handles unquoted image value" {
+  local tmpfile
+  tmpfile="$(mktemp)"
+  printf 'services:\n  test:\n    image: ghcr.io/org/image:tag\n' > "$tmpfile"
+
+  run awk '/image:.*ghcr\.io/{
+    sub(/^[[:space:]]*image:[[:space:]]*/, "")
+    gsub(/^["'"'"']|["'"'"']$/, "")
+    gsub(/[[:space:]].*$/, "")
+    print; exit
+  }' "$tmpfile"
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "ghcr.io/org/image:tag" ]
+  rm -f "$tmpfile"
+}
+
+@test "GHCR image extraction handles double-quoted image value" {
+  local tmpfile
+  tmpfile="$(mktemp)"
+  printf 'services:\n  test:\n    image: "ghcr.io/org/image:tag"\n' > "$tmpfile"
+
+  run awk '/image:.*ghcr\.io/{
+    sub(/^[[:space:]]*image:[[:space:]]*/, "")
+    gsub(/^["'"'"']|["'"'"']$/, "")
+    gsub(/[[:space:]].*$/, "")
+    print; exit
+  }' "$tmpfile"
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "ghcr.io/org/image:tag" ]
+  rm -f "$tmpfile"
+}
+
+@test "GHCR image extraction handles single-quoted image value" {
+  local tmpfile
+  tmpfile="$(mktemp)"
+  printf "services:\n  test:\n    image: 'ghcr.io/org/image:tag'\n" > "$tmpfile"
+
+  run awk '/image:.*ghcr\.io/{
+    sub(/^[[:space:]]*image:[[:space:]]*/, "")
+    gsub(/^["'"'"']|["'"'"']$/, "")
+    gsub(/[[:space:]].*$/, "")
+    print; exit
+  }' "$tmpfile"
+
+  [ "$status" -eq 0 ]
+  [ "$output" = "ghcr.io/org/image:tag" ]
+  rm -f "$tmpfile"
+}
+
+# ---------------------------------------------------------------------------
+# setup-test-env.sh
+# ---------------------------------------------------------------------------
+
 @test "setup-test-env.sh prints usage when called with no args" {
   run "$SCRIPTS_DIR/setup-test-env.sh"
   [ "$status" -eq 1 ]

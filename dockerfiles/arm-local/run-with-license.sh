@@ -41,11 +41,17 @@ if [ ! -f .env ]; then
 fi
 
 # Load environment variables from .env file
+# Only KEY=VALUE lines are processed to avoid executing arbitrary shell code
 echo "Loading environment variables from .env file..."
-set -a
-# shellcheck source=.env
-. ./.env
-set +a
+while IFS= read -r line || [ -n "$line" ]; do
+  # Skip comments and blank lines
+  [[ "$line" =~ ^[[:space:]]*# ]] && continue
+  [[ -z "${line// }" ]] && continue
+  # Only accept lines of the form KEY=VALUE (no shell metacharacters in key)
+  if [[ "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*=(.*)$ ]]; then
+    export "$line"
+  fi
+done < .env
 
 # Validate required environment variables
 MISSING_VARS=()
@@ -71,7 +77,13 @@ fi
 
 # Check docker login status for ghcr.io by pulling the selected OS image
 echo "Checking GitHub Container Registry authentication..."
-GHCR_IMAGE=$(awk '/image: ghcr\.io/{print $2; exit}' "$COMPOSE_FILE")
+GHCR_IMAGE=$(awk '/image:.*ghcr\.io/{
+  # Extract the value after "image:", strip leading/trailing whitespace and quotes
+  sub(/^[[:space:]]*image:[[:space:]]*/, "")
+  gsub(/^["'"'"']|["'"'"']$/, "")
+  gsub(/[[:space:]].*$/, "")
+  print; exit
+}' "$COMPOSE_FILE")
 if [ -z "$GHCR_IMAGE" ]; then
   echo "Error: Could not determine ghcr.io image from $COMPOSE_FILE"
   exit 1

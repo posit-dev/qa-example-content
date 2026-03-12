@@ -38,12 +38,18 @@ while [ $# -gt 0 ]; do
 done
 
 # Load environment variables from .env file if it exists
+# Only KEY=VALUE lines are processed to avoid executing arbitrary shell code
 if [ -f .env ]; then
   echo "Loading environment variables from .env file..."
-  set -a
-  # shellcheck source=.env
-  . ./.env
-  set +a
+  while IFS= read -r line || [ -n "$line" ]; do
+    # Skip comments and blank lines
+    [[ "$line" =~ ^[[:space:]]*# ]] && continue
+    [[ -z "${line// }" ]] && continue
+    # Only accept lines of the form KEY=VALUE (no shell metacharacters in key)
+    if [[ "$line" =~ ^[A-Za-z_][A-Za-z0-9_]*=(.*)$ ]]; then
+      export "$line"
+    fi
+  done < .env
 fi
 
 # Check if the container is running
