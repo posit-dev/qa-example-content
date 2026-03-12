@@ -118,32 +118,35 @@ else
         /tmp/setup-test-env.sh "$branch"
         ;;
       2)
-        echo ""
-        if [ "$SETUP_DONE" = true ]; then
-            echo "=== Quick Reference ==="
-            echo "Example test commands:"
-            echo "  npx playwright test --project e2e-electron --workers 2 --grep @:connections"
-            echo "  npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer"
-            echo ""
-            echo "Other commands:"
-            echo "  /tmp/start-vnc.sh    - Start VNC server"
-            echo "  /tmp/ssh-install.sh  - Install SSH server"
-            cd /__w/positron/positron
-        else
-            echo "=== Quick Reference ==="
-            echo "To set up, run:"
-            echo "  /tmp/setup-test-env.sh <branch>"
-            echo ""
-            echo "Other commands:"
-            echo "  /tmp/start-vnc.sh    - Start VNC server"
-            echo "  /tmp/ssh-install.sh  - Install SSH server"
-        fi
-        echo ""
         ;;
       *)
         echo "Invalid choice."
         ;;
     esac
+
+    # Always show quick reference before dropping to shell
+    echo ""
+    if [ -d "/__w/positron/positron/.git" ]; then
+        echo "=== Quick Reference ==="
+        echo "Example test commands:"
+        echo "  npx playwright test --project e2e-electron --workers 2 --grep @:connections"
+        echo "  npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer"
+        echo ""
+        echo "Other commands:"
+        echo "  /tmp/start-vnc.sh    - Start VNC server"
+        echo "  /tmp/ssh-install.sh  - Install SSH server"
+        echo ""
+        cd /__w/positron/positron
+    else
+        echo "=== Quick Reference ==="
+        echo "To set up, run:"
+        echo "  /tmp/setup-test-env.sh <branch>"
+        echo ""
+        echo "Other commands:"
+        echo "  /tmp/start-vnc.sh    - Start VNC server"
+        echo "  /tmp/ssh-install.sh  - Install SSH server"
+        echo ""
+    fi
     exec /bin/bash -l
   '
 fi
