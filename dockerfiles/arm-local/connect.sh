@@ -144,6 +144,8 @@ else
         echo "Invalid choice."
         ;;
     esac
+    echo "=== Ready ==="
+    echo ""
     exec /bin/bash -l
   '
 fi
