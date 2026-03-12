@@ -1,0 +1,17 @@
+{
+  "name": "qa-example-content",
+  "private": true,
+  "description": "QA test content and local container environments",
+  "scripts": {
+    "arm:start": "cd dockerfiles/arm-local && ./run-with-license.sh ubuntu24",
+    "arm:start:rocky": "cd dockerfiles/arm-local && ./run-with-license.sh rocky8",
+    "arm:connect": "cd dockerfiles/arm-local && ./connect.sh",
+    "arm:stop": "cd dockerfiles/arm-local && ./stop-containers.sh ubuntu24",
+    "arm:stop:rocky": "cd dockerfiles/arm-local && ./stop-containers.sh rocky8",
+    "arm:status": "cd dockerfiles/arm-local && ./status.sh",
+    "wb:start": "cd dockerfiles/wb-local && ./run.sh ubuntu24",
+    "wb:connect": "cd dockerfiles/wb-local && ./connect.sh",
+    "wb:stop": "cd dockerfiles/wb-local && ./stop-containers.sh ubuntu24",
+    "wb:status": "cd dockerfiles/wb-local && ./status.sh"
+  }
+}
