@@ -12,6 +12,34 @@ log_error() {
     echo "ERROR: $1"
 }
 
+# Function to check if branch exists (local or remote)
+branch_exists() {
+    local branch="$1"
+    git show-ref --verify --quiet "refs/heads/$branch" 2>/dev/null || \
+    git show-ref --verify --quiet "refs/remotes/origin/$branch" 2>/dev/null
+}
+
+# Function to prompt for valid branch
+prompt_for_branch() {
+    local branch="$1"
+    while true; do
+        if branch_exists "$branch"; then
+            echo "$branch"
+            return 0
+        fi
+        echo ""
+        echo "Branch '$branch' not found."
+        echo "Available branches (showing first 20):"
+        git branch -r | head -20 | sed 's/origin\//  /'
+        echo ""
+        read -p "Enter a valid branch name (or 'q' to quit): " branch
+        if [ "$branch" = "q" ] || [ "$branch" = "quit" ]; then
+            echo "Aborting setup."
+            exit 1
+        fi
+    done
+}
+
 # Display usage instructions if no branch is provided
 if [ "$1" = "" ] || [ "$1" = "-h" ] || [ "$1" = "--help" ]; then
     echo "Usage: $0 <branch_name>"
@@ -51,7 +79,8 @@ if [ -d "$REPO_DIR/.git" ]; then
         log_error "Failed to fetch from remote"
     fi
 
-    # Checkout specified branch
+    # Validate and checkout branch
+    BRANCH=$(prompt_for_branch "$BRANCH")
     echo "Checking out branch: $BRANCH"
     if ! git checkout "$BRANCH"; then
         log_error "Failed to checkout branch: $BRANCH"
@@ -66,10 +95,15 @@ else
     echo "Cloning Positron repository..."
     if ! git clone https://github.com/posit-dev/positron.git; then
         log_error "Failed to clone Positron repository"
+        exit 1
     fi
     cd "$REPO_DIR" || { log_error "Failed to enter repository directory"; exit 1; }
 
-    # Checkout specified branch
+    # Fetch to ensure we have all remote branch info
+    git fetch --all
+
+    # Validate and checkout branch
+    BRANCH=$(prompt_for_branch "$BRANCH")
     echo "Checking out branch: $BRANCH"
     if ! git checkout "$BRANCH"; then
         log_error "Failed to checkout branch: $BRANCH"
