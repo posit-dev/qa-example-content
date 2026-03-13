@@ -23,5 +23,17 @@ if [ -z "$CONNECT_BOOTSTRAP_SECRETKEY" ]; then
   echo "Generated CONNECT_BOOTSTRAP_SECRETKEY"
 fi
 
+# Auto-detect architecture if not already set
+if [ -z "${ARCH_SUFFIX:-}" ]; then
+  case "$(uname -m)" in
+    aarch64|arm64) ARCH_SUFFIX="arm64" ;;
+    x86_64|amd64)  ARCH_SUFFIX="amd64" ;;
+    *)             echo "Unsupported architecture: $(uname -m)"; exit 1 ;;
+  esac
+fi
+export ARCH_SUFFIX
+
+echo "Detected architecture: ${ARCH_SUFFIX}"
+
 docker compose -f ${COMPOSE_FILE} up
 

@@ -1,4 +1,6 @@
-# Setup for Positron ARM64 Local Workbench Testing
+# Setup for Positron Local Workbench Testing
+
+Supports both **arm64** (macOS Apple Silicon) and **amd64** (Windows/x86 Linux). Architecture is auto-detected.
 
 ## Prerequisites
 
@@ -13,17 +15,26 @@ Fill in the values:
 * **E2E_POSTGRES vars**: 1Password under `Positron > E2E Postgres DB Connection info`
 * **WB_PASSWORD**: Your desired password for the `user1` account in Workbench
 
+**Optional overrides** (add to `.env` if needed):
+* **ARCH_SUFFIX**: Override auto-detected architecture (`arm64` or `amd64`)
+* **IMAGE_TAG**: Override the container image tag (e.g., `100` if the latest tag isn't available for your architecture)
+
 ### 2. Docker Login
 
 ```bash
 docker login ghcr.io -u <your_github_username>
 ```
 
-Use a GitHub Personal Access Token with `read:packages` scope as your password.
+> **Note:** When prompted for a password, enter your **GitHub Personal Access Token**, not your GitHub password. The token needs `read:packages` scope.
 
 ### 3. GitHub Token
 
 You'll need a GitHub Personal Access Token with `read:packages` scope for downloading Positron releases.
+
+### 4. Shell
+
+* **macOS**: Use the default Terminal
+* **Windows**: Use **Git Bash** (comes with Git for Windows)
 
 ## Quick Start
 
