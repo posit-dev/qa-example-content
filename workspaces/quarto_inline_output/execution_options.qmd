@@ -7,7 +7,10 @@ This cell should run.
 
 ```{r}
 #| label: first cell
+#| fig-width: 4
+#| fig-height: 4
 print("This is the first cell.")
+.ps.internal(active_request())
 ```
 
 This cell should not, unless it was run by itself, since it has eval: false.
