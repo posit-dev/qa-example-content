@@ -89,7 +89,7 @@ if [ -z "$GHCR_IMAGE" ]; then
   echo "Error: Could not determine ghcr.io image from $COMPOSE_FILE"
   exit 1
 fi
-if ! docker pull "$GHCR_IMAGE" --quiet 2>/dev/null; then
+if ! docker manifest inspect "$GHCR_IMAGE" >/dev/null 2>&1; then
   echo ""
   echo "Error: Not authenticated with GitHub Container Registry (ghcr.io)"
   echo ""
