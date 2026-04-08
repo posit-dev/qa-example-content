@@ -344,6 +344,22 @@ fi
 # Ensure (fetch once) + export CONNECT_TOKEN for subsequent steps/tests
 ensure_connect_token || true
 
+# Setup environment modules
+echo "Setting up environment modules..."
+if ! sudo apt install -y environment-modules; then
+    log_error "Failed to install environment-modules"
+fi
+if ! sudo mkdir -p /opt/modules/modulefiles/R; then
+    log_error "Failed to create /opt/modules/modulefiles/R directory"
+fi
+printf '#%%Module1.0\nset root /root/scratch/R-4.4.1\nprepend-path PATH $root/bin\nprepend-path MANPATH $root/share/man\nsetenv R_HOME $root/lib/R\n' | sudo tee /opt/modules/modulefiles/R/4.4.1 > /dev/null
+if ! sudo mkdir -p /opt/modules/modulefiles/python; then
+    log_error "Failed to create /opt/modules/modulefiles/python directory"
+fi
+printf '#%%Module1.0\nset root /root/scratch/python-env\nprepend-path PATH $root/bin\n' | sudo tee /opt/modules/modulefiles/python/3.12.10 > /dev/null
+echo 'source /etc/profile.d/modules.sh' >> /home/${Q_USER}/.profile
+echo 'module use /opt/modules/modulefiles' >> /home/${Q_USER}/.profile
+
 # Log completion and versions
 echo ""
 echo "Installation complete 🎉"
