@@ -103,7 +103,7 @@ fetch_latest_wb_url() {
     
     # Fetch the json and extract the URL
     local url
-    url=$(curl -s "$json_url" | jq -r ".workbench.platforms[\"$platform_key\"].link")
+    url=$(curl -s "$json_url" | jq -r ".products.workbench.platforms[\"$platform_key\"].link")
     
     if [ -z "$url" ] || [ "$url" = "null" ]; then
         echo "Failed to fetch the latest Workbench URL for $arch architecture" >&2
