@@ -14,6 +14,10 @@
     "wb:connect": "bash -c \"cd dockerfiles/wb-local && ./connect.sh\"",
     "wb:stop": "bash -c \"cd dockerfiles/wb-local && ./stop-containers.sh ubuntu24\"",
     "wb:stop:rocky": "bash -c \"cd dockerfiles/wb-local && ./stop-containers.sh rocky8\"",
-    "wb:status": "bash -c \"cd dockerfiles/wb-local && ./status.sh\""
+    "wb:status": "bash -c \"cd dockerfiles/wb-local && ./status.sh\"",
+    "jupyter:start": "bash -c \"cd dockerfiles/jupyter-local && ./run.sh\"",
+    "jupyter:connect": "bash -c \"cd dockerfiles/jupyter-local && ./connect.sh\"",
+    "jupyter:connect:ci": "bash -c \"cd dockerfiles/jupyter-local && ./connect.sh --ci\"",
+    "jupyter:stop": "bash -c \"cd dockerfiles/jupyter-local && ./stop-containers.sh\""
   }
 }
