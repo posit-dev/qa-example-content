@@ -195,6 +195,22 @@ If you see `/opt/scripts/install-jupyter-positron.sh: No such file or directory`
 - Make sure you're running `connect.sh` from the `dockerfiles/jupyter-local` directory
 - The scripts should be automatically copied when you run `npm run jupyter:connect`
 
+### Python externally-managed-environment error
+Ubuntu 24.04 uses PEP 668 to prevent system-wide Python package installations. The install script handles this by:
+- Installing jupyter-positron-server into TLJH's user environment (`/opt/tljh/user`)
+- This is where user notebook servers run, so packages are available to users
+- If TLJH environments aren't found, it falls back to using `--break-system-packages`
+
+### JupyterHub fails to start with "could not be imported" error
+If you see errors about `pamauthenticator.PAMAuthenticator` not being imported:
+```bash
+# Reset auth configuration to TLJH's default
+sudo tljh-config unset auth.type
+sudo tljh-config reload
+systemctl status jupyterhub
+```
+TLJH uses PAMAuthenticator by default, so no explicit configuration is needed.
+
 ### Installation fails
 Check that:
 - GITHUB_TOKEN is set and valid

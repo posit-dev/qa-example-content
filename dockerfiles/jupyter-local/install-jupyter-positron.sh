@@ -84,11 +84,7 @@ if ! curl -L https://tljh.jupyter.org/bootstrap.py | sudo -E python3 - --admin a
     log_error "Failed to install TLJH"
 fi
 
-# Configure TLJH to use PAM authenticator (system users)
-echo "Configuring JupyterHub to use PAM authenticator..."
-if ! sudo tljh-config set auth.type pamauthenticator.PAMAuthenticator; then
-    log_error "Failed to set JupyterHub authenticator"
-fi
+# TLJH uses PAM authenticator by default, no need to configure it explicitly
 
 # Set password for admin user (system level)
 echo "Setting password for admin user..."
@@ -151,13 +147,30 @@ else
     cd "${JUPYTER_POSITRON_DIR}"
 fi
 
-# Install jupyter-positron-server dependencies
-echo "Installing jupyter-positron-server dependencies..."
-if ! sudo -H python3 -m pip install --upgrade pip; then
-    log_error "Failed to upgrade pip"
-fi
-if ! sudo -H python3 -m pip install -e "${JUPYTER_POSITRON_DIR}"; then
-    log_error "Failed to install jupyter-positron-server"
+# Install jupyter-positron-server dependencies into TLJH's user environment
+echo "Installing jupyter-positron-server dependencies into TLJH user environment..."
+TLJH_USER_ENV="/opt/tljh/user"
+if [ -d "${TLJH_USER_ENV}" ]; then
+    # Install into TLJH's user environment (where user notebooks run)
+    if ! sudo "${TLJH_USER_ENV}/bin/python3" -m pip install --upgrade pip; then
+        log_error "Failed to upgrade pip in TLJH user environment"
+    fi
+    if ! sudo "${TLJH_USER_ENV}/bin/python3" -m pip install -e "${JUPYTER_POSITRON_DIR}"; then
+        log_error "Failed to install jupyter-positron-server in TLJH user environment"
+    fi
+
+    # Also install some common packages users might need
+    echo "Installing common Python packages..."
+    sudo "${TLJH_USER_ENV}/bin/python3" -m pip install numpy pandas matplotlib scipy scikit-learn || true
+else
+    # Fallback: install system-wide with break-system-packages flag
+    echo "⚠️  WARNING: TLJH user environment not found, installing system-wide..."
+    if ! sudo python3 -m pip install --break-system-packages --upgrade pip; then
+        log_error "Failed to upgrade pip"
+    fi
+    if ! sudo python3 -m pip install --break-system-packages -e "${JUPYTER_POSITRON_DIR}"; then
+        log_error "Failed to install jupyter-positron-server"
+    fi
 fi
 
 # Configure JupyterHub to use positron
