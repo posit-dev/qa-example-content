@@ -2,9 +2,11 @@ FROM ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 
-# Install system dependencies
+# Install system dependencies including systemd
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
+    systemd \
+    systemd-sysv \
     ca-certificates \
     curl \
     wget \
@@ -22,6 +24,22 @@ RUN apt-get update && \
     acl \
     && rm -rf /var/lib/apt/lists/*
 
+# Clean up systemd
+RUN cd /lib/systemd/system/sysinit.target.wants/ && \
+    ls | grep -v systemd-tmpfiles-setup | xargs rm -f && \
+    rm -f /lib/systemd/system/multi-user.target.wants/* \
+    /etc/systemd/system/*.wants/* \
+    /lib/systemd/system/local-fs.target.wants/* \
+    /lib/systemd/system/sockets.target.wants/*udev* \
+    /lib/systemd/system/sockets.target.wants/*initctl* \
+    /lib/systemd/system/basic.target.wants/* \
+    /lib/systemd/system/anaconda.target.wants/* \
+    /lib/systemd/system/plymouth* \
+    /lib/systemd/system/systemd-update-utmp*
+
+# Enable systemd
+STOPSIGNAL SIGRTMIN+3
+
 # Create a non-root user for jupyter
 ARG Q_USER=jupyter-user
 ARG Q_UID=1100
@@ -35,5 +53,5 @@ RUN groupadd -g ${Q_GID} ${Q_GROUP} && \
 # Set up working directory
 WORKDIR /opt
 
-# Keep container running
-CMD ["/bin/bash", "-c", "while true; do sleep 3600; done"]
+# Use systemd as init
+CMD ["/lib/systemd/systemd"]

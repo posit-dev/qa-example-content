@@ -1,22 +1,27 @@
-version: '3.8'
-
 services:
   jupyter-test:
-    image: ghcr.io/posit-dev/positron-jupyter-ubuntu24-${ARCH_SUFFIX:-arm64}:${IMAGE_TAG:-latest}
+    image: ghcr.io/posit-dev/positron-ubuntu24-${ARCH_SUFFIX:-arm64}:${IMAGE_TAG:-117}
     container_name: jupyter-test
     ports:
       - "8888:8888"  # JupyterHub
       - "8080:8080"  # Positron server
-    command: /bin/bash -c "while true; do sleep 3600; done"
+    command: /lib/systemd/systemd
     tty: true
     stdin_open: true
+    privileged: true
     networks:
       - jupyter-network
     environment:
       - JUPYTER_PASSWORD=${JUPYTER_PASSWORD:-testpassword}
       - GITHUB_TOKEN=${GITHUB_TOKEN}
+      - container=docker
     volumes:
       - jupyter-data:/home/jupyter-user
+      - /sys/fs/cgroup:/sys/fs/cgroup:rw
+    tmpfs:
+      - /tmp
+      - /run
+      - /run/lock
 
 networks:
   jupyter-network:

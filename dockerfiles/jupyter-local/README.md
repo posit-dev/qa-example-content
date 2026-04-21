@@ -60,7 +60,7 @@ Or from this directory:
 ```
 
 This will:
-- Copy installation scripts into the container
+- Copy installation scripts into the container (`/opt/scripts/`)
 - Copy the license file (if present)
 - Show current installation status
 - Run the installation script
@@ -147,9 +147,10 @@ The CI process (running in a different repo) will:
 The setup consists of:
 
 1. **Base Image** (Dockerfile):
-   - Ubuntu 24.04
+   - Ubuntu 24.04 with systemd
    - Basic system dependencies
    - Non-root user (jupyter-user)
+   - **Note**: Requires systemd as PID 1 for TLJH to work properly
 
 2. **Installation Script** (install-jupyter-positron.sh):
    - Installs TLJH
@@ -178,17 +179,32 @@ Unlike the `wb-local` directory which sets up Workbench with Connect and Postgre
 
 ### Container won't start
 ```bash
-./stop-containers.sh
-./run.sh
+npm run jupyter:stop
+npm run jupyter:start
 ```
+
+### Installation fails with "System has not been booted with systemd"
+This means the container isn't running with systemd as PID 1. This should be handled by the docker-compose configuration, but if you see this error:
+- Make sure you're using the provided docker-compose.ubuntu24.yml
+- The container runs with `privileged: true` to support systemd
+- The container command is set to `/lib/systemd/systemd`
+
+### Script not found error
+If you see `/opt/scripts/install-jupyter-positron.sh: No such file or directory`:
+- The scripts are copied to `/opt/scripts/` (not `/tmp/`) to avoid tmpfs clearing
+- Make sure you're running `connect.sh` from the `dockerfiles/jupyter-local` directory
+- The scripts should be automatically copied when you run `npm run jupyter:connect`
 
 ### Installation fails
 Check that:
 - GITHUB_TOKEN is set and valid
 - License file exists (if required)
 - Architecture is supported (arm64 or amd64/x64)
+- Container has systemd running: `docker exec jupyter-test systemctl status`
 
 ### Can't access JupyterHub
 - Verify the container is running: `docker ps | grep jupyter-test`
-- Check JupyterHub status inside container: `systemctl status jupyterhub`
+- Check if systemd is running: `docker exec jupyter-test systemctl status`
+- Check JupyterHub status inside container: `docker exec jupyter-test systemctl status jupyterhub`
 - Check logs: `docker logs jupyter-test`
+- Check JupyterHub logs: `docker exec jupyter-test journalctl -u jupyterhub -n 50`

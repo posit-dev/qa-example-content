@@ -50,12 +50,15 @@ if ! docker ps | grep -q "jupyter-test"; then
   exit 1
 fi
 
+# Create scripts directory in container
+docker exec jupyter-test mkdir -p /opt/scripts >/dev/null 2>&1
+
 # Copy scripts to container (quietly), stripping Windows line endings
 for script in install-jupyter-positron.sh positronDownload.sh; do
   if [ -f "./$script" ]; then
-    docker cp "./$script" "jupyter-test:/tmp/$script" >/dev/null 2>&1
-    docker exec jupyter-test sed -i 's/\r$//' "/tmp/$script" 2>/dev/null
-    docker exec jupyter-test chmod +x "/tmp/$script" 2>/dev/null
+    docker cp "./$script" "jupyter-test:/opt/scripts/$script" >/dev/null 2>&1
+    docker exec jupyter-test sed -i 's/\r$//' "/opt/scripts/$script" 2>/dev/null
+    docker exec jupyter-test chmod +x "/opt/scripts/$script" 2>/dev/null
   fi
 done
 
@@ -94,10 +97,10 @@ echo ""
 # Connect to the container and run install script
 if [ "$CI_MODE" = true ]; then
   echo "Running in CI mode - using latest versions without prompts..."
-  docker exec -it -e GITHUB_TOKEN="$GITHUB_TOKEN" jupyter-test /bin/bash -c "/tmp/install-jupyter-positron.sh --ci; exec /bin/bash"
+  docker exec -it -e GITHUB_TOKEN="$GITHUB_TOKEN" jupyter-test /bin/bash -c "/opt/scripts/install-jupyter-positron.sh --ci; exec /bin/bash"
 else
   docker exec -it -e GITHUB_TOKEN="$GITHUB_TOKEN" -e ALREADY_INSTALLED="$ALREADY_INSTALLED" jupyter-test /bin/bash -c '
-    /tmp/install-jupyter-positron.sh
+    /opt/scripts/install-jupyter-positron.sh
 
     # Show quick reference before dropping to shell
     echo ""
@@ -113,7 +116,7 @@ else
         echo ""
     else
         echo "To install, run:"
-        echo "  /tmp/install-jupyter-positron.sh"
+        echo "  /opt/scripts/install-jupyter-positron.sh"
     fi
     echo ""
     exec /bin/bash
