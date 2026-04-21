@@ -3,7 +3,7 @@ services:
     image: ghcr.io/posit-dev/positron-ubuntu24-${ARCH_SUFFIX:-arm64}:${IMAGE_TAG:-117}
     container_name: jupyter-test
     ports:
-      - "8888:8888"  # JupyterHub
+      - "8888:80"    # JupyterHub (TLJH uses port 80 internally)
       - "8080:8080"  # Positron server
     command: /lib/systemd/systemd
     tty: true

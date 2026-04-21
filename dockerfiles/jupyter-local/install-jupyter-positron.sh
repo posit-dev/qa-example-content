@@ -173,19 +173,24 @@ else
     fi
 fi
 
+# Enable jupyter-positron-server extension in user environment
+echo "Enabling jupyter-positron-server extension..."
+sudo "${TLJH_USER_ENV}/bin/jupyter" server extension enable jupyter_positron_server
+
 # Configure JupyterHub to use positron
 echo "Configuring JupyterHub..."
-sudo tee -a /opt/tljh/config/jupyterhub_config.d/positron.py >/dev/null <<EOF
+sudo tee /opt/tljh/config/jupyterhub_config.d/positron.py >/dev/null <<'EOF'
 # Positron configuration
 import os
 
-# Set the path to positron-server
+# Set environment variables for Positron
 c.Spawner.environment = {
     'POSITRON_SERVER_PATH': '/opt/positron-server',
+    'POSITRON_LICENSE_FILE': '/opt/positron-server/positron.lic',
 }
 
-# Use positron as the default interface
-c.Spawner.default_url = '/positron'
+# Don't set default_url - let users choose their interface
+# c.Spawner.default_url = '/positron'
 EOF
 
 # Copy license file if it exists
