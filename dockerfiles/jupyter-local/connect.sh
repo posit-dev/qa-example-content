@@ -108,7 +108,7 @@ else
     if systemctl is-active jupyterhub >/dev/null 2>&1; then
         echo "Access JupyterHub: http://localhost:8888"
         echo "  Username: admin"
-        echo "  Password: admin"
+        echo "  Password: Set on first login"
         echo ""
         echo "  Or use your configured user:"
         echo "  Username: user (or Q_USER from .env)"

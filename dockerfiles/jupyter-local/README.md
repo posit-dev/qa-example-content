@@ -30,7 +30,17 @@ For local development, place your `positron.lic` file in this directory. The fil
 
 For CI, the license will come from a GitHub secret and will be mounted or copied into the container.
 
-### 3. Start the Container
+### 3. Authenticate with GitHub Container Registry
+
+Before starting the container, authenticate with GHCR to pull the base image:
+
+```bash
+docker login ghcr.io -u <your_github_username>
+```
+
+> **Note:** When prompted for a password, enter your **GitHub Personal Access Token** (PAT), not your GitHub password. The token needs `read:packages` scope. You can create a token at https://github.com/settings/tokens
+
+### 4. Start the Container
 
 From the repository root:
 ```bash
@@ -47,7 +57,7 @@ This will:
 - Start the container
 - Keep it running in the background
 
-### 4. Connect and Install
+### 5. Connect and Install
 
 From the repository root:
 ```bash
@@ -72,18 +82,20 @@ npm run jupyter:connect:ci
 # Or: ./connect.sh --ci
 ```
 
-### 5. Access JupyterHub
+### 6. Access JupyterHub
 
 Once installation is complete:
 - URL: http://localhost:8888
 - Username: `admin`
-- Password: `admin`
+- Password: Set on first login
 
 Or use the configured user:
 - Username: `user` (or your Q_USER from env)
-- Password: Set on first login (TLJH uses PAM + first-use auth)
+- Password: Set on first login
 
-### 6. Stop and Cleanup
+**Note:** TLJH uses FirstUseAuthenticator - you set your password the first time you log in with a username.
+
+### 7. Stop and Cleanup
 
 From the repository root:
 ```bash
