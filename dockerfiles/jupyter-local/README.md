@@ -80,8 +80,8 @@ Once installation is complete:
 - Password: `admin`
 
 Or use the configured user:
-- Username: `jupyter-user` (or your Q_USER from env)
-- Password: (your JUPYTER_PASSWORD from .env)
+- Username: `user` (or your Q_USER from env)
+- Password: Set on first login (TLJH uses PAM + first-use auth)
 
 ### 6. Stop and Cleanup
 
@@ -117,8 +117,8 @@ Or from this directory:
 The following environment variables can be set in `.env` or passed directly:
 
 - `GITHUB_TOKEN`: Required. GitHub token for accessing positron-builds
-- `JUPYTER_PASSWORD`: Password for the jupyter-user account (default: testpassword)
-- `Q_USER`: Username for additional user account (default: jupyter-user)
+- `JUPYTER_PASSWORD`: Not used (TLJH manages passwords)
+- `Q_USER`: Username for additional admin user (default: user)
 - `ARCH_SUFFIX`: Architecture suffix (auto-detected: arm64 or amd64)
 - `POSITRON_TAG`: Specific Positron release tag (default: latest)
 - `LICENSE_FILE`: Path to license file (default: /opt/positron.lic)

@@ -37,12 +37,9 @@ fi
 POSITRON_TAG=${POSITRON_TAG:-""}  # Empty default will get the latest release
 GITHUB_TOKEN=${GITHUB_TOKEN:-"myToken"}
 
-# User configuration with defaults that can be overridden by environment variables
-Q_USER=${Q_USER:-"jupyter-user"}
-Q_UID=${Q_UID:-1100}
-Q_GID=${Q_GID:-1100}
-Q_GROUP=${Q_GROUP:-"jupyter-group"}
-JUPYTER_PASSWORD=${JUPYTER_PASSWORD:-"testpassword"}
+# User configuration
+# Note: TLJH prepends "jupyter-" to usernames, so "user" becomes "jupyter-user"
+Q_USER=${Q_USER:-"user"}
 
 # License file location (can be from CI secret or local file)
 LICENSE_FILE=${LICENSE_FILE:-"/opt/positron.lic"}
@@ -95,14 +92,10 @@ fi
 echo "admin:admin" | sudo chpasswd
 
 # Create the Q_USER as a regular user (if different from admin)
+# Note: Don't create system users for TLJH - TLJH manages its own users
+# Just add them as JupyterHub admins
 if [ "${Q_USER}" != "admin" ]; then
-    echo "Creating user ${Q_USER}..."
-    if ! id -u ${Q_USER} > /dev/null 2>&1; then
-        sudo useradd --create-home --shell /bin/bash ${Q_USER}
-    fi
-    echo "${Q_USER}:${JUPYTER_PASSWORD}" | sudo chpasswd
-
-    # Add Q_USER as admin too
+    echo "Adding ${Q_USER} as JupyterHub admin..."
     if ! sudo tljh-config add-item users.admin ${Q_USER}; then
         log_error "Failed to add ${Q_USER} to JupyterHub admins"
     fi
@@ -127,35 +120,15 @@ if ! TAG=${POSITRON_TAG} ARCH_SUFFIX=${ARCH_SUFFIX} GITHUB_TOKEN=${GITHUB_TOKEN}
     log_error "Failed to download/install Positron server"
 fi
 
-# Install jupyter-positron-server
-echo "Installing jupyter-positron-server..."
-JUPYTER_POSITRON_REPO="https://github.com/posit-dev/jupyter-positron-server"
-JUPYTER_POSITRON_DIR="/opt/jupyter-positron-server"
-
-# Clone or update jupyter-positron-server
-if [ -d "${JUPYTER_POSITRON_DIR}" ]; then
-    echo "Updating existing jupyter-positron-server..."
-    cd "${JUPYTER_POSITRON_DIR}"
-    if ! sudo git pull; then
-        log_error "Failed to update jupyter-positron-server"
-    fi
-else
-    echo "Cloning jupyter-positron-server..."
-    if ! sudo git clone "${JUPYTER_POSITRON_REPO}" "${JUPYTER_POSITRON_DIR}"; then
-        log_error "Failed to clone jupyter-positron-server"
-    fi
-    cd "${JUPYTER_POSITRON_DIR}"
-fi
-
-# Install jupyter-positron-server dependencies into TLJH's user environment
-echo "Installing jupyter-positron-server dependencies into TLJH user environment..."
+# Install jupyter-positron-server into TLJH's user environment
+echo "Installing jupyter-positron-server into TLJH user environment..."
 TLJH_USER_ENV="/opt/tljh/user"
 if [ -d "${TLJH_USER_ENV}" ]; then
-    # Install into TLJH's user environment (where user notebooks run)
+    # Install directly from git (no need to clone source)
     if ! sudo "${TLJH_USER_ENV}/bin/python3" -m pip install --upgrade pip; then
         log_error "Failed to upgrade pip in TLJH user environment"
     fi
-    if ! sudo "${TLJH_USER_ENV}/bin/python3" -m pip install -e "${JUPYTER_POSITRON_DIR}"; then
+    if ! sudo "${TLJH_USER_ENV}/bin/python3" -m pip install git+https://github.com/posit-dev/jupyter-positron-server.git; then
         log_error "Failed to install jupyter-positron-server in TLJH user environment"
     fi
 
@@ -168,35 +141,18 @@ else
     if ! sudo python3 -m pip install --break-system-packages --upgrade pip; then
         log_error "Failed to upgrade pip"
     fi
-    if ! sudo python3 -m pip install --break-system-packages -e "${JUPYTER_POSITRON_DIR}"; then
+    if ! sudo python3 -m pip install --break-system-packages git+https://github.com/posit-dev/jupyter-positron-server.git; then
         log_error "Failed to install jupyter-positron-server"
     fi
 fi
 
-# Enable jupyter-positron-server extension in user environment
-echo "Enabling jupyter-positron-server extension..."
-sudo "${TLJH_USER_ENV}/bin/jupyter" server extension enable jupyter_positron_server
-
-# Configure JupyterHub to use positron
-echo "Configuring JupyterHub..."
-sudo tee /opt/tljh/config/jupyterhub_config.d/positron.py >/dev/null <<'EOF'
-# Positron configuration
-import os
-
-# Set environment variables for Positron
-c.Spawner.environment = {
-    'POSITRON_SERVER_PATH': '/opt/positron-server',
-    'POSITRON_LICENSE_FILE': '/opt/positron-server/positron.lic',
-}
-
-# Don't set default_url - let users choose their interface
-# c.Spawner.default_url = '/positron'
-EOF
+# No JupyterHub configuration needed - Positron uses default paths
+# (/opt/positron-server with license at /opt/positron-server/license.lic)
 
 # Copy license file if it exists
 if [ -f "${LICENSE_FILE}" ]; then
     echo "Copying license file..."
-    sudo cp "${LICENSE_FILE}" /opt/positron-server/positron.lic
+    sudo cp "${LICENSE_FILE}" /opt/positron-server/license.lic
 else
     echo "⚠️  WARNING: License file not found at ${LICENSE_FILE}"
     echo "   Positron will run in unlicensed mode with limitations."

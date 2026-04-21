@@ -40,15 +40,7 @@ RUN cd /lib/systemd/system/sysinit.target.wants/ && \
 # Enable systemd
 STOPSIGNAL SIGRTMIN+3
 
-# Create a non-root user for jupyter
-ARG Q_USER=jupyter-user
-ARG Q_UID=1100
-ARG Q_GID=1100
-ARG Q_GROUP=jupyter-group
-
-RUN groupadd -g ${Q_GID} ${Q_GROUP} && \
-    useradd --create-home --shell /bin/bash --home-dir /home/${Q_USER} -u ${Q_UID} -g ${Q_GROUP} ${Q_USER} && \
-    echo "${Q_USER} ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
+# TLJH will create users as needed
 
 # Set up working directory
 WORKDIR /opt

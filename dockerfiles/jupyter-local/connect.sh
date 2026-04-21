@@ -111,8 +111,8 @@ else
         echo "  Password: admin"
         echo ""
         echo "  Or use your configured user:"
-        echo "  Username: jupyter-user (or Q_USER from .env)"
-        echo "  Password: (JUPYTER_PASSWORD from .env)"
+        echo "  Username: user (or Q_USER from .env)"
+        echo "  Password: Set on first login"
         echo ""
     else
         echo "To install, run:"
