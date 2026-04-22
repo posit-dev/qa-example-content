@@ -71,8 +71,8 @@ fi
 if ! sudo apt-get update; then
     log_error "Failed to update package lists after adding universe"
 fi
-if ! sudo apt-get install -y jq curl wget python3-pip python3-venv; then
-    log_error "Failed to install required packages (jq, curl, wget, python3-pip, python3-venv)"
+if ! sudo apt-get install -y acl jq curl wget python3-pip python3-venv; then
+    log_error "Failed to install required packages (acl, jq, curl, wget, python3-pip, python3-venv)"
 fi
 
 # Install TLJH (The Littlest JupyterHub)
@@ -147,15 +147,46 @@ else
 fi
 
 # No JupyterHub configuration needed - Positron uses default paths
-# (/opt/positron-server with license at /opt/positron-server/license.lic)
+# (/opt/positron-server with license at /opt/license.lic)
 
 # Copy license file if it exists
 if [ -f "${LICENSE_FILE}" ]; then
     echo "Copying license file..."
-    sudo cp "${LICENSE_FILE}" /opt/positron-server/license.lic
+    sudo cp "${LICENSE_FILE}" /opt/license.lic
 else
     echo "⚠️  WARNING: License file not found at ${LICENSE_FILE}"
     echo "   Positron will run in unlicensed mode with limitations."
+fi
+
+# Set access permissions for TLJH users
+echo "Setting access permissions..."
+# TLJH creates system users with "jupyter-" prefix, so "admin" becomes "jupyter-admin"
+# Admin user needs access to /root, pre-installed Python environments, and Positron
+sudo setfacl -m u:jupyter-admin:x /root
+if [ -d /root/.venv ]; then
+    sudo setfacl -R -m u:jupyter-admin:rx /root/.venv
+    sudo setfacl -R -m d:u:jupyter-admin:rx /root/.venv
+fi
+if [ -d /root/.pyenv ]; then
+    sudo setfacl -R -m u:jupyter-admin:rx /root/.pyenv
+    sudo setfacl -R -m d:u:jupyter-admin:rx /root/.pyenv
+fi
+sudo setfacl -R -m u:jupyter-admin:rx /opt/positron-server
+sudo setfacl -R -m d:u:jupyter-admin:rx /opt/positron-server
+
+# If Q_USER is different from admin, grant them access too
+if [ "${Q_USER}" != "admin" ]; then
+    sudo setfacl -m u:jupyter-${Q_USER}:x /root 2>/dev/null || true
+    if [ -d /root/.venv ]; then
+        sudo setfacl -R -m u:jupyter-${Q_USER}:rx /root/.venv 2>/dev/null || true
+        sudo setfacl -R -m d:u:jupyter-${Q_USER}:rx /root/.venv 2>/dev/null || true
+    fi
+    if [ -d /root/.pyenv ]; then
+        sudo setfacl -R -m u:jupyter-${Q_USER}:rx /root/.pyenv 2>/dev/null || true
+        sudo setfacl -R -m d:u:jupyter-${Q_USER}:rx /root/.pyenv 2>/dev/null || true
+    fi
+    sudo setfacl -R -m u:jupyter-${Q_USER}:rx /opt/positron-server 2>/dev/null || true
+    sudo setfacl -R -m d:u:jupyter-${Q_USER}:rx /opt/positron-server 2>/dev/null || true
 fi
 
 # Restart JupyterHub to apply changes
@@ -177,13 +208,15 @@ POSITRON_FULL_VERSION="${POSITRON_VERSION}-${POSITRON_BUILD}"
 echo "Positron version:    ${POSITRON_FULL_VERSION}"
 echo "JupyterHub URL:      http://localhost:8888"
 echo ""
-echo "Default credentials:"
+echo "Login credentials:"
 echo "  Username:          admin"
-echo "  Password:          admin"
+echo "  Password:          Set on first login"
 echo ""
 echo "Additional user:"
 echo "  Username:          ${Q_USER}"
-echo "  Password:          [HIDDEN]"
+echo "  Password:          Set on first login"
+echo ""
+echo "Note: TLJH uses FirstUseAuthenticator - set your password on first login"
 echo ""
 
 # Report any errors that occurred
