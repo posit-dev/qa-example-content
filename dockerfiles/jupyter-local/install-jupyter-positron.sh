@@ -91,13 +91,23 @@ if ! id -u admin > /dev/null 2>&1; then
 fi
 echo "admin:admin" | sudo chpasswd
 
+# Create TLJH-prefixed users in advance so we can set ACLs
+# TLJH prepends "jupyter-" to usernames, so we create these system users now
+echo "Creating TLJH system users..."
+if ! id -u jupyter-admin > /dev/null 2>&1; then
+    sudo useradd --create-home --shell /bin/bash jupyter-admin
+fi
+
 # Create the Q_USER as a regular user (if different from admin)
-# Note: Don't create system users for TLJH - TLJH manages its own users
-# Just add them as JupyterHub admins
 if [ "${Q_USER}" != "admin" ]; then
     echo "Adding ${Q_USER} as JupyterHub admin..."
     if ! sudo tljh-config add-item users.admin ${Q_USER}; then
         log_error "Failed to add ${Q_USER} to JupyterHub admins"
+    fi
+
+    # Create the jupyter-prefixed system user
+    if ! id -u jupyter-${Q_USER} > /dev/null 2>&1; then
+        sudo useradd --create-home --shell /bin/bash jupyter-${Q_USER}
     fi
 fi
 
@@ -160,7 +170,7 @@ fi
 
 # Set access permissions for TLJH users
 echo "Setting access permissions..."
-# TLJH creates system users with "jupyter-" prefix, so "admin" becomes "jupyter-admin"
+# TLJH uses system users with "jupyter-" prefix - we created them above
 # Admin user needs access to /root, pre-installed Python environments, and Positron
 sudo setfacl -m u:jupyter-admin:x /root
 if [ -d /root/.venv ]; then
@@ -176,17 +186,17 @@ sudo setfacl -R -m d:u:jupyter-admin:rx /opt/positron-server
 
 # If Q_USER is different from admin, grant them access too
 if [ "${Q_USER}" != "admin" ]; then
-    sudo setfacl -m u:jupyter-${Q_USER}:x /root 2>/dev/null || true
+    sudo setfacl -m u:jupyter-${Q_USER}:x /root
     if [ -d /root/.venv ]; then
-        sudo setfacl -R -m u:jupyter-${Q_USER}:rx /root/.venv 2>/dev/null || true
-        sudo setfacl -R -m d:u:jupyter-${Q_USER}:rx /root/.venv 2>/dev/null || true
+        sudo setfacl -R -m u:jupyter-${Q_USER}:rx /root/.venv
+        sudo setfacl -R -m d:u:jupyter-${Q_USER}:rx /root/.venv
     fi
     if [ -d /root/.pyenv ]; then
-        sudo setfacl -R -m u:jupyter-${Q_USER}:rx /root/.pyenv 2>/dev/null || true
-        sudo setfacl -R -m d:u:jupyter-${Q_USER}:rx /root/.pyenv 2>/dev/null || true
+        sudo setfacl -R -m u:jupyter-${Q_USER}:rx /root/.pyenv
+        sudo setfacl -R -m d:u:jupyter-${Q_USER}:rx /root/.pyenv
     fi
-    sudo setfacl -R -m u:jupyter-${Q_USER}:rx /opt/positron-server 2>/dev/null || true
-    sudo setfacl -R -m d:u:jupyter-${Q_USER}:rx /opt/positron-server 2>/dev/null || true
+    sudo setfacl -R -m u:jupyter-${Q_USER}:rx /opt/positron-server
+    sudo setfacl -R -m d:u:jupyter-${Q_USER}:rx /opt/positron-server
 fi
 
 # Restart JupyterHub to apply changes
