@@ -199,6 +199,81 @@ if [ "${Q_USER}" != "admin" ]; then
     sudo setfacl -R -m d:u:jupyter-${Q_USER}:rx /opt/positron-server
 fi
 
+# Configure .Renviron for TLJH users
+echo "Configuring .Renviron for R library paths..."
+# Configure for jupyter-admin
+sudo mkdir -p /home/jupyter-admin
+sudo tee "/home/jupyter-admin/.Renviron" >/dev/null <<EOF
+R_LIBS_SITE=/usr/local/lib/R/site-library
+R_LIBS_USER=/usr/local/lib/R/site-library
+EOF
+sudo chown jupyter-admin:jupyter-admin "/home/jupyter-admin/.Renviron"
+
+# Configure for jupyter-${Q_USER} if different from admin
+if [ "${Q_USER}" != "admin" ]; then
+    sudo mkdir -p /home/jupyter-${Q_USER}
+    sudo tee "/home/jupyter-${Q_USER}/.Renviron" >/dev/null <<EOF
+R_LIBS_SITE=/usr/local/lib/R/site-library
+R_LIBS_USER=/usr/local/lib/R/site-library
+EOF
+    sudo chown jupyter-${Q_USER}:jupyter-${Q_USER} "/home/jupyter-${Q_USER}/.Renviron"
+fi
+
+# Setup environment modules to make R available in PATH
+echo "Setting up environment modules..."
+if ! sudo apt install -y environment-modules; then
+    log_error "Failed to install environment-modules"
+fi
+
+# Create module files for R (pointing to /opt/R/current/bin if R is installed)
+if [ -d /opt/R ]; then
+    if ! sudo mkdir -p /opt/modules/modulefiles/R; then
+        log_error "Failed to create /opt/modules/modulefiles/R directory"
+    fi
+    # Point to /opt/R/current if it exists, otherwise skip R module
+    if [ -d /opt/R/current ]; then
+        printf '#%%Module1.0\nset root /opt/R/current\nprepend-path PATH $root/bin\nprepend-path MANPATH $root/share/man\nsetenv R_HOME $root/lib/R\n' | sudo tee /opt/modules/modulefiles/R/current > /dev/null
+    fi
+fi
+
+# Configure shell profiles for TLJH users
+echo "Configuring shell profiles for environment modules..."
+# For jupyter-admin
+if [ -d /home/jupyter-admin ]; then
+    echo 'source /etc/profile.d/modules.sh' >> /home/jupyter-admin/.profile
+    echo 'module use /opt/modules/modulefiles' >> /home/jupyter-admin/.profile
+    if [ -f /opt/modules/modulefiles/R/current ]; then
+        echo 'module load R/current' >> /home/jupyter-admin/.profile
+    fi
+    sudo chown jupyter-admin:jupyter-admin /home/jupyter-admin/.profile
+
+    # Also configure .bashrc for interactive shells
+    echo 'source /etc/profile.d/modules.sh' >> /home/jupyter-admin/.bashrc
+    echo 'module use /opt/modules/modulefiles' >> /home/jupyter-admin/.bashrc
+    if [ -f /opt/modules/modulefiles/R/current ]; then
+        echo 'module load R/current' >> /home/jupyter-admin/.bashrc
+    fi
+    sudo chown jupyter-admin:jupyter-admin /home/jupyter-admin/.bashrc
+fi
+
+# For jupyter-${Q_USER} if different from admin
+if [ "${Q_USER}" != "admin" ] && [ -d /home/jupyter-${Q_USER} ]; then
+    echo 'source /etc/profile.d/modules.sh' >> /home/jupyter-${Q_USER}/.profile
+    echo 'module use /opt/modules/modulefiles' >> /home/jupyter-${Q_USER}/.profile
+    if [ -f /opt/modules/modulefiles/R/current ]; then
+        echo 'module load R/current' >> /home/jupyter-${Q_USER}/.profile
+    fi
+    sudo chown jupyter-${Q_USER}:jupyter-${Q_USER} /home/jupyter-${Q_USER}/.profile
+
+    # Also configure .bashrc for interactive shells
+    echo 'source /etc/profile.d/modules.sh' >> /home/jupyter-${Q_USER}/.bashrc
+    echo 'module use /opt/modules/modulefiles' >> /home/jupyter-${Q_USER}/.bashrc
+    if [ -f /opt/modules/modulefiles/R/current ]; then
+        echo 'module load R/current' >> /home/jupyter-${Q_USER}/.bashrc
+    fi
+    sudo chown jupyter-${Q_USER}:jupyter-${Q_USER} /home/jupyter-${Q_USER}/.bashrc
+fi
+
 # Restart JupyterHub to apply changes
 echo "Restarting JupyterHub..."
 if ! sudo tljh-config reload; then
