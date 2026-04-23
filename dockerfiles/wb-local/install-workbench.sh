@@ -91,7 +91,7 @@ fi
 # Function to fetch the latest Workbench URL based on architecture
 fetch_latest_wb_url() {
     local arch=$1
-    local json_url="https://dailies.rstudio.com/rstudio/globemaster-allium/index.json"
+    local json_url="https://dailies.rstudio.com/rstudio/latest/index.json"
     
     # Map architecture to the correct key in the json
     local platform_key
