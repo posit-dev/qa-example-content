@@ -41,9 +41,6 @@ GITHUB_TOKEN=${GITHUB_TOKEN:-"myToken"}
 # Note: TLJH prepends "jupyter-" to usernames, so "user" becomes "jupyter-user"
 Q_USER=${Q_USER:-"user"}
 
-# License file location (can be from CI secret or local file)
-LICENSE_FILE=${LICENSE_FILE:-"/opt/positron.lic"}
-
 echo "Jupyter + Positron Installation"
 echo "================================"
 echo ""
@@ -57,7 +54,6 @@ else
 fi
 echo "  ARCH_SUFFIX: ${ARCH_SUFFIX}"
 echo "  Q_USER: ${Q_USER}"
-echo "  LICENSE_FILE: ${LICENSE_FILE}"
 echo ""
 
 # Install required packages
@@ -159,12 +155,9 @@ fi
 # No JupyterHub configuration needed - Positron uses default paths
 # (/opt/positron-server with license at /opt/license.lic)
 
-# Copy license file if it exists
-if [ -f "${LICENSE_FILE}" ]; then
-    echo "Copying license file..."
-    sudo cp "${LICENSE_FILE}" /opt/license.lic
-else
-    echo "⚠️  WARNING: License file not found at ${LICENSE_FILE}"
+# Check if license file exists
+if [ ! -f "/opt/license.lic" ]; then
+    echo "⚠️  WARNING: License file not found at /opt/license.lic"
     echo "   Positron will run in unlicensed mode with limitations."
 fi
 

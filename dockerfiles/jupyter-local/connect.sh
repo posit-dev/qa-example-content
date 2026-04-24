@@ -65,7 +65,7 @@ done
 # Copy license file if it exists (check for positron.lic in current directory)
 if [ -f "./positron.lic" ]; then
   echo "Copying license file to container..."
-  docker cp "./positron.lic" "jupyter-test:/opt/positron.lic" >/dev/null 2>&1
+  docker cp "./positron.lic" "jupyter-test:/opt/license.lic" >/dev/null 2>&1
 fi
 
 # Show current status
