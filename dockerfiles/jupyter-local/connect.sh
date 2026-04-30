@@ -67,7 +67,6 @@ if [ -f "./positron.lic" ]; then
   echo "Copying license file to container..."
   LICENSE_ARCH=$(docker exec jupyter-test uname -m | sed 's/arm64/aarch64/')
   LICENSE_DEST="/opt/positron-server/resources/activation/linux/${LICENSE_ARCH}"
-  docker exec jupyter-test mkdir -p "${LICENSE_DEST}" >/dev/null 2>&1
   docker cp "./positron.lic" "jupyter-test:${LICENSE_DEST}/license.lic" >/dev/null 2>&1
 fi
 
