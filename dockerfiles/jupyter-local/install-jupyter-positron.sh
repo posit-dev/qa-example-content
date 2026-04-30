@@ -152,12 +152,16 @@ else
     fi
 fi
 
-# No JupyterHub configuration needed - Positron uses default paths
-# (/opt/positron-server with license at /opt/license.lic)
+# Determine the license architecture directory name
+case "$(uname -m)" in
+    aarch64|arm64) LICENSE_ARCH="aarch64" ;;
+    *)             LICENSE_ARCH="x86_64" ;;
+esac
 
 # Check if license file exists
-if [ ! -f "/opt/license.lic" ]; then
-    echo "⚠️  WARNING: License file not found at /opt/license.lic"
+LICENSE_DEST="/opt/positron-server/resources/activation/linux/${LICENSE_ARCH}/license.lic"
+if [ ! -f "${LICENSE_DEST}" ]; then
+    echo "⚠️  WARNING: License file not found at ${LICENSE_DEST}"
     echo "   Positron will run in unlicensed mode with limitations."
 fi
 
