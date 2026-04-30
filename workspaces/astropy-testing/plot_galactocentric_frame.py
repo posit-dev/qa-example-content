@@ -85,8 +85,9 @@ gc_rings = coord.SkyCoord(ring_rep, frame=coord.Galactocentric)
 plot_positions_and_velocities(gc_rings)
 
 
-# Now we can transform to galactic coordinates and visualize the rings in
-# observable coordinates
+################################################################################
+# Now we can transform to Galactic coordinates and visualize the rings in
+# observable coordinates:
 gal_rings = gc_rings.transform_to(coord.Galactic)
 
 fig, ax = plt.subplots(1, 1, figsize=(8, 6), dpi=200)
