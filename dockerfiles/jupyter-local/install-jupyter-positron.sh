@@ -158,9 +158,16 @@ case "$(uname -m)" in
     *)             LICENSE_ARCH="x86_64" ;;
 esac
 
-# Check if license file exists
+# Move staged license file to final location if it exists
 LICENSE_DEST="/opt/positron-server/resources/activation/linux/${LICENSE_ARCH}/license.lic"
-if [ ! -f "${LICENSE_DEST}" ]; then
+if [ -f "/opt/positron.lic" ]; then
+    echo "Installing license file..."
+    if sudo mv /opt/positron.lic "${LICENSE_DEST}"; then
+        echo "  ✓ License file installed at ${LICENSE_DEST}"
+    else
+        log_error "Failed to move license file from /opt/positron.lic to ${LICENSE_DEST}"
+    fi
+elif [ ! -f "${LICENSE_DEST}" ]; then
     echo "⚠️  WARNING: License file not found at ${LICENSE_DEST}"
     echo "   Positron will run in unlicensed mode with limitations."
 fi

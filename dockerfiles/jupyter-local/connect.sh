@@ -62,12 +62,14 @@ for script in install-jupyter-positron.sh positronDownload.sh; do
   fi
 done
 
-# Copy license file if it exists (check for positron.lic in current directory)
+# Copy license file to staging area if it exists (will be moved to final location by install script)
 if [ -f "./positron.lic" ]; then
-  echo "Copying license file to container..."
-  LICENSE_ARCH=$(docker exec jupyter-test uname -m | sed 's/arm64/aarch64/')
-  LICENSE_DEST="/opt/positron-server/resources/activation/linux/${LICENSE_ARCH}"
-  docker cp "./positron.lic" "jupyter-test:${LICENSE_DEST}/license.lic" >/dev/null 2>&1
+  echo "Copying license file to container staging area..."
+  if docker cp "./positron.lic" "jupyter-test:/opt/positron.lic"; then
+    echo "  ✓ License file staged at /opt/positron.lic"
+  else
+    echo "  ✗ Failed to copy license file to staging area"
+  fi
 fi
 
 # Show current status
