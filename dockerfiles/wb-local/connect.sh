@@ -51,7 +51,7 @@ if ! docker ps | grep -q "test"; then
 fi
 
 # Copy scripts to container (quietly), stripping Windows line endings
-for script in install-workbench.sh positronDownload.sh get-latest-wb-noble-url.sh; do
+for script in install-workbench.sh positronDownload.sh get-latest-wb-noble-url.sh configure-datasources.sh; do
   if [ -f "./$script" ]; then
     docker cp "./$script" "test:/tmp/$script" >/dev/null 2>&1
     docker exec test sed -i 's/\r$//' "/tmp/$script" 2>/dev/null
@@ -88,9 +88,34 @@ echo ""
 # Connect to the container and run install script
 if [ "$CI_MODE" = true ]; then
   echo "Running in CI mode - using latest versions without prompts..."
-  docker exec -it -e GITHUB_TOKEN="$GITHUB_TOKEN" test /bin/bash -c "/tmp/install-workbench.sh --ci; exec /bin/bash"
+  docker exec -it \
+    -e GITHUB_TOKEN="$GITHUB_TOKEN" \
+    -e DATABRICKS_URL="${DATABRICKS_URL:-}" \
+    -e DATABRICKS_CLIENT_ID="${DATABRICKS_CLIENT_ID:-}" \
+    -e DATABRICKS_SERVICE_ACCOUNT_EMAIL="${DATABRICKS_SERVICE_ACCOUNT_EMAIL:-}" \
+    -e DATABRICKS_SERVICE_ACCOUNT_PASSWORD="${DATABRICKS_SERVICE_ACCOUNT_PASSWORD:-}" \
+    -e DATABRICKS_SERVICE_ACCOUNT_OTP_SECRET="${DATABRICKS_SERVICE_ACCOUNT_OTP_SECRET:-}" \
+    -e SNOWFLAKE_ACCOUNT="${SNOWFLAKE_ACCOUNT:-}" \
+    -e SNOWFLAKE_CLIENT_ID="${SNOWFLAKE_CLIENT_ID:-}" \
+    -e SNOWFLAKE_CLIENT_SECRET="${SNOWFLAKE_CLIENT_SECRET:-}" \
+    -e SNOWFLAKE_USERNAME="${SNOWFLAKE_USERNAME:-}" \
+    -e SNOWFLAKE_PASSWORD="${SNOWFLAKE_PASSWORD:-}" \
+    test /bin/bash -c "/tmp/install-workbench.sh --ci; exec /bin/bash"
 else
-  docker exec -it -e GITHUB_TOKEN="$GITHUB_TOKEN" -e ALREADY_INSTALLED="$ALREADY_INSTALLED" test /bin/bash -c '
+  docker exec -it \
+    -e GITHUB_TOKEN="$GITHUB_TOKEN" \
+    -e ALREADY_INSTALLED="$ALREADY_INSTALLED" \
+    -e DATABRICKS_URL="${DATABRICKS_URL:-}" \
+    -e DATABRICKS_CLIENT_ID="${DATABRICKS_CLIENT_ID:-}" \
+    -e DATABRICKS_SERVICE_ACCOUNT_EMAIL="${DATABRICKS_SERVICE_ACCOUNT_EMAIL:-}" \
+    -e DATABRICKS_SERVICE_ACCOUNT_PASSWORD="${DATABRICKS_SERVICE_ACCOUNT_PASSWORD:-}" \
+    -e DATABRICKS_SERVICE_ACCOUNT_OTP_SECRET="${DATABRICKS_SERVICE_ACCOUNT_OTP_SECRET:-}" \
+    -e SNOWFLAKE_ACCOUNT="${SNOWFLAKE_ACCOUNT:-}" \
+    -e SNOWFLAKE_CLIENT_ID="${SNOWFLAKE_CLIENT_ID:-}" \
+    -e SNOWFLAKE_CLIENT_SECRET="${SNOWFLAKE_CLIENT_SECRET:-}" \
+    -e SNOWFLAKE_USERNAME="${SNOWFLAKE_USERNAME:-}" \
+    -e SNOWFLAKE_PASSWORD="${SNOWFLAKE_PASSWORD:-}" \
+    test /bin/bash -c '
     /tmp/install-workbench.sh
 
     # Show quick reference before dropping to shell
