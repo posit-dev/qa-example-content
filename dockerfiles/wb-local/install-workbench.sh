@@ -335,6 +335,16 @@ if ! TAG=${POSITRON_TAG} ARCH_SUFFIX=${ARCH_SUFFIX} GITHUB_TOKEN=${GITHUB_TOKEN}
     log_error "Failed to download/install Positron"
 fi
 
+# Configure data sources (Databricks, Snowflake)
+echo "Configuring data sources..."
+if [ -f "/tmp/configure-datasources.sh" ]; then
+    if ! /tmp/configure-datasources.sh; then
+        log_error "Failed to configure data sources"
+    fi
+else
+    echo "Skipping data source configuration (configure-datasources.sh not found)"
+fi
+
 # Start RStudio server
 echo "Starting RStudio server..."
 if ! sudo rstudio-server start; then
