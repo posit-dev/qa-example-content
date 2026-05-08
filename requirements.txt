@@ -15,7 +15,7 @@ plotly
 ridgeplot
 ipyleaflet
 ipywidgets
-bqplot
+bqplot==0.12.47
 ipydatagrid
 ipympl
 ipytree
