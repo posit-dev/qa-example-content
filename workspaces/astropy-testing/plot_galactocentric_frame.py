@@ -64,7 +64,7 @@ c1 = coord.ICRS(ra=89.014303*u.degree, dec=13.924912*u.degree,
 # as well. To use the Astropy default solar position and motion parameters, we
 # can simply do:
 
-gc1 = c1.transform_to(coord.Galactocentric)
+gc1 = c1.transform_to(coord.Galactocentric())
 
 ##############################################################################
 # From here, we can access the components of the resulting
@@ -171,11 +171,12 @@ axes[1].set_xlabel('$v_x$ [{0}]'.format((u.km/u.s).to_string("latex_inline")))
 axes[1].set_ylabel('$v_y$ [{0}]'.format((u.km/u.s).to_string("latex_inline")))
 
 fig.tight_layout()
+plt.show()
 
 ##############################################################################
 # Now we can transform to Galactic coordinates and visualize the rings in
 # observable coordinates:
-gal_rings = gc_rings.transform_to(coord.Galactic)
+gal_rings = gc_rings.transform_to(coord.Galactic())
 
 fig,ax = plt.subplots(1, 1, figsize=(8,6))
 for i in range(len(ring_distances)):
@@ -188,3 +189,4 @@ ax.set_xlabel('$l$ [deg]')
 ax.set_ylabel(r'$\mu_l \, \cos b$ [{0}]'.format((u.mas/u.yr).to_string('latex_inline')))
 
 ax.legend()
+plt.show()
