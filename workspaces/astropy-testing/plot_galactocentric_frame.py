@@ -1,35 +1,33 @@
 # -*- coding: utf-8 -*-
-"""
-========================================================================
-Transforming positions and velocities to and from a Galactocentric frame
-========================================================================
-
-This document shows a few examples of how to use and customize the
-`~astropy.coordinates.Galactocentric` frame to transform Heliocentric sky
-positions, distance, proper motions, and radial velocities to a Galactocentric,
-Cartesian frame, and the same in reverse.
-
-The main configurable parameters of the `~astropy.coordinates.Galactocentric`
-frame control the position and velocity of the solar system barycenter within
-the Galaxy. These are specified by setting the ICRS coordinates of the
-Galactic center, the distance to the Galactic center (the sun-galactic center
-line is always assumed to be the x-axis of the Galactocentric frame), and the
-Cartesian 3-velocity of the sun in the Galactocentric frame. We'll first
-demonstrate how to customize these values, then show how to set the solar motion
-instead by inputting the proper motion of Sgr A*.
-
-Note that, for brevity, we may refer to the solar system barycenter as just "the
-sun" in the examples below.
-
--------------------
-
-*By: Adrian Price-Whelan*
-
-*License: BSD*
-
--------------------
-
-"""
+#
+# ========================================================================
+# Transforming positions and velocities to and from a Galactocentric frame
+# ========================================================================
+#
+# This document shows a few examples of how to use and customize the
+# `~astropy.coordinates.Galactocentric` frame to transform Heliocentric sky
+# positions, distance, proper motions, and radial velocities to a Galactocentric,
+# Cartesian frame, and the same in reverse.
+#
+# The main configurable parameters of the `~astropy.coordinates.Galactocentric`
+# frame control the position and velocity of the solar system barycenter within
+# the Galaxy. These are specified by setting the ICRS coordinates of the
+# Galactic center, the distance to the Galactic center (the sun-galactic center
+# line is always assumed to be the x-axis of the Galactocentric frame), and the
+# Cartesian 3-velocity of the sun in the Galactocentric frame. We'll first
+# demonstrate how to customize these values, then show how to set the solar
+# motion instead by inputting the proper motion of Sgr A*.
+#
+# Note that, for brevity, we may refer to the solar system barycenter as just
+# "the sun" in the examples below.
+#
+# -------------------
+#
+# *By: Adrian Price-Whelan*
+#
+# *License: BSD*
+#
+# -------------------
 
 ##############################################################################
 # Make `print` work the same in all versions of Python, set up numpy,
