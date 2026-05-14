@@ -18,8 +18,8 @@ setHook("positron.session_init", function(start_type) {
 	cat(paste0("[hook:init] project=", project, "\n"))
 
 	# Verify rstudioapi can trigger UI actions (navigateToFile)
-	rstudioapi::navigateToFile(".Rprofile")
-	cat("[hook:init] navigateToFile completed\n")
+	rstudioapi::navigateToFile("DESCRIPTION")
+	cat("[hook:init] navigateToFile DESCRIPTION completed\n")
 })
 
 setHook("positron.session_reconnect", function() {
