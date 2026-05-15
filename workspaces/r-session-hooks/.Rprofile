@@ -35,6 +35,6 @@ setHook("positron.session_reconnect", function() {
 	}
 
 	# Verify rstudioapi works on reconnect
-	project <- rstudioapi::getActiveProject()
+	project <- basename(rstudioapi::getActiveProject())
 	cat(paste0("[hook:reconnect] project=", project, "\n"))
 })
