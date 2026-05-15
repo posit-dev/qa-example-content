@@ -14,7 +14,7 @@ setHook("positron.session_init", function(start_type) {
 	}
 
 	# Verify two-way rstudioapi communication works inside hook
-	project <- rstudioapi::getActiveProject()
+	project <- basename(rstudioapi::getActiveProject())
 	cat(paste0("[hook:init] project=", project, "\n"))
 
 	# Verify rstudioapi can trigger UI actions (navigateToFile)
