@@ -59,6 +59,11 @@ for script in install-workbench.sh positronDownload.sh get-latest-wb-noble-url.s
   fi
 done
 
+# Copy license file if present
+if [ -f "./workbench.lic" ]; then
+  docker cp "./workbench.lic" "test:/tmp/workbench.lic" >/dev/null 2>&1
+fi
+
 # Show current status
 echo ""
 echo "=== Status ==="
