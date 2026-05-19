@@ -273,6 +273,18 @@ if ! sudo apt install -y ./workbench.deb; then
     log_error "Failed to install Workbench package"
 fi
 
+# Copy and configure Workbench license if present
+if [ -f "/tmp/workbench.lic" ]; then
+    echo "Configuring Workbench license..."
+    sudo mkdir -p /var/lib/rstudio-server
+    sudo cp /tmp/workbench.lic /var/lib/rstudio-server/workbench.lic
+    sudo chown 999:999 /var/lib/rstudio-server/workbench.lic
+    sudo chmod 0600 /var/lib/rstudio-server/workbench.lic
+    echo "Workbench license configured"
+else
+    echo "No Workbench license file found at /tmp/workbench.lic - skipping license configuration"
+fi
+
 # Set access permissions
 echo "Setting access permissions..."
 sudo setfacl -m u:${Q_USER}:x /root
