@@ -42,3 +42,4 @@ SQLAlchemy
 psycopg2-binary
 ipykernel
 astropy
+htmltools<0.7
