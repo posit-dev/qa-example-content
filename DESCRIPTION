@@ -37,4 +37,6 @@ Imports:
     viridis,
     RPostgres,
     DBI,
-    connections
+    connections,
+    nycflights13,
+    dbplyr
