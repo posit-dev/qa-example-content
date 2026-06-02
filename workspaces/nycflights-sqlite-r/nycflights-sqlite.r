@@ -1,3 +1,5 @@
+path <- dbplyr::nycflights13_sqlite(path = "db/")
+
 library(DBI)
 con <- dbConnect(
   RSQLite::SQLite(),
