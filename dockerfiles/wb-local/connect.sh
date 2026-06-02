@@ -7,6 +7,7 @@ export MSYS_NO_PATHCONV=1
 
 # Parse command line arguments
 CI_MODE=false
+CREDENTIALS=""
 while [ $# -gt 0 ]; do
   case $1 in
     -h|--help)
@@ -15,13 +16,22 @@ while [ $# -gt 0 ]; do
       echo "Connects to the running test container with an interactive bash shell"
       echo ""
       echo "OPTIONS:"
-      echo "  --ci        CI mode: skip all prompts and use defaults (requires GITHUB_TOKEN env var)"
-      echo "  -h, --help  Show this help message"
+      echo "  --ci                      CI mode: skip all prompts and use defaults (requires GITHUB_TOKEN env var)"
+      echo "  --credentials=<type>      Configure one credential type: databricks, snowflake, or azure"
+      echo "  -h, --help                Show this help message"
       exit 0
       ;;
     --ci)
       CI_MODE=true
       shift
+      ;;
+    --credentials=*)
+      CREDENTIALS="${1#*=}"
+      shift
+      ;;
+    --credentials)
+      CREDENTIALS="$2"
+      shift 2
       ;;
     *)
       echo "Unknown option: $1"
@@ -30,6 +40,20 @@ while [ $# -gt 0 ]; do
       ;;
   esac
 done
+
+# Validate credential type if provided
+if [ -n "$CREDENTIALS" ]; then
+  case "$CREDENTIALS" in
+    databricks|snowflake|azure) ;;
+    *)
+      echo "Invalid --credentials value: '$CREDENTIALS' (expected: databricks, snowflake, or azure)"
+      exit 1
+      ;;
+  esac
+  echo "Credential type selected: $CREDENTIALS"
+else
+  echo "No --credentials specified - no data source will be configured"
+fi
 
 # Load environment variables from .env file if it exists
 if [ -f .env ]; then
@@ -105,7 +129,8 @@ if [ "$CI_MODE" = true ]; then
     -e SNOWFLAKE_CLIENT_SECRET_="${SNOWFLAKE_CLIENT_SECRET:-}" \
     -e SNOWFLAKE_USERNAME_="${SNOWFLAKE_USERNAME:-}" \
     -e SNOWFLAKE_PASSWORD_="${SNOWFLAKE_PASSWORD:-}" \
-    test /bin/bash -c "/tmp/install-workbench.sh --ci; exec /bin/bash"
+    -e AZURE_SERVICE_PRINCIPAL_CLIENT_SECRET_="${AZURE_SERVICE_PRINCIPAL_CLIENT_SECRET:-}" \
+    test /bin/bash -c "/tmp/install-workbench.sh --ci ${CREDENTIALS:+--credentials=$CREDENTIALS}; exec /bin/bash"
 else
   docker exec -it \
     -e GITHUB_TOKEN="$GITHUB_TOKEN" \
@@ -120,8 +145,10 @@ else
     -e SNOWFLAKE_CLIENT_SECRET_="${SNOWFLAKE_CLIENT_SECRET:-}" \
     -e SNOWFLAKE_USERNAME_="${SNOWFLAKE_USERNAME:-}" \
     -e SNOWFLAKE_PASSWORD_="${SNOWFLAKE_PASSWORD:-}" \
+    -e AZURE_SERVICE_PRINCIPAL_CLIENT_SECRET_="${AZURE_SERVICE_PRINCIPAL_CLIENT_SECRET:-}" \
+    -e CREDENTIALS="${CREDENTIALS:-}" \
     test /bin/bash -c '
-    /tmp/install-workbench.sh
+    /tmp/install-workbench.sh ${CREDENTIALS:+--credentials="$CREDENTIALS"}
 
     # Show quick reference before dropping to shell
     echo ""

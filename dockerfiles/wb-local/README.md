@@ -63,6 +63,25 @@ Open http://localhost:8787 and login:
 * **Username**: `user1`
 * **Password**: Your `.env` WB_PASSWORD value
 
+## Credential Configuration
+
+Workbench can be configured with **one** credential type per install, selected with the
+`--credentials` flag:
+
+```bash
+GITHUB_TOKEN=your_token npm run wb:connect -- --credentials=databricks
+GITHUB_TOKEN=your_token npm run wb:connect -- --credentials=snowflake
+GITHUB_TOKEN=your_token npm run wb:connect -- --credentials=azure
+```
+
+| Type | Requires in `.env` |
+|------|--------------------|
+| `databricks` | `DATABRICKS_*` values |
+| `snowflake` | `SNOWFLAKE_*` values |
+| `azure` | `AZURE_SERVICE_PRINCIPAL_CLIENT_SECRET` |
+
+If `--credentials` is omitted, no data source is configured.
+
 ## All npm Scripts
 
 ```bash
@@ -83,7 +102,8 @@ Or from this directory:
 GITHUB_TOKEN=your_token ./connect.sh --ci
 ```
 
-This bypasses all prompts and automatically installs the latest versions.
+This bypasses all prompts and automatically installs the latest versions. Add
+`--credentials=<databricks|snowflake|azure>` to configure a data source.
 
 ## Cleanup
 
