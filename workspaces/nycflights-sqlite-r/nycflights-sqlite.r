@@ -1,6 +1,9 @@
-library(connections)
-library(DBI)
-library(RSQLite)
+path <- dbplyr::nycflights13_sqlite(path = "db/")
 
-db_path <- file.path(getwd(), "db", "nycflights13.sqlite")
-con <- connection_open(SQLite(), db_path)
+library(DBI)
+con <- dbConnect(
+  RSQLite::SQLite(),
+  dbname = "db/nycflights13.sqlite",
+  bigint = "integer64"
+)
+connections::connection_view(con)
