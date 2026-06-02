@@ -11,7 +11,7 @@
     "arm:status": "bash -c \"cd dockerfiles/arm-local && ./status.sh\"",
     "wb:start": "bash -c \"cd dockerfiles/wb-local && ./run.sh ubuntu24\"",
     "wb:start:rocky": "bash -c \"cd dockerfiles/wb-local && ./run.sh rocky8\"",
-    "wb:connect": "bash -c \"cd dockerfiles/wb-local && ./connect.sh\"",
+    "wb:connect": "bash -c 'cd dockerfiles/wb-local && ./connect.sh \"$@\"' --",
     "wb:stop": "bash -c \"cd dockerfiles/wb-local && ./stop-containers.sh ubuntu24\"",
     "wb:stop:rocky": "bash -c \"cd dockerfiles/wb-local && ./stop-containers.sh rocky8\"",
     "wb:status": "bash -c \"cd dockerfiles/wb-local && ./status.sh\"",

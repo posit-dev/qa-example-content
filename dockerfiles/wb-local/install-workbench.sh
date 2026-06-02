@@ -12,6 +12,7 @@ log_error() {
 # Parse command line arguments
 CI_MODE=false
 CI_STABLE_MODE=false
+CREDENTIALS=""
 while [ $# -gt 0 ]; do
   case $1 in
     --ci)
@@ -22,12 +23,31 @@ while [ $# -gt 0 ]; do
       CI_STABLE_MODE=true
       shift
       ;;
+    --credentials=*)
+      CREDENTIALS="${1#*=}"
+      shift
+      ;;
+    --credentials)
+      CREDENTIALS="$2"
+      shift 2
+      ;;
     *)
       echo "Unknown option: $1"
       exit 1
       ;;
   esac
 done
+
+# Validate credential type if provided
+if [ -n "${CREDENTIALS}" ]; then
+    case "${CREDENTIALS}" in
+        databricks|snowflake|azure) ;;
+        *)
+            echo "Invalid --credentials value: '${CREDENTIALS}' (expected: databricks, snowflake, or azure)"
+            exit 1
+            ;;
+    esac
+fi
 
 # Interactive installation prompt (skip in CI mode)
 if [ "$CI_MODE" = true ]; then
@@ -233,6 +253,11 @@ echo "  Q_UID: ${Q_UID}"
 echo "  Q_GID: ${Q_GID}"
 echo "  Q_GROUP: ${Q_GROUP}"
 echo "  WB_PASSWORD: [HIDDEN]"
+if [ -n "${CREDENTIALS}" ]; then
+    echo "  CREDENTIALS: ${CREDENTIALS}"
+else
+    echo "  CREDENTIALS: [none]"
+fi
 
 # Create the user (skip if already exists)
 echo "Creating user ${Q_USER}..."
@@ -347,14 +372,18 @@ if ! TAG=${POSITRON_TAG} ARCH_SUFFIX=${ARCH_SUFFIX} GITHUB_TOKEN=${GITHUB_TOKEN}
     log_error "Failed to download/install Positron"
 fi
 
-# Configure data sources (Databricks, Snowflake)
-echo "Configuring data sources..."
-if [ -f "/tmp/configure-datasources.sh" ]; then
-    if ! /tmp/configure-datasources.sh; then
-        log_error "Failed to configure data sources"
+# Configure data sources (one credential type: databricks, snowflake, or azure)
+if [ -n "${CREDENTIALS}" ]; then
+    echo "Configuring data source: ${CREDENTIALS}..."
+    if [ -f "/tmp/configure-datasources.sh" ]; then
+        if ! /tmp/configure-datasources.sh "${CREDENTIALS}"; then
+            log_error "Failed to configure data source: ${CREDENTIALS}"
+        fi
+    else
+        echo "Skipping data source configuration (configure-datasources.sh not found)"
     fi
 else
-    echo "Skipping data source configuration (configure-datasources.sh not found)"
+    echo "No --credentials specified - skipping data source configuration"
 fi
 
 # Start RStudio server
