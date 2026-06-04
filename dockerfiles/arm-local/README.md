@@ -41,17 +41,10 @@ Or for Rocky 8: `npm run arm:start:rocky`
 npm run arm:connect
 ```
 
-You'll see a menu. Options depend on whether the environment has been set up:
+You'll see a menu with two options regardless of state:
 
-**First run (not yet set up):**
-1. **Setup environment** - Clones repo, installs dependencies, and compiles (prompts for branch)
-2. **Skip to shell**
-
-**Subsequent runs (already set up):**
-1. **Update environment** - Pulls latest changes and reinstalls dependencies (prompts for branch)
-2. **Update + start e2e server** - Pulls latest, reinstalls, then starts the Positron server on `:8080` for `e2e-server` browser tests
-3. **Start e2e server** - Starts the Positron server on `:8080` without updating (use when code hasn't changed)
-4. **Skip to shell**
+1. **Setup / Update environment** - Clones (first run) or pulls latest and reinstalls (subsequent runs). Prompts for branch.
+2. **Skip to shell** - Jump straight to the shell. Use shell commands (see below) to start the server, view reports, etc.
 
 After setup completes, you're ready to run tests:
 

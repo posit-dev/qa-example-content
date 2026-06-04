@@ -116,33 +116,14 @@ else
         echo "Display: $DISPLAY_STATUS"
     fi
 
-    start_server() {
-        echo ""
-        echo "Starting Positron e2e server on port 8080..."
-        cd /__w/positron/positron
-        ./scripts/code-server.sh --no-launch --host 0.0.0.0 --connection-token dev-token --port 8080 \
-            --user-data-dir $HOME/.positron-e2e-test \
-            --disable-telemetry --disable-experiments --skip-welcome --skip-release-notes \
-            --no-cached-data --disable-updates --use-inmemory-secretstorage \
-            --disable-workspace-trust > /tmp/e2e-server.log 2>&1 &
-        sleep 3
-        if curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/?tkn=dev-token | grep -q "30[12]"; then
-            echo "Server is up -> http://localhost:8080/?tkn=dev-token"
-        else
-            echo "Server starting... (tail /tmp/e2e-server.log to check)"
-        fi
-    }
-
     echo ""
     echo "=== Options ==="
     if [ "$SETUP_DONE" = true ]; then
-        echo "1) Update environment            [git pull + reinstall]"
-        echo "2) Update + start e2e server     [git pull + reinstall + start server on :8080]"
-        echo "3) Start e2e server              [start server on :8080, no update]"
-        echo "4) Skip to shell"
+        echo "1) Update environment   [git pull + reinstall]"
+        echo "2) Skip to shell"
         echo ""
-        read -p "Choice [1-4, default=4]: " choice
-        choice=${choice:-4}
+        read -p "Choice [1-2, default=2]: " choice
+        choice=${choice:-2}
     else
         echo "1) Setup environment   [clone + install]"
         echo "2) Skip to shell"
@@ -159,20 +140,6 @@ else
         /tmp/setup-test-env.sh "$branch"
         ;;
       2)
-        if [ "$SETUP_DONE" = true ]; then
-            echo ""
-            read -p "Branch [default=main]: " branch
-            branch=${branch:-main}
-            /tmp/setup-test-env.sh "$branch"
-            start_server
-        fi
-        ;;
-      3)
-        if [ "$SETUP_DONE" = true ]; then
-            start_server
-        fi
-        ;;
-      4)
         ;;
       *)
         echo "Invalid choice."
