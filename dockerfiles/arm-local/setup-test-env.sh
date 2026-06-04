@@ -203,12 +203,93 @@ export PWTEST_BLOB_DO_NOT_REMOVE="1"
 cd $REPO_DIR
 EOF
 
-# Add a helper script to run tests
+# Add helper scripts and aliases
 cat > /usr/local/bin/run-tests <<EOF
 #!/bin/bash
 cd $REPO_DIR && npx playwright test "\$@"
 EOF
 chmod +x /usr/local/bin/run-tests
+
+cat > /usr/local/bin/start-server <<EOF
+#!/bin/bash
+echo "Starting Positron e2e server on port 8080..."
+cd $REPO_DIR
+./scripts/e2e-start-server.sh 8080 dev-token \$HOME/.positron-e2e-test 0.0.0.0 > /tmp/e2e-server.log 2>&1 &
+sleep 2
+if ss -tlnp 2>/dev/null | grep -q ":8080" || netstat -tlnp 2>/dev/null | grep -q ":8080"; then
+    echo "Server is up -> http://localhost:8080/?tkn=dev-token"
+else
+    echo "Server starting... (tail /tmp/e2e-server.log to check)"
+fi
+EOF
+chmod +x /usr/local/bin/start-server
+
+cat > /usr/local/bin/start-vnc <<EOF
+#!/bin/bash
+/tmp/start-vnc.sh
+EOF
+chmod +x /usr/local/bin/start-vnc
+
+cat > /usr/local/bin/install-ssh <<EOF
+#!/bin/bash
+/tmp/ssh-install.sh
+EOF
+chmod +x /usr/local/bin/install-ssh
+
+cat > /usr/local/bin/show-report <<EOF
+#!/bin/bash
+echo "Opening test report at http://localhost:9323 ..."
+cd $REPO_DIR && npx playwright show-report --host 0.0.0.0
+EOF
+chmod +x /usr/local/bin/show-report
+
+cat > /usr/local/bin/status <<EOF
+#!/bin/bash
+echo ""
+echo "=== Status ==="
+if [ -d "/__w/positron/positron/.git" ]; then
+    BRANCH=\$(cd /__w/positron/positron && git branch --show-current 2>/dev/null)
+    COMMIT=\$(cd /__w/positron/positron && git log -1 --format="%h %s" 2>/dev/null)
+    echo "Branch:  \$BRANCH"
+    echo "Commit:  \$COMMIT"
+else
+    echo "Setup:   Not complete"
+fi
+if pgrep -x Xvfb >/dev/null 2>&1; then
+    echo "Display: running"
+else
+    echo "Display: not running"
+fi
+if curl -s -o /dev/null -w "%{http_code}" http://localhost:8080/?tkn=dev-token 2>/dev/null | grep -q "30[12]"; then
+    echo "Server:  running -> http://localhost:8080/?tkn=dev-token"
+else
+    echo "Server:  not running"
+fi
+echo ""
+EOF
+chmod +x /usr/local/bin/status
+
+cat > /usr/local/bin/commands <<EOF
+#!/bin/bash
+echo ""
+echo "=== Test Commands ==="
+echo "  run-tests --project e2e-electron --workers 2 --grep @:connections"
+echo "  run-tests --project e2e-server   --workers 2 --grep @:web"
+echo ""
+echo "=== Other Commands ==="
+echo "  start-server   - Start e2e server on :8080"
+echo "  start-vnc      - Watch tests run visually (connect to localhost:5900)"
+echo "  show-report    - Serve test report at http://localhost:9323"
+echo "  install-ssh    - Install SSH server (for Remote SSH editor access)"
+echo "  status         - Show branch, display, and server status"
+echo "  commands       - Show this list"
+echo ""
+echo "=== Logs ==="
+echo "  tail /tmp/e2e-server.log  - e2e server logs"
+echo "  tail /tmp/Xvfb.out        - display server logs"
+echo ""
+EOF
+chmod +x /usr/local/bin/commands
 
 echo ""
 echo "===== Test Environment Setup Complete ====="
@@ -224,14 +305,5 @@ if [ ${#ERRORS[@]} -gt 0 ]; then
     echo "Setup may not be fully functional. Check logs above for details."
 fi
 
-echo ""
-echo "Ready to run tests. Example commands:"
-echo "  npx playwright test --project e2e-electron --workers 2 --grep @:connections"
-echo "  npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer"
-echo ""
-echo "Other useful commands:"
-echo "  /tmp/start-vnc.sh                        - Start VNC server (connect to localhost:5900)"
-echo "  npx playwright show-report --host 0.0.0.0 - View test report (localhost:9323)"
-echo ""
 echo "NOTE: If you open a new terminal/shell, run: source ~/.bashrc"
 echo ""

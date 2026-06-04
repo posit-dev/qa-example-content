@@ -10,6 +10,8 @@ services:
       - "5900:5900"
       - "9323:9323"
       - "3456:22"
+    volumes:
+      - /private/tmp/positron-e2e:/tmp/positron-e2e
     command: /bin/bash -c "while true; do sleep 3600; done"
     tty: true
     stdin_open: true

@@ -83,11 +83,25 @@ else
         SETUP_DONE=false
     fi
 
+    # Ensure Xvfb is running (required for electron tests)
+    if ! pgrep -x Xvfb >/dev/null 2>&1; then
+        /usr/bin/Xvfb :10 -ac -screen 0 2560x1440x24 > /tmp/Xvfb.out 2>&1 &
+        sleep 1
+    fi
+    export DISPLAY=:10
+
     # Check Xvfb
     if pgrep -x Xvfb >/dev/null 2>&1; then
         DISPLAY_STATUS="running"
     else
         DISPLAY_STATUS="not running"
+    fi
+
+    # Check e2e server
+    if ss -tlnp 2>/dev/null | grep -q ":8080" || netstat -tlnp 2>/dev/null | grep -q ":8080"; then
+        SERVER_STATUS="running  → http://localhost:8080/?tkn=dev-token"
+    else
+        SERVER_STATUS="not running"
     fi
 
     echo ""
@@ -96,6 +110,7 @@ else
         echo "Branch:  $BRANCH"
         echo "Commit:  $COMMIT"
         echo "Display: $DISPLAY_STATUS"
+        echo "Server:  $SERVER_STATUS"
     else
         echo "Setup:   Not complete"
         echo "Display: $DISPLAY_STATUS"
@@ -104,17 +119,15 @@ else
     echo ""
     echo "=== Options ==="
     if [ "$SETUP_DONE" = true ]; then
-        echo "1) Update environment  [git pull + reinstall]"
-    else
-        echo "1) Setup environment   [clone + install]"
-    fi
-    echo "2) Skip to shell"
-    echo ""
-
-    if [ "$SETUP_DONE" = true ]; then
+        echo "1) Update environment   [git pull + reinstall]"
+        echo "2) Skip to shell"
+        echo ""
         read -p "Choice [1-2, default=2]: " choice
         choice=${choice:-2}
     else
+        echo "1) Setup environment   [clone + install]"
+        echo "2) Skip to shell"
+        echo ""
         read -p "Choice [1-2, default=1]: " choice
         choice=${choice:-1}
     fi
@@ -137,13 +150,21 @@ else
     echo ""
     if [ -d "/__w/positron/positron/.git" ]; then
         echo "=== Quick Reference ==="
-        echo "Example test commands:"
-        echo "  npx playwright test --project e2e-electron --workers 2 --grep @:connections"
-        echo "  npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer"
+        echo "Test commands:"
+        echo "  run-tests --project e2e-electron --workers 2 --grep @:connections"
+        echo "  run-tests --project e2e-server   --workers 2 --grep @:web"
         echo ""
         echo "Other commands:"
-        echo "  /tmp/start-vnc.sh    - Start VNC server"
-        echo "  /tmp/ssh-install.sh  - Install SSH server"
+        echo "  start-server   - Start e2e server on :8080"
+        echo "  start-vnc      - Watch tests run visually (connect to localhost:5900)"
+        echo "  show-report    - Serve test report at http://localhost:9323"
+        echo "  install-ssh    - Install SSH server (for Remote SSH editor access)"
+        echo "  status         - Reprint branch, display, and server status"
+        echo "  commands       - Reprint this list"
+        echo ""
+        echo "Logs:"
+        echo "  tail /tmp/e2e-server.log  - e2e server logs"
+        echo "  tail /tmp/Xvfb.out        - display server logs"
         echo ""
         cd /__w/positron/positron
     else

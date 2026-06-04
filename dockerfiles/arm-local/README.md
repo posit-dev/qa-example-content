@@ -18,7 +18,7 @@ Create a `license.txt` file in this directory with the Positron Workbench Licens
 ### 3. Docker Login
 
 ```bash
-docker login ghcr.io -u <your_github_username>
+docker login ghcr.io -u <your_github_username> 
 ```
 
 Use a GitHub Personal Access Token with `read:packages` scope as your password.
@@ -41,15 +41,19 @@ Or for Rocky 8: `npm run arm:start:rocky`
 npm run arm:connect
 ```
 
-You'll see a menu:
-1. **Setup test environment** - Clones repo and installs dependencies (prompts for branch)
-2. **Skip to shell** - For reconnecting or manual setup
+You'll see a menu with two options regardless of state:
+
+1. **Setup / Update environment** - Clones (first run) or pulls latest and reinstalls (subsequent runs). Prompts for branch.
+2. **Skip to shell** - Jump straight to the shell. Use shell commands (see below) to start the server, view reports, etc.
 
 After setup completes, you're ready to run tests:
 
 ```bash
+# Electron tests (run inside the container)
 npx playwright test --project e2e-electron --workers 2 --grep @:connections
-npx playwright test --project e2e-browser --workers 2 --grep @:data-explorer
+
+# Browser tests against the e2e server (can be run from your local Positron repo)
+npx playwright test --project e2e-server --workers 2 --grep @:web
 ```
 
 ## All npm Scripts
