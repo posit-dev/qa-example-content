@@ -207,7 +207,6 @@ EOF
 cat > /usr/local/bin/run-tests <<EOF
 #!/bin/bash
 cd $REPO_DIR && npx playwright test "\$@"
-npx playwright show-report --host 0.0.0.0
 EOF
 chmod +x /usr/local/bin/run-tests
 
