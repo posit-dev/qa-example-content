@@ -27,11 +27,22 @@ docker login ghcr.io -u <your_github_username>
 
 > **Note:** When prompted for a password, enter your **GitHub Personal Access Token**, not your GitHub password. The token needs `read:packages` scope.
 
-### 3. GitHub Token
+### 3. Docker Resource Settings
+
+In **Docker Desktop → Settings → Resources → Advanced**, allocate enough resources for Workbench to run smoothly. Recommended minimums:
+
+* **CPU**: 8+ cores
+* **Memory**: 16 GB
+* **Swap**: 2 GB
+* **Disk**: enough free space for the Workbench and Positron images
+
+![Docker Resource Settings](doc-images/dockerConf.png)
+
+### 4. GitHub Token
 
 You'll need a GitHub Personal Access Token with `read:packages` scope for downloading Positron releases.
 
-### 4. Shell
+### 5. Shell
 
 * **macOS**: Use the default Terminal
 * **Windows**: Use **Git Bash** (comes with Git for Windows)
