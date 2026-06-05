@@ -23,6 +23,17 @@ docker login ghcr.io -u <your_github_username>
 
 Use a GitHub Personal Access Token with `read:packages` scope as your password.
 
+### 4. Docker Resource Settings
+
+In **Docker Desktop → Settings → Resources → Advanced**, allocate enough resources for the test environment to run smoothly. Recommended minimums:
+
+* **CPU**: 8+ cores
+* **Memory**: 16 GB
+* **Swap**: 2 GB
+* **Disk**: enough free space for the container images
+
+![Docker Resource Settings](doc-images/dockerConf.png)
+
 ## Quick Start
 
 Open **two terminal windows** from the repo root:
