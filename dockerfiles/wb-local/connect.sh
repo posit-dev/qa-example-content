@@ -7,6 +7,7 @@ export MSYS_NO_PATHCONV=1
 
 # Parse command line arguments
 CI_MODE=false
+CI_STABLE_MODE=false
 CREDENTIALS=""
 while [ $# -gt 0 ]; do
   case $1 in
@@ -16,13 +17,18 @@ while [ $# -gt 0 ]; do
       echo "Connects to the running test container with an interactive bash shell"
       echo ""
       echo "OPTIONS:"
-      echo "  --ci                      CI mode: skip all prompts and use defaults (requires GITHUB_TOKEN env var)"
+      echo "  --ci                      CI mode: skip all prompts and use latest versions (requires GITHUB_TOKEN env var)"
+      echo "  --ci-stable               CI mode: skip all prompts, latest Positron + released Workbench (requires GITHUB_TOKEN env var)"
       echo "  --credentials=<type>      Configure one credential type: databricks, snowflake, or azure"
       echo "  -h, --help                Show this help message"
       exit 0
       ;;
     --ci)
       CI_MODE=true
+      shift
+      ;;
+    --ci-stable)
+      CI_STABLE_MODE=true
       shift
       ;;
     --credentials=*)
@@ -115,8 +121,14 @@ fi
 echo ""
 
 # Connect to the container and run install script
-if [ "$CI_MODE" = true ]; then
-  echo "Running in CI mode - using latest versions without prompts..."
+if [ "$CI_MODE" = true ] || [ "$CI_STABLE_MODE" = true ]; then
+  if [ "$CI_STABLE_MODE" = true ]; then
+    CI_INSTALL_FLAG="--ci-stable"
+    echo "Running in CI stable mode - latest Positron + released Workbench without prompts..."
+  else
+    CI_INSTALL_FLAG="--ci"
+    echo "Running in CI mode - using latest versions without prompts..."
+  fi
   docker exec -it \
     -e GITHUB_TOKEN="$GITHUB_TOKEN" \
     -e DATABRICKS_URL_="${DATABRICKS_URL:-}" \
@@ -130,7 +142,7 @@ if [ "$CI_MODE" = true ]; then
     -e SNOWFLAKE_USERNAME_="${SNOWFLAKE_USERNAME:-}" \
     -e SNOWFLAKE_PASSWORD_="${SNOWFLAKE_PASSWORD:-}" \
     -e AZURE_SERVICE_PRINCIPAL_CLIENT_SECRET_="${AZURE_SERVICE_PRINCIPAL_CLIENT_SECRET:-}" \
-    test /bin/bash -c "/tmp/install-workbench.sh --ci ${CREDENTIALS:+--credentials=$CREDENTIALS}; exec /bin/bash"
+    test /bin/bash -c "/tmp/install-workbench.sh $CI_INSTALL_FLAG ${CREDENTIALS:+--credentials=$CREDENTIALS}; exec /bin/bash"
 else
   docker exec -it \
     -e GITHUB_TOKEN="$GITHUB_TOKEN" \

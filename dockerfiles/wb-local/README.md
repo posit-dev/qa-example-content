@@ -116,6 +116,12 @@ GITHUB_TOKEN=your_token ./connect.sh --ci
 This bypasses all prompts and automatically installs the latest versions. Add
 `--credentials=<databricks|snowflake|azure>` to configure a data source.
 
+Use `--ci-stable` instead of `--ci` to install the latest Positron with the
+released (stable) Workbench:
+```bash
+GITHUB_TOKEN=your_token ./connect.sh --ci-stable
+```
+
 ## Cleanup
 
 1. Terminal 2: `exit`
