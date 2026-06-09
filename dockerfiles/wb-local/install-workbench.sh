@@ -218,10 +218,10 @@ fi
 # Now we can fetch the WB_URL if it wasn't provided
 if [ -z "${WB_URL}" ]; then
     if [ "$CI_STABLE_MODE" = true ]; then
-        echo "CI Stable Mode: Fetching latest released Workbench URL..."
+        echo "CI Stable Mode: Fetching latest released Workbench URL for ${ARCH_SUFFIX} architecture..."
         # Get the directory where this script is located
         SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-        WB_URL=$("${SCRIPT_DIR}/get-latest-wb-noble-url.sh")
+        WB_URL=$("${SCRIPT_DIR}/get-latest-wb-noble-url.sh" "${ARCH_SUFFIX}")
         if [ $? -ne 0 ] || [ -z "${WB_URL}" ]; then
             log_error "Failed to fetch released Workbench URL from get-latest-wb-noble-url.sh"
         fi
