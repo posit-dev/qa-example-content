@@ -33,7 +33,6 @@ if [ ! -f .env ]; then
     echo "Create a .env file with:"
     echo "  E2E_POSTGRES_USER="
     echo "  E2E_POSTGRES_PASSWORD="
-    echo "  E2E_POSTGRES_DB="
   fi
   echo ""
   echo "(Values found in 1Password: Positron > E2E Postgres DB Connection info)"
@@ -60,9 +59,6 @@ if [ -z "$E2E_POSTGRES_USER" ]; then
 fi
 if [ -z "$E2E_POSTGRES_PASSWORD" ]; then
   MISSING_VARS+=("E2E_POSTGRES_PASSWORD")
-fi
-if [ -z "$E2E_POSTGRES_DB" ]; then
-  MISSING_VARS+=("E2E_POSTGRES_DB")
 fi
 
 if [ ${#MISSING_VARS[@]} -gt 0 ]; then

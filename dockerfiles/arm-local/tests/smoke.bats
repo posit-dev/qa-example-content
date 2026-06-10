@@ -133,7 +133,7 @@ _run_with_license_setup() {
   local compose_content="$2"
 
   echo "license content" > "$tmpdir/license.txt"
-  printf 'E2E_POSTGRES_USER=user\nE2E_POSTGRES_PASSWORD=pass\nE2E_POSTGRES_DB=db\n' > "$tmpdir/.env"
+  printf 'E2E_POSTGRES_USER=user\nE2E_POSTGRES_PASSWORD=pass\n' > "$tmpdir/.env"
   printf '%s' "$compose_content" > "$tmpdir/docker-compose.ubuntu24.yml"
 
   mkdir -p "$tmpdir/bin"

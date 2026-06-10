@@ -21,11 +21,10 @@ services:
     environment:
       - E2E_POSTGRES_USER=${E2E_POSTGRES_USER:-testuser}
       - E2E_POSTGRES_PASSWORD=${E2E_POSTGRES_PASSWORD:-testpassword}
-      - E2E_POSTGRES_DB=${E2E_POSTGRES_DB:-testdb}
       - POSITRON_DEV_LICENSE=${POSITRON_DEV_LICENSE}
 
   postgres:
-    image: ghcr.io/posit-dev/positron-postgres-opensuse156-arm64:137
+    image: ghcr.io/posit-dev/positron-postgres-arm64:143
     container_name: postgres
     ports:
       - "5432:5432"
@@ -34,9 +33,8 @@ services:
     environment:
       - E2E_POSTGRES_USER=${E2E_POSTGRES_USER:-testuser}
       - E2E_POSTGRES_PASSWORD=${E2E_POSTGRES_PASSWORD:-testpassword}
-      - E2E_POSTGRES_DB=${E2E_POSTGRES_DB:-testdb}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${E2E_POSTGRES_USER:-testuser} -d ${E2E_POSTGRES_DB:-testdb}"]
+      test: ["CMD-SHELL", "pg_isready -U ${E2E_POSTGRES_USER:-testuser} -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 5

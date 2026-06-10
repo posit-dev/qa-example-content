@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   test:
-    image: ghcr.io/posit-dev/positron-ubuntu24-${ARCH_SUFFIX:-arm64}:${IMAGE_TAG:-127}
+    image: ghcr.io/posit-dev/positron-ubuntu24-arm64:127
     container_name: test
     ports:
       - "8080:8080"
@@ -23,14 +23,13 @@ services:
       # Postgres configuration
       - E2E_POSTGRES_USER=${E2E_POSTGRES_USER:-testuser}
       - E2E_POSTGRES_PASSWORD=${E2E_POSTGRES_PASSWORD:-testpassword}
-      - E2E_POSTGRES_DB=${E2E_POSTGRES_DB:-testdb}
       - WB_PASSWORD=${WB_PASSWORD:-testpassword}
       - CONNECT_BOOTSTRAP_SECRETKEY=${CONNECT_BOOTSTRAP_SECRETKEY}
     volumes:
       - connect_tokens:/tokens
 
   postgres:
-    image: ghcr.io/posit-dev/positron-postgres-ubuntu24-${ARCH_SUFFIX:-arm64}:${IMAGE_TAG:-127}
+    image: ghcr.io/posit-dev/positron-postgres-arm64:143
     container_name: postgres
     ports:
       - "5432:5432"
@@ -39,9 +38,8 @@ services:
     environment:
       - E2E_POSTGRES_USER=${E2E_POSTGRES_USER:-testuser}
       - E2E_POSTGRES_PASSWORD=${E2E_POSTGRES_PASSWORD:-testpassword}
-      - E2E_POSTGRES_DB=${E2E_POSTGRES_DB:-testdb}
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${E2E_POSTGRES_USER:-testuser} -d ${E2E_POSTGRES_DB:-testdb}"]
+      test: ["CMD-SHELL", "pg_isready -U ${E2E_POSTGRES_USER:-testuser} -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
