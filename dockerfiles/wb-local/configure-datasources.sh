@@ -31,7 +31,7 @@ client-id = ${DATABRICKS_CLIENT_ID_}
 EOF
         echo "  Created /etc/rstudio/databricks.conf for workspace: ${WORKSPACE_NAME}"
 
-        if ! grep -q "databricks-enabled=1" /etc/rstudio/rserver.conf 2>/dev/null; then
+        if ! grep -qE '^[[:space:]]*databricks-enabled=1' /etc/rstudio/rserver.conf 2>/dev/null; then
             echo "databricks-enabled=1" | sudo tee -a /etc/rstudio/rserver.conf > /dev/null
         fi
         echo "  Updated /etc/rstudio/rserver.conf with Databricks feature flag"
@@ -51,7 +51,7 @@ account = ${SNOWFLAKE_ACCOUNT_}
 EOF
         echo "  Created /etc/rstudio/snowflake.conf for account: ${SNOWFLAKE_ACCOUNT_}"
 
-        if ! grep -q "allow-refresh-snowflake-roles=1" /etc/rstudio/rserver.conf 2>/dev/null; then
+        if ! grep -qE '^[[:space:]]*allow-refresh-snowflake-roles=1' /etc/rstudio/rserver.conf 2>/dev/null; then
             echo "allow-refresh-snowflake-roles=1" | sudo tee -a /etc/rstudio/rserver.conf > /dev/null
         fi
         echo "  Updated /etc/rstudio/rserver.conf with Snowflake feature flag"
@@ -64,7 +64,7 @@ EOF
         fi
 
         # 2a. Append OpenID auth settings to rserver.conf
-        if ! grep -q "auth-openid=1" /etc/rstudio/rserver.conf 2>/dev/null; then
+        if ! grep -qE '^[[:space:]]*auth-openid=1' /etc/rstudio/rserver.conf 2>/dev/null; then
             sudo tee -a /etc/rstudio/rserver.conf > /dev/null <<EOF
 auth-openid=1
 auth-openid-issuer=https://login.microsoftonline.com/b0b52785-d0b5-4b72-a6d0-13ac07ebbbd7/v2.0

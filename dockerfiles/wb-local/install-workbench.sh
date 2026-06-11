@@ -322,6 +322,21 @@ if ! sudo rstudio-server stop; then
     log_error "Failed to stop RStudio server"
 fi
 
+# rstudio-server stop can return before rserver has fully exited, and this
+# container has no systemd to wait on. Wait for rserver to actually exit so we
+# don't mutate its install dir while it's still running.
+echo "Waiting for rserver to stop..."
+for _ in $(seq 1 15); do
+    pgrep -x rserver >/dev/null 2>&1 || break
+    sleep 1
+done
+
+# Safety net: if rserver is still alive, signal it.
+if pgrep -x rserver >/dev/null 2>&1; then
+    echo "rserver still running - sending TERM..."
+    sudo pkill -x rserver 2>/dev/null || true
+fi
+
 cd /usr/lib/rstudio-server/bin/
 
 # Check if positron-server/bundled exists
