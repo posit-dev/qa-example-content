@@ -238,8 +238,9 @@ chmod +x /usr/local/bin/install-ssh
 
 cat > /usr/local/bin/show-report <<EOF
 #!/bin/bash
-echo "Opening test report at http://localhost:9323 ..."
-cd $REPO_DIR && npx playwright show-report --host 0.0.0.0
+echo "Serving test report at http://localhost:9323"
+echo "(Use localhost, not 0.0.0.0 — trace viewer requires localhost for service workers)"
+cd $REPO_DIR && npx playwright show-report --host 0.0.0.0 2>&1 | grep -v "Serving HTML report"
 EOF
 chmod +x /usr/local/bin/show-report
 
