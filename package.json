@@ -18,6 +18,8 @@
     "jupyter:start": "bash -c \"cd dockerfiles/jupyter-local && ./run.sh\"",
     "jupyter:connect": "bash -c \"cd dockerfiles/jupyter-local && ./connect.sh\"",
     "jupyter:connect:ci": "bash -c \"cd dockerfiles/jupyter-local && ./connect.sh --ci\"",
-    "jupyter:stop": "bash -c \"cd dockerfiles/jupyter-local && ./stop-containers.sh\""
+    "jupyter:stop": "bash -c \"cd dockerfiles/jupyter-local && ./stop-containers.sh\"",
+    "db:start": "bash -c \"cd dockerfiles/db-local && ./start.sh\"",
+    "db:stop": "bash -c \"cd dockerfiles/db-local && ./stop.sh\""
   }
 }
