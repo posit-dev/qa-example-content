@@ -3,7 +3,7 @@ version: '3.8'
 services:
   test:
     image: ghcr.io/posit-dev/positron-ubuntu24-arm64:127
-    container_name: test
+    container_name: ${CONTAINER_PREFIX:-}test
     ports:
       - "8080:8080"
       - "5900:5900"
@@ -30,7 +30,7 @@ services:
 
   postgres:
     image: ghcr.io/posit-dev/positron-postgres-arm64:143
-    container_name: postgres
+    container_name: ${CONTAINER_PREFIX:-}postgres
     ports:
       - "5432:5432"
     networks:
@@ -52,7 +52,7 @@ services:
   connect:
     image: rstudio/rstudio-connect-preview:dev-jammy-daily
     platform: linux/amd64
-    container_name: connect
+    container_name: ${CONTAINER_PREFIX:-}connect
     networks:
       - mynetwork
     ports:

@@ -3,7 +3,7 @@ version: '3.8'
 services:
   test:
     image: ghcr.io/posit-dev/positron-sles156-arm64:135
-    container_name: test
+    container_name: ${CONTAINER_PREFIX:-}test
     init: true
     ports:
       - "8080:8080"
@@ -25,7 +25,7 @@ services:
 
   postgres:
     image: ghcr.io/posit-dev/positron-postgres-arm64:143
-    container_name: postgres
+    container_name: ${CONTAINER_PREFIX:-}postgres
     ports:
       - "5432:5432"
     networks:

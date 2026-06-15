@@ -67,6 +67,8 @@ if [ -f .env ]; then
   export $(grep -v '^#' .env | xargs)
 fi
 
+TEST_CONTAINER="${CONTAINER_PREFIX:-}test"
+
 # GITHUB_TOKEN is always required
 if [ -z "$GITHUB_TOKEN" ]; then
   echo "Error: set GITHUB_TOKEN before running: GITHUB_TOKEN=your_token ./connect.sh"
@@ -74,7 +76,7 @@ if [ -z "$GITHUB_TOKEN" ]; then
 fi
 
 # Check if the container is running
-if ! docker ps | grep -q "test"; then
+if ! docker ps | grep -q "$TEST_CONTAINER"; then
   echo "Error: test container is not running!"
   echo "Start with: npm run wb:start"
   exit 1
@@ -83,24 +85,24 @@ fi
 # Copy scripts to container (quietly), stripping Windows line endings
 for script in install-workbench.sh positronDownload.sh get-latest-wb-noble-url.sh configure-datasources.sh; do
   if [ -f "./$script" ]; then
-    docker cp "./$script" "test:/tmp/$script" >/dev/null 2>&1
-    docker exec test sed -i 's/\r$//' "/tmp/$script" 2>/dev/null
-    docker exec test chmod +x "/tmp/$script" 2>/dev/null
+    docker cp "./$script" "$TEST_CONTAINER:/tmp/$script" >/dev/null 2>&1
+    docker exec "$TEST_CONTAINER" sed -i 's/\r$//' "/tmp/$script" 2>/dev/null
+    docker exec "$TEST_CONTAINER" chmod +x "/tmp/$script" 2>/dev/null
   fi
 done
 
 # Copy license file if present
 if [ -f "./workbench.lic" ]; then
-  docker cp "./workbench.lic" "test:/tmp/workbench.lic" >/dev/null 2>&1
+  docker cp "./workbench.lic" "$TEST_CONTAINER:/tmp/workbench.lic" >/dev/null 2>&1
 fi
 
 # Show current status
 echo ""
 echo "=== Status ==="
-WB_VERSION=$(docker exec test bash -c 'rstudio-server version 2>/dev/null | head -1 | awk "{print \$1}"' 2>/dev/null)
+WB_VERSION=$(docker exec "$TEST_CONTAINER" bash -c 'rstudio-server version 2>/dev/null | head -1 | awk "{print \$1}"' 2>/dev/null)
 if [ -n "$WB_VERSION" ] && [ "$WB_VERSION" != "" ]; then
     echo "Workbench: $WB_VERSION"
-    POSITRON_VERSION=$(docker exec test bash -c '
+    POSITRON_VERSION=$(docker exec "$TEST_CONTAINER" bash -c '
         for dir in /usr/lib/rstudio-server/bin/positron-server/new /usr/lib/rstudio-server/bin/positron-server; do
             if [ -f "$dir/product.json" ]; then
                 VER=$(grep "positronVersion" "$dir/product.json" 2>/dev/null | sed "s/.*\"positronVersion\": *\"\([^\"]*\)\".*/\1/")
@@ -142,7 +144,7 @@ if [ "$CI_MODE" = true ] || [ "$CI_STABLE_MODE" = true ]; then
     -e SNOWFLAKE_USERNAME_="${SNOWFLAKE_USERNAME:-}" \
     -e SNOWFLAKE_PASSWORD_="${SNOWFLAKE_PASSWORD:-}" \
     -e AZURE_SERVICE_PRINCIPAL_CLIENT_SECRET_="${AZURE_SERVICE_PRINCIPAL_CLIENT_SECRET:-}" \
-    test /bin/bash -c "/tmp/install-workbench.sh $CI_INSTALL_FLAG ${CREDENTIALS:+--credentials=$CREDENTIALS}; exec /bin/bash"
+    "$TEST_CONTAINER" /bin/bash -c "/tmp/install-workbench.sh $CI_INSTALL_FLAG ${CREDENTIALS:+--credentials=$CREDENTIALS}; exec /bin/bash"
 else
   docker exec -it \
     -e GITHUB_TOKEN="$GITHUB_TOKEN" \
@@ -159,7 +161,7 @@ else
     -e SNOWFLAKE_PASSWORD_="${SNOWFLAKE_PASSWORD:-}" \
     -e AZURE_SERVICE_PRINCIPAL_CLIENT_SECRET_="${AZURE_SERVICE_PRINCIPAL_CLIENT_SECRET:-}" \
     -e CREDENTIALS="${CREDENTIALS:-}" \
-    test /bin/bash -c '
+    "$TEST_CONTAINER" /bin/bash -c '
     /tmp/install-workbench.sh ${CREDENTIALS:+--credentials="$CREDENTIALS"}
 
     # Show quick reference before dropping to shell

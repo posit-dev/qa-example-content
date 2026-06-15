@@ -11,6 +11,9 @@ cp .env.example .env
 
 Fill in the values from 1Password under `Positron > E2E Postgres DB Connection info`.
 
+**Optional overrides** (add to `.env` if needed):
+* **CONTAINER_PREFIX**: Prefix for container names (e.g., `arm-`). Set this if you also run `wb-local` at the same time to avoid container name conflicts — containers become `arm-test`, `arm-postgres`, etc.
+
 ### 2. Create License File
 
 Create a `license.txt` file in this directory with the Positron Workbench License from 1Password (IDE/Workbench vault).

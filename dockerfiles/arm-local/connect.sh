@@ -52,8 +52,10 @@ if [ -f .env ]; then
   done < .env
 fi
 
+TEST_CONTAINER="${CONTAINER_PREFIX:-}test"
+
 # Check if the container is running
-if ! docker ps | grep -q "test"; then
+if ! docker ps | grep -q "$TEST_CONTAINER"; then
   echo "Error: test container is not running!"
   echo "Start with: npm run arm:start"
   exit 1
@@ -62,18 +64,18 @@ fi
 # Copy scripts to container (quietly)
 for script in setup-test-env.sh start-vnc.sh ssh-install.sh; do
   if [ -f "./$script" ]; then
-    docker cp "./$script" "test:/tmp/$script" >/dev/null 2>&1
-    docker exec test chmod +x "/tmp/$script" 2>/dev/null
+    docker cp "./$script" "$TEST_CONTAINER:/tmp/$script" >/dev/null 2>&1
+    docker exec "$TEST_CONTAINER" chmod +x "/tmp/$script" 2>/dev/null
   fi
 done
 
 # Connect to the container and run setup
 if [ "$CI_MODE" = true ]; then
   echo "Running in CI mode with branch: $CI_BRANCH"
-  docker exec -it test /bin/bash -c "/tmp/setup-test-env.sh '$CI_BRANCH' && exec /bin/bash -l"
+  docker exec -it "$TEST_CONTAINER" /bin/bash -c "/tmp/setup-test-env.sh '$CI_BRANCH' && exec /bin/bash -l"
 else
   # Interactive mode - show status and menu
-  docker exec -it test /bin/bash -c '
+  docker exec -it "$TEST_CONTAINER" /bin/bash -c '
     # Check setup status
     if [ -d "/__w/positron/positron/.git" ]; then
         BRANCH=$(cd /__w/positron/positron && git branch --show-current 2>/dev/null)
