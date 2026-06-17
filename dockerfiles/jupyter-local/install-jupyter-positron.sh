@@ -36,6 +36,10 @@ fi
 
 POSITRON_TAG=${POSITRON_TAG:-""}  # Empty default will get the latest release
 GITHUB_TOKEN=${GITHUB_TOKEN:-"myToken"}
+# Path to a pre-staged positron-server tarball (e.g. a branch CI build). When set
+# and present, it is used instead of downloading a published positron-builds
+# release, so CI exercises the server built from the branch under test.
+POSITRON_SERVER_TARBALL=${POSITRON_SERVER_TARBALL:-""}
 
 # User configuration
 # Note: TLJH prepends "jupyter-" to usernames, so "user" becomes "jupyter-user"
@@ -115,15 +119,29 @@ cd /opt/positron-server
 # Get directory where this script is located (for positronDownload.sh)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Run download script
-if [ -n "${POSITRON_TAG}" ]; then
-    echo "Running download script with TAG=${POSITRON_TAG}, ARCH_SUFFIX=${ARCH_SUFFIX}, GITHUB_TOKEN=***..."
+# Install the server from a pre-staged branch tarball if one was provided;
+# otherwise download a published positron-builds release. The branch tarball is
+# packaged with a top-level vscode-reh-web-linux-x64/ directory, matching what
+# positronDownload.sh expects, so the same --strip-components=1 extraction applies.
+if [ -n "${POSITRON_SERVER_TARBALL}" ] && [ -f "${POSITRON_SERVER_TARBALL}" ]; then
+    echo "Installing positron-server from staged branch tarball: ${POSITRON_SERVER_TARBALL}"
+    if ! tar -xzf "${POSITRON_SERVER_TARBALL}" --strip-components=1; then
+        log_error "Failed to extract staged Positron server tarball ${POSITRON_SERVER_TARBALL}"
+    fi
 else
-    echo "Running download script with latest Positron release, ARCH_SUFFIX=${ARCH_SUFFIX}, GITHUB_TOKEN=***..."
-fi
+    if [ -n "${POSITRON_SERVER_TARBALL}" ]; then
+        echo "⚠️  WARNING: POSITRON_SERVER_TARBALL=${POSITRON_SERVER_TARBALL} not found; falling back to download."
+    fi
+    # Run download script
+    if [ -n "${POSITRON_TAG}" ]; then
+        echo "Running download script with TAG=${POSITRON_TAG}, ARCH_SUFFIX=${ARCH_SUFFIX}, GITHUB_TOKEN=***..."
+    else
+        echo "Running download script with latest Positron release, ARCH_SUFFIX=${ARCH_SUFFIX}, GITHUB_TOKEN=***..."
+    fi
 
-if ! TAG=${POSITRON_TAG} ARCH_SUFFIX=${ARCH_SUFFIX} GITHUB_TOKEN=${GITHUB_TOKEN} "${SCRIPT_DIR}/positronDownload.sh"; then
-    log_error "Failed to download/install Positron server"
+    if ! TAG=${POSITRON_TAG} ARCH_SUFFIX=${ARCH_SUFFIX} GITHUB_TOKEN=${GITHUB_TOKEN} "${SCRIPT_DIR}/positronDownload.sh"; then
+        log_error "Failed to download/install Positron server"
+    fi
 fi
 
 # Install jupyter-positron-server into TLJH's user environment
@@ -134,7 +152,7 @@ if [ -d "${TLJH_USER_ENV}" ]; then
     if ! sudo "${TLJH_USER_ENV}/bin/python3" -m pip install --upgrade pip; then
         log_error "Failed to upgrade pip in TLJH user environment"
     fi
-    if ! sudo "${TLJH_USER_ENV}/bin/python3" -m pip install git+https://github.com/posit-dev/jupyter-positron-server.git@verifier; then
+    if ! sudo "${TLJH_USER_ENV}/bin/python3" -m pip install git+https://github.com/posit-dev/jupyter-positron-server.git; then
         log_error "Failed to install jupyter-positron-server in TLJH user environment"
     fi
 
@@ -147,7 +165,7 @@ else
     if ! sudo python3 -m pip install --break-system-packages --upgrade pip; then
         log_error "Failed to upgrade pip"
     fi
-    if ! sudo python3 -m pip install --break-system-packages git+https://github.com/posit-dev/jupyter-positron-server.git@verifier; then
+    if ! sudo python3 -m pip install --break-system-packages git+https://github.com/posit-dev/jupyter-positron-server.git; then
         log_error "Failed to install jupyter-positron-server"
     fi
 fi
@@ -189,7 +207,7 @@ fi
 echo "Installing jupyter-positron-verifier (Hub minting service)..."
 TLJH_HUB_ENV="/opt/tljh/hub"
 if [ -d "${TLJH_HUB_ENV}" ]; then
-    if ! sudo "${TLJH_HUB_ENV}/bin/python3" -m pip install git+https://github.com/isabelizimm/jupyter-positron-verifier.git; then
+    if ! sudo "${TLJH_HUB_ENV}/bin/python3" -m pip install git+https://github.com/posit-dev/jupyter-positron-verifier.git; then
         log_error "Failed to install jupyter-positron-verifier in TLJH hub environment"
     fi
 else
@@ -237,8 +255,6 @@ c.JupyterHub.services = [
         "command": ["${TLJH_HUB_ENV}/bin/positron-verifier"],
         "environment": {
             "POSITRON_MINTING_KEY_FILE": "/etc/positron/signing-key.pem",
-            "POSITRON_LICENSE_ISSUER": "Posit JupyterHub",
-            "POSITRON_LICENSE_LICENSEE": "Dev",
             "POSITRON_LICENSE_MANAGER_PATH": "${LICENSE_MANAGER_DIR}/license-manager",
             "PORT": "10101",
         },
