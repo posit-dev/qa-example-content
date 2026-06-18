@@ -36,6 +36,10 @@ fi
 
 POSITRON_TAG=${POSITRON_TAG:-""}  # Empty default will get the latest release
 GITHUB_TOKEN=${GITHUB_TOKEN:-"myToken"}
+# Path to a pre-staged positron-server tarball (e.g. a branch CI build). When set
+# and present, it is used instead of downloading a published positron-builds
+# release, so CI exercises the server built from the branch under test.
+POSITRON_SERVER_TARBALL=${POSITRON_SERVER_TARBALL:-""}
 
 # User configuration
 # Note: TLJH prepends "jupyter-" to usernames, so "user" becomes "jupyter-user"
@@ -115,15 +119,29 @@ cd /opt/positron-server
 # Get directory where this script is located (for positronDownload.sh)
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
-# Run download script
-if [ -n "${POSITRON_TAG}" ]; then
-    echo "Running download script with TAG=${POSITRON_TAG}, ARCH_SUFFIX=${ARCH_SUFFIX}, GITHUB_TOKEN=***..."
+# Install the server from a pre-staged branch tarball if one was provided;
+# otherwise download a published positron-builds release. The branch tarball is
+# packaged with a top-level vscode-reh-web-linux-x64/ directory, matching what
+# positronDownload.sh expects, so the same --strip-components=1 extraction applies.
+if [ -n "${POSITRON_SERVER_TARBALL}" ] && [ -f "${POSITRON_SERVER_TARBALL}" ]; then
+    echo "Installing positron-server from staged branch tarball: ${POSITRON_SERVER_TARBALL}"
+    if ! tar -xzf "${POSITRON_SERVER_TARBALL}" --strip-components=1; then
+        log_error "Failed to extract staged Positron server tarball ${POSITRON_SERVER_TARBALL}"
+    fi
 else
-    echo "Running download script with latest Positron release, ARCH_SUFFIX=${ARCH_SUFFIX}, GITHUB_TOKEN=***..."
-fi
+    if [ -n "${POSITRON_SERVER_TARBALL}" ]; then
+        echo "⚠️  WARNING: POSITRON_SERVER_TARBALL=${POSITRON_SERVER_TARBALL} not found; falling back to download."
+    fi
+    # Run download script
+    if [ -n "${POSITRON_TAG}" ]; then
+        echo "Running download script with TAG=${POSITRON_TAG}, ARCH_SUFFIX=${ARCH_SUFFIX}, GITHUB_TOKEN=***..."
+    else
+        echo "Running download script with latest Positron release, ARCH_SUFFIX=${ARCH_SUFFIX}, GITHUB_TOKEN=***..."
+    fi
 
-if ! TAG=${POSITRON_TAG} ARCH_SUFFIX=${ARCH_SUFFIX} GITHUB_TOKEN=${GITHUB_TOKEN} "${SCRIPT_DIR}/positronDownload.sh"; then
-    log_error "Failed to download/install Positron server"
+    if ! TAG=${POSITRON_TAG} ARCH_SUFFIX=${ARCH_SUFFIX} GITHUB_TOKEN=${GITHUB_TOKEN} "${SCRIPT_DIR}/positronDownload.sh"; then
+        log_error "Failed to download/install Positron server"
+    fi
 fi
 
 # Install jupyter-positron-server into TLJH's user environment
@@ -158,8 +176,12 @@ case "$(uname -m)" in
     *)             LICENSE_ARCH="x86_64" ;;
 esac
 
-# Move staged license file to final location if it exists
+# Move staged license file to final location if it exists.
+# NOTE: the .lic is now ENTITLEMENT only. It is read by the Hub-side verifier (via
+# license-manager), NOT by user sessions. positron-server no longer reads a raw .lic;
+# it validates a short-lived signed token minted per session (see minting setup below).
 LICENSE_DEST="/opt/positron-server/resources/activation/linux/${LICENSE_ARCH}/license.lic"
+LICENSE_MANAGER_DIR="/opt/positron-server/resources/activation/linux/${LICENSE_ARCH}"
 if [ -f "/opt/positron.lic" ]; then
     echo "Installing license file..."
     if sudo mv /opt/positron.lic "${LICENSE_DEST}"; then
@@ -169,8 +191,84 @@ if [ -f "/opt/positron.lic" ]; then
     fi
 elif [ ! -f "${LICENSE_DEST}" ]; then
     echo "⚠️  WARNING: License file not found at ${LICENSE_DEST}"
-    echo "   Positron will run in unlicensed mode with limitations."
+    echo "   The minting service cannot verify entitlement and Positron will fail to start."
 fi
+# Tighten the .lic so only root (the Hub/verifier) can read it; user sessions must not.
+if [ -f "${LICENSE_DEST}" ]; then
+    sudo chmod 600 "${LICENSE_DEST}" || log_error "Failed to chmod 600 ${LICENSE_DEST}"
+fi
+
+# ---------------------------------------------------------------------------
+# License token minting (replaces handing the raw .lic to user sessions).
+# jupyter-positron-verifier runs in the Hub env (privileged), holds the signing
+# key, verifies entitlement via license-manager, and mints short-lived per-session
+# license tokens. Users never see the signing key or the raw .lic.
+# ---------------------------------------------------------------------------
+echo "Installing jupyter-positron-verifier (Hub minting service)..."
+TLJH_HUB_ENV="/opt/tljh/hub"
+if [ -d "${TLJH_HUB_ENV}" ]; then
+    if ! sudo "${TLJH_HUB_ENV}/bin/python3" -m pip install git+https://github.com/posit-dev/jupyter-positron-verifier.git; then
+        log_error "Failed to install jupyter-positron-verifier in TLJH hub environment"
+    fi
+else
+    log_error "TLJH hub environment not found at ${TLJH_HUB_ENV}; cannot install minting service"
+fi
+
+# Install the signing key the verifier uses to mint tokens. It must pair with the
+# OrchestratorPublicKey embedded in positron-server. Provided out-of-band (never committed):
+# staged at /opt/signing-key.pem by the caller (docker cp in CI, or volume locally).
+echo "Installing signing key..."
+sudo mkdir -p /etc/positron
+if [ -f "/opt/signing-key.pem" ]; then
+    if sudo mv /opt/signing-key.pem /etc/positron/signing-key.pem && sudo chmod 600 /etc/positron/signing-key.pem; then
+        echo "  ✓ Signing key installed at /etc/positron/signing-key.pem"
+    else
+        log_error "Failed to install signing key to /etc/positron/signing-key.pem"
+    fi
+elif [ ! -f "/etc/positron/signing-key.pem" ]; then
+    log_error "Signing key not found at /opt/signing-key.pem; minting service cannot start"
+fi
+
+# Write JupyterHub config: register the minting service and point user sessions at it.
+echo "Writing Positron minting JupyterHub config..."
+TLJH_CONFIG_D="/opt/tljh/config/jupyterhub_config.d"
+sudo mkdir -p "${TLJH_CONFIG_D}"
+
+sudo tee "${TLJH_CONFIG_D}/positron-env.py" >/dev/null <<'EOF'
+import os
+
+path = os.environ.get("PATH", "/bin:/usr/bin")
+c.SystemdSpawner.environment = {
+    "PATH": f"/opt/positron-server/bin:/usr/local/bin:/opt/tljh/user/bin:{path}",
+    "POSITRON_LICENSE_MINTING_ENDPOINT": "http://127.0.0.1:10101/services/positron-license/mint",
+}
+EOF
+
+sudo tee "${TLJH_CONFIG_D}/positron-minting.py" >/dev/null <<EOF
+# Register jupyter-positron-verifier as a managed JupyterHub service. It runs in
+# the Hub context (privileged), holds the signing key, verifies entitlement via
+# license-manager, and mints short-lived license tokens for each Positron session.
+c.JupyterHub.services = [
+    {
+        "name": "positron-license",
+        "url": "http://127.0.0.1:10101",
+        "command": ["${TLJH_HUB_ENV}/bin/positron-verifier"],
+        "environment": {
+            "POSITRON_MINTING_KEY_FILE": "/etc/positron/signing-key.pem",
+            "POSITRON_LICENSE_MANAGER_PATH": "${LICENSE_MANAGER_DIR}/license-manager",
+            "PORT": "10101",
+        },
+    }
+]
+
+c.JupyterHub.load_roles = [
+    {
+        "name": "positron-license-service",
+        "services": ["positron-license"],
+        "scopes": ["read:users"],
+    }
+]
+EOF
 
 # Set access permissions for TLJH users
 echo "Setting access permissions..."
