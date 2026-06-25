@@ -15,3 +15,5 @@ workspaces/quarto_shiny/mini-app.html
 dockerfiles/all-tests/deps/pdol_rsa
 dockerfiles/all-tests/deps/.env
 **/.claude/*
+# Downloaded from S3 at e2e runtime (very-large-data-frame.test.ts); keep `git clean -fd` from wiping it mid-suite
+/data-files/largeParquet.parquet
