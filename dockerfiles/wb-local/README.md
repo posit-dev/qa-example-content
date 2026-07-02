@@ -17,7 +17,6 @@ Fill in the values:
 
 **Optional overrides** (add to `.env` if needed):
 * **ARCH_SUFFIX**: Override auto-detected architecture (`arm64` or `amd64`)
-* **IMAGE_TAG**: Override the container image tag (e.g., `100` if the latest tag isn't available for your architecture)
 
 ### 2. Docker Login
 

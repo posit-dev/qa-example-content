@@ -134,7 +134,6 @@ The following environment variables can be set in `.env` or passed directly:
 - `ARCH_SUFFIX`: Architecture suffix (auto-detected: arm64 or amd64)
 - `POSITRON_TAG`: Specific Positron release tag (default: latest)
 - `LICENSE_FILE`: Path to license file (default: /opt/positron.lic)
-- `IMAGE_TAG`: Docker image tag to use (default: latest)
 
 **Note**: The `admin` user is always created with password `admin` for convenience.
 
