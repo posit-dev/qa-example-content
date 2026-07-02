@@ -144,7 +144,7 @@ The CI process (running in a different repo) will:
 
 1. Pull the base Ubuntu 24 image from GHCR:
    ```
-   ghcr.io/posit-dev/positron-jupyter-ubuntu24-{ARCH}:{TAG}
+   ghcr.io/posit-dev/positron-jupyter-ubuntu24:{TAG}
    ```
 
 2. Run the installation script from this repo:
