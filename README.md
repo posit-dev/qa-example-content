@@ -1,5 +1,8 @@
 # QA Content Examples
 
+> [!IMPORTANT]
+> **This repository is archived.** Its contents now live in the [posit-dev/positron](https://github.com/posit-dev/positron) repo under `docker` and `test/e2e`.
+
 This is a place to store content for internal testing & demos. Please keep things organized and well documented in this README file.
 
 ## Contents
